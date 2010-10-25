@@ -67,6 +67,7 @@ import org.knime.core.data.DataCell;
 import org.knime.core.data.DataCellDataInput;
 import org.knime.core.data.DataCellDataOutput;
 import org.knime.core.data.DataCellSerializer;
+import org.knime.core.data.DataType;
 import org.knime.core.data.DataValue;
 import org.w3c.dom.Document;
 import org.w3c.dom.svg.SVGDocument;
@@ -79,6 +80,10 @@ import org.xml.sax.SAXException;
  */
 public class SvgCell extends DataCell implements SvgValue,
         org.knime.core.data.StringValue {
+    
+    
+    public static final DataType TYPE = DataType.getType(SvgCell.class);
+    
     private static class SvgSerializer implements DataCellSerializer<SvgCell> {
         /**
          * {@inheritDoc}
