@@ -24,6 +24,10 @@ Require-Bundle: org.knime.base;bundle-version="2.2.0",
  org.apache.batik.transcoder;bundle-version="1.6.0";visibility:=reexport,
  org.apache.batik.util;bundle-version="1.6.0";visibility:=reexport,
  org.apache.batik.util.gui;bundle-version="1.6.0",
- org.apache.batik.xml;bundle-version="1.6.0";visibility:=reexport
+ org.apache.batik.xml;bundle-version="1.6.0";visibility:=reexport,
+ org.apache.batik.svggen;bundle-version="1.6.0";visibility:=reexport
 Bundle-ClassPath: .
-Export-Package: org.knime.base.data.xml
+Export-Package: org.knime.base.data.xml,
+ org.knime.ext.batik.svgexport,
+ org.knime.ext.svg
+Bundle-Activator: org.knime.ext.svg.SvgPluginActivator
