@@ -52,6 +52,7 @@ import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Vector;
 
 import org.apache.batik.dom.svg.SVGDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
@@ -92,8 +93,7 @@ public class SparkLineNodeModel extends NodeModel {
     /** Config identifier: Name of new column. */
     static final String CFG_NEW_COLUMN_NAME = "new_column_name";
 
-    private SettingsModelFilterString m_columns =
-            new SettingsModelFilterString(CFG_COLUMNS);
+    private SettingsModelFilterString m_columns = null;
 
     private SettingsModelString m_newColName = new SettingsModelString(
             CFG_NEW_COLUMN_NAME, "Spark Lines");
@@ -125,8 +125,19 @@ public class SparkLineNodeModel extends NodeModel {
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
-        if (m_columns.getIncludeList() == null) {
-            throw new InvalidSettingsException("No settings available");
+        if (m_columns == null) {
+            if (inSpecs[0] == null) {
+                throw new InvalidSettingsException("No Settings available!");
+            }
+            Vector<String> includedNames = new Vector<String>();
+            for (int i = 0; i < inSpecs[0].getNumColumns(); i++) {
+                if (inSpecs[0].getColumnSpec(i).getType().isCompatible(
+                        DoubleValue.class)) {
+                    includedNames.add(inSpecs[0].getColumnSpec(i).getName());
+                }
+            }
+            m_columns = new SettingsModelFilterString(CFG_COLUMNS,
+                    includedNames, new Vector<String>());
         }
         DataTableSpec spec = inSpecs[0];
         for (String s : m_columns.getIncludeList()) {
@@ -139,7 +150,7 @@ public class SparkLineNodeModel extends NodeModel {
                     + m_newColName);
         }
         ColumnRearranger arranger = createColumnRearranger(spec);
-        return new DataTableSpec[]{arranger.createSpec()};
+        return new DataTableSpec[]{ arranger.createSpec() };
     }
 
     private ColumnRearranger createColumnRearranger(final DataTableSpec spec) {
@@ -168,7 +179,7 @@ public class SparkLineNodeModel extends NodeModel {
                     lowerBound instanceof DoubleValue ? ((DoubleValue)lowerBound)
                             .getDoubleValue() : 0.0;
             DataCell upperBound =
-                    spec.getColumnSpec(indices[i]).getDomain().getLowerBound();
+                    spec.getColumnSpec(indices[i]).getDomain().getUpperBound();
             m_rangeMax[i] =
                     upperBound instanceof DoubleValue ? ((DoubleValue)upperBound)
                             .getDoubleValue() : 0.0;
@@ -177,27 +188,34 @@ public class SparkLineNodeModel extends NodeModel {
         result.append(new SingleCellFactory(append) {
             @Override
             public DataCell getCell(final DataRow row) {
+                final int xWidth = 200;
+                final int xOffset = 2;
+                final int yHeight = 20;
+                final int yOffset = 2;
                 DOMImplementation domImpl = new SVGDOMImplementation();
                 String svgNS = "http://www.w3.org/2000/svg";
                 Document myFactory = domImpl.createDocument(svgNS, "svg", null);
                 SVGGraphics2D g = new SVGGraphics2D(myFactory);
                 g.setColor(Color.GREEN);
-                g.setSVGCanvasSize(new Dimension(1100, 110));
-                g.drawRect(0, 0, 1100, 110);
+                g.setSVGCanvasSize(new Dimension(xWidth+2*xOffset, yHeight+2*yOffset));
+                g.setBackground(Color.WHITE);
+                g.setColor(Color.BLACK);
+                g.drawRect(0, 0, xWidth + 2*xOffset - 1, yHeight + 2*yOffset - 1);
 
                 if (indices.length >= 2) {
                     DataCell c = row.getCell(indices[0]);
                     double d =
                             c instanceof DoubleValue ? ((DoubleValue)c)
                                     .getDoubleValue() : 0.0;
-                    int y0 = 105 - (int)(100.0 * (d - m_rangeMin[0]) / (m_rangeMax[0] - m_rangeMin[0]));
-                    int x0 = 50;
+                    int y0 = yHeight+yOffset - (int)(yHeight * (d - m_rangeMin[0]) / (m_rangeMax[0] - m_rangeMin[0]));
+                    int x0 = xOffset;
                     for (int i = 1; i < indices.length; i++) {
                         c = row.getCell(indices[i]);
                         d = c instanceof DoubleValue ? ((DoubleValue)c)
                                         .getDoubleValue() : 0.0;
-                        int y1 = (int)(100.0 * (d - m_rangeMin[i]) / (m_rangeMax[i] - m_rangeMin[i]));
-                        int x1 = x0 + 1000/indices.length;
+                        int y1 = yHeight+yOffset - (int)(yHeight * (d - m_rangeMin[i]) / (m_rangeMax[i] - m_rangeMin[i]));
+                        int x1 = x0 + xWidth/(indices.length - 1);
+                        g.setColor(Color.BLUE);
                         g.drawLine(x0, y0, x1, y1);
                         x0 = x1;
                         y0 = y1;
