@@ -159,8 +159,8 @@ public class SparkLineNodeModel extends NodeModel {
             }
         }
         // store ranges for affected columns
-        double[] m_rangeMin = new double[colNames.size()];
-        double[] m_rangeMax = new double[colNames.size()];
+        final double[] m_rangeMin = new double[colNames.size()];
+        final double[] m_rangeMax = new double[colNames.size()];
         for (int i = 0; i < indices.length; i++) {
             DataCell lowerBound =
                     spec.getColumnSpec(indices[i]).getDomain().getLowerBound();
@@ -182,16 +182,27 @@ public class SparkLineNodeModel extends NodeModel {
                 Document myFactory = domImpl.createDocument(svgNS, "svg", null);
                 SVGGraphics2D g = new SVGGraphics2D(myFactory);
                 g.setColor(Color.GREEN);
-                g.setSVGCanvasSize(new Dimension(200, 200));
+                g.setSVGCanvasSize(new Dimension(1100, 110));
+                g.drawRect(0, 0, 1100, 110);
 
-                for (int i = 0; i < indices.length; i++) {
-                    DataCell c = row.getCell(indices[i]);
+                if (indices.length >= 2) {
+                    DataCell c = row.getCell(indices[0]);
                     double d =
                             c instanceof DoubleValue ? ((DoubleValue)c)
                                     .getDoubleValue() : 0.0;
-
+                    int y0 = 105 - (int)(100.0 * (d - m_rangeMin[0]) / (m_rangeMax[0] - m_rangeMin[0]));
+                    int x0 = 50;
+                    for (int i = 1; i < indices.length; i++) {
+                        c = row.getCell(indices[i]);
+                        d = c instanceof DoubleValue ? ((DoubleValue)c)
+                                        .getDoubleValue() : 0.0;
+                        int y1 = (int)(100.0 * (d - m_rangeMin[i]) / (m_rangeMax[i] - m_rangeMin[i]));
+                        int x1 = x0 + 1000/indices.length;
+                        g.drawLine(x0, y0, x1, y1);
+                        x0 = x1;
+                        y0 = y1;
+                    }
                 }
-                g.fillOval(20, 20, 20, 20);
 
                 myFactory.replaceChild(g.getRoot(),
                         myFactory.getDocumentElement());
