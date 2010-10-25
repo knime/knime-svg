@@ -47,9 +47,10 @@
  */
 package org.knime.ext.svg.node.sparklines;
 
+import java.awt.Color;
+import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.batik.dom.svg.SVGDOMImplementation;
@@ -78,8 +79,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.svg.SVGDocument;
 
 /**
- * Append a column holding SvgDataCells holding SparkLines for the
- * selected numerical columns.
+ * Append a column holding SvgDataCells holding SparkLines for the selected
+ * numerical columns.
  *
  * @author M. Berthold, University of Konstanz
  */
@@ -87,13 +88,15 @@ public class SparkLineNodeModel extends NodeModel {
 
     /** Config identifier: Included columns. */
     static final String CFG_COLUMNS = "columns";
+
     /** Config identifier: Name of new column. */
     static final String CFG_NEW_COLUMN_NAME = "new_column_name";
 
     private SettingsModelFilterString m_columns =
-                        new SettingsModelFilterString(CFG_COLUMNS);
-    private SettingsModelString m_newColName =
-                        new SettingsModelString(CFG_NEW_COLUMN_NAME, "Spark Lines");
+            new SettingsModelFilterString(CFG_COLUMNS);
+
+    private SettingsModelString m_newColName = new SettingsModelString(
+            CFG_NEW_COLUMN_NAME, "Spark Lines");
 
     /**
      * Constructor for the node model.
@@ -107,9 +110,9 @@ public class SparkLineNodeModel extends NodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
         ColumnRearranger arranger =
-            createColumnRearranger(inData[0].getDataTableSpec());
-        BufferedDataTable out = exec.createColumnRearrangeTable(
-                inData[0], arranger, exec);
+                createColumnRearranger(inData[0].getDataTableSpec());
+        BufferedDataTable out =
+                exec.createColumnRearrangeTable(inData[0], arranger, exec);
         return new BufferedDataTable[]{out};
     }
 
@@ -132,8 +135,8 @@ public class SparkLineNodeModel extends NodeModel {
             }
         }
         if (spec.containsName(m_newColName.getStringValue())) {
-            throw new InvalidSettingsException(
-                    "Column already exits: " + m_newColName);
+            throw new InvalidSettingsException("Column already exits: "
+                    + m_newColName);
         }
         ColumnRearranger arranger = createColumnRearranger(spec);
         return new DataTableSpec[]{arranger.createSpec()};
@@ -141,8 +144,9 @@ public class SparkLineNodeModel extends NodeModel {
 
     private ColumnRearranger createColumnRearranger(final DataTableSpec spec) {
         ColumnRearranger result = new ColumnRearranger(spec);
-        DataColumnSpec append = new DataColumnSpecCreator(
-                m_newColName.getStringValue(), SvgCell.TYPE).createSpec();
+        DataColumnSpec append =
+                new DataColumnSpecCreator(m_newColName.getStringValue(),
+                        SvgCell.TYPE).createSpec();
         // create list of cell indices to include in SparkLine.
         List<String> colNames = m_columns.getIncludeList();
         final int[] indices = new int[colNames.size()];
@@ -158,36 +162,45 @@ public class SparkLineNodeModel extends NodeModel {
         double[] m_rangeMin = new double[colNames.size()];
         double[] m_rangeMax = new double[colNames.size()];
         for (int i = 0; i < indices.length; i++) {
-            DataCell lowerBound = spec.getColumnSpec(indices[i]).getDomain().getLowerBound();
-            m_rangeMin[i] = lowerBound instanceof DoubleValue
-                   ? ((DoubleValue)lowerBound).getDoubleValue() : 0.0;
-            DataCell upperBound = spec.getColumnSpec(indices[i]).getDomain().getLowerBound();
-            m_rangeMax[i] = upperBound instanceof DoubleValue
-            ? ((DoubleValue)upperBound).getDoubleValue() : 0.0;
+            DataCell lowerBound =
+                    spec.getColumnSpec(indices[i]).getDomain().getLowerBound();
+            m_rangeMin[i] =
+                    lowerBound instanceof DoubleValue ? ((DoubleValue)lowerBound)
+                            .getDoubleValue() : 0.0;
+            DataCell upperBound =
+                    spec.getColumnSpec(indices[i]).getDomain().getLowerBound();
+            m_rangeMax[i] =
+                    upperBound instanceof DoubleValue ? ((DoubleValue)upperBound)
+                            .getDoubleValue() : 0.0;
         }
-        
+
         result.append(new SingleCellFactory(append) {
-           @Override
+            @Override
             public DataCell getCell(final DataRow row) {
-               DOMImplementation domImpl = new SVGDOMImplementation();
-               String svgNS = "http://www.w3.org/2000/svg";
-               Document myFactory = domImpl.createDocument(svgNS, "svg", null);
-               SVGGraphics2D g = new SVGGraphics2D(myFactory);
-               for (int i = 0; i < indices.length; i++) {
-                   DataCell c = row.getCell(indices[i]);
-                   double d = c instanceof DoubleValue
-                       ? ((DoubleValue)c).getDoubleValue() : 0.0;
-                       g.drawLine(20, 0, 20, 20);
-                       g.drawLine(0, 10, 20, 10);
-               }
-               myFactory.getDocumentElement().appendChild(g.getRoot());
-               DataCell dc = new SvgCell((SVGDocument)myFactory);
-               return dc;
+                DOMImplementation domImpl = new SVGDOMImplementation();
+                String svgNS = "http://www.w3.org/2000/svg";
+                Document myFactory = domImpl.createDocument(svgNS, "svg", null);
+                SVGGraphics2D g = new SVGGraphics2D(myFactory);
+                g.setColor(Color.GREEN);
+                g.setSVGCanvasSize(new Dimension(200, 200));
+
+                for (int i = 0; i < indices.length; i++) {
+                    DataCell c = row.getCell(indices[i]);
+                    double d =
+                            c instanceof DoubleValue ? ((DoubleValue)c)
+                                    .getDoubleValue() : 0.0;
+
+                }
+                g.fillOval(20, 20, 20, 20);
+
+                myFactory.replaceChild(g.getRoot(),
+                        myFactory.getDocumentElement());
+                DataCell dc = new SvgCell((SVGDocument)myFactory);
+                return dc;
             }
         });
         return result;
     }
-
 
     /** {@inheritDoc} */
     @Override
