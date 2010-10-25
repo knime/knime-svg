@@ -50,7 +50,9 @@ package org.knime.ext.svg.node.sparklines;
 import org.knime.core.data.DoubleValue;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnFilter;
+import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.SettingsModelFilterString;
+import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 /**
  * Dialog for
@@ -72,6 +74,11 @@ public class SparkLineNodeDialog extends DefaultNodeSettingsPane {
                 new SettingsModelFilterString(SparkLineNodeModel.CFG_COLUMNS),
                 0, true, DoubleValue.class);
         addDialogComponent(m_columnFilter);
+        DialogComponentString m_newColName =
+            new DialogComponentString(
+                new SettingsModelString(SparkLineNodeModel.CFG_NEW_COLUMN_NAME, ""),
+                "Name of new Column:");
+        addDialogComponent(m_newColName);
         setDefaultTabTitle("SparkLine Properties");
     }
 
