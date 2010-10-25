@@ -113,19 +113,29 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer {
             return;
         }
 
+        Rectangle clipBounds = g.getClipBounds();
+        if ((clipBounds.getHeight() < 1) || (clipBounds.getWidth() < 1)) {
+            return;
+        }
+
         GVTBuilder gvtBuilder = new GVTBuilder();
         BridgeContext bridgeContext = new BridgeContext(UA);
         GraphicsNode gvtRoot = gvtBuilder.build(bridgeContext, m_doc);
 
         Rectangle2D svgBounds = gvtRoot.getBounds();
-        AffineTransform transform = new AffineTransform();
-
-        Rectangle clipBounds = g.getClipBounds();
+        if (svgBounds == null) {
+            g.setFont(NO_SVG_FONT);
+            g.drawString("Invalid SVG", 2, 14);
+            return;
+        }
 
         double scaleX = (clipBounds.getWidth() - 10) / svgBounds.getWidth();
         double scaleY = (clipBounds.getHeight() - 10) / svgBounds.getHeight();
         double scale = Math.min(scaleX, scaleY);
+
+        AffineTransform transform = new AffineTransform();
         transform.scale(scale, scale);
+        transform.translate(-svgBounds.getX(), -svgBounds.getY());
 
         StaticRenderer renderer = new StaticRenderer(R_HINTS, transform);
         renderer.setTree(gvtRoot);
@@ -136,10 +146,10 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer {
         final BufferedImage image = renderer.getOffScreen();
 
         double heightDiff =
-                clipBounds.getHeight() - scale * (10 + svgBounds.getHeight());
+                clipBounds.getHeight() - scale * svgBounds.getHeight();
 
         double widthDiff =
-                clipBounds.getWidth() - scale * (10 + svgBounds.getWidth());
+                clipBounds.getWidth() - scale * svgBounds.getWidth();
 
         g.drawImage(image, (int)(widthDiff / 2), (int)(heightDiff / 2), null);
     }
