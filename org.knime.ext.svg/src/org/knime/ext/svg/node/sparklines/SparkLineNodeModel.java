@@ -51,13 +51,16 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
 import org.apache.batik.dom.svg.SVGDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.knime.base.data.xml.SvgCell;
+import org.knime.base.data.xml.SvgValueRenderer;
 import org.knime.core.data.DataCell;
+import org.knime.core.data.DataColumnProperties;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataRow;
@@ -155,9 +158,17 @@ public class SparkLineNodeModel extends NodeModel {
 
     private ColumnRearranger createColumnRearranger(final DataTableSpec spec) {
         ColumnRearranger result = new ColumnRearranger(spec);
-        DataColumnSpec append =
+        // add new column
+        DataColumnSpecCreator append =
                 new DataColumnSpecCreator(m_newColName.getStringValue(),
-                        SvgCell.TYPE).createSpec();
+                        SvgCell.TYPE);
+        // and set properties to adjust renderer appropriately
+        HashMap<String,String> newProps = new HashMap<String,String>();
+        newProps.put(SvgValueRenderer.OPTION_KEEP_ASPECT_RATIO, "false");
+        newProps.put(SvgValueRenderer.OPTION_PREFERRED_HEIGHT, "10");
+        newProps.put(SvgValueRenderer.OPTION_PREFERRED_WIDTH, "50");
+        DataColumnProperties props = new DataColumnProperties(newProps);
+        append.setProperties(props);
         // create list of cell indices to include in SparkLine.
         List<String> colNames = m_columns.getIncludeList();
         final int[] indices = new int[colNames.size()];
@@ -185,13 +196,13 @@ public class SparkLineNodeModel extends NodeModel {
                             .getDoubleValue() : 0.0;
         }
 
-        result.append(new SingleCellFactory(append) {
+        result.append(new SingleCellFactory(append.createSpec()) {
             @Override
             public DataCell getCell(final DataRow row) {
                 final int xWidth = 200;
-                final int xOffset = 2;
+                final int xOffset = 1;
                 final int yHeight = 20;
-                final int yOffset = 2;
+                final int yOffset = 1;
                 DOMImplementation domImpl = new SVGDOMImplementation();
                 String svgNS = "http://www.w3.org/2000/svg";
                 Document myFactory = domImpl.createDocument(svgNS, "svg", null);
