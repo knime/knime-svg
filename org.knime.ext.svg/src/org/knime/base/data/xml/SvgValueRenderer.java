@@ -65,6 +65,8 @@ import org.apache.batik.bridge.UserAgent;
 import org.apache.batik.bridge.UserAgentAdapter;
 import org.apache.batik.gvt.GraphicsNode;
 import org.apache.batik.gvt.renderer.StaticRenderer;
+import org.knime.core.data.DataColumnProperties;
+import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.renderer.AbstractPainterDataValueRenderer;
 import org.w3c.dom.svg.SVGDocument;
 
@@ -74,6 +76,31 @@ import org.w3c.dom.svg.SVGDocument;
  * @author Thorsten Meinl, University of Konstanz
  */
 public class SvgValueRenderer extends AbstractPainterDataValueRenderer {
+    /**
+     * Property key that can be used in {@link DataColumnProperties} to specify
+     * whether the aspect ration of the SVG should be kept (<code>true</code>)
+     * or if the images should be scaled to the maximum on both directions (
+     * <code>false</code>).
+     */
+    public static final String OPTION_KEEP_ASPECT_RATIO =
+            SvgValueRenderer.class + ".keepAspectRatio";
+
+    /**
+     * Property key that can be used in {@link DataColumnProperties} to specify
+     * the preferred height of the rendered image. The value must be a positive
+     * integer.
+     */
+    public static final String OPTION_PREFERRED_HEIGHT = SvgValueRenderer.class
+            + ".preferredHeight";
+
+    /**
+     * Property key that can be used in {@link DataColumnProperties} to specify
+     * the preferred width of the rendered image. The value must be a positive
+     * integer.
+     */
+    public static final String OPTION_PREFERRED_WIDTH = SvgValueRenderer.class
+            + ".preferredWidth";
+
     private SVGDocument m_doc;
 
     private static final Font NO_SVG_FONT = new Font(Font.SANS_SERIF,
@@ -83,6 +110,31 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer {
 
     private static final RenderingHints R_HINTS = new RenderingHints(
             RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+    private final boolean m_keepAspectRatio;
+
+    private final Dimension m_preferredSize;
+
+    /**
+     * Creates a new renderer for SVG values. The passed spec may contain
+     * properties that can be used to fine-tune rendering.
+     *
+     * @param spec a data column spec with properties
+     */
+    public SvgValueRenderer(final DataColumnSpec spec) {
+        DataColumnProperties props = spec.getProperties();
+        m_keepAspectRatio =
+                Boolean.parseBoolean(props.getProperty(
+                        OPTION_KEEP_ASPECT_RATIO, "true"));
+
+        int width =
+                Integer.parseInt(props
+                        .getProperty(OPTION_PREFERRED_WIDTH, "90"));
+        int height =
+                Integer.parseInt(props.getProperty(OPTION_PREFERRED_HEIGHT,
+                        "90"));
+        m_preferredSize = new Dimension(width, height);
+    }
 
     /**
      * Sets the string object for the cell being rendered.
@@ -131,10 +183,13 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer {
 
         double scaleX = (clipBounds.getWidth() - 10) / svgBounds.getWidth();
         double scaleY = (clipBounds.getHeight() - 10) / svgBounds.getHeight();
-        double scale = Math.min(scaleX, scaleY);
+        if (m_keepAspectRatio) {
+            scaleX = Math.min(scaleX, scaleY);
+            scaleY = Math.min(scaleX, scaleY);
+        }
 
         AffineTransform transform = new AffineTransform();
-        transform.scale(scale, scale);
+        transform.scale(scaleX, scaleY);
         transform.translate(-svgBounds.getX(), -svgBounds.getY());
 
         StaticRenderer renderer = new StaticRenderer(R_HINTS, transform);
@@ -146,10 +201,10 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer {
         final BufferedImage image = renderer.getOffScreen();
 
         double heightDiff =
-                clipBounds.getHeight() - scale * svgBounds.getHeight();
+                clipBounds.getHeight() - scaleX * svgBounds.getHeight();
 
         double widthDiff =
-                clipBounds.getWidth() - scale * svgBounds.getWidth();
+                clipBounds.getWidth() - scaleY * svgBounds.getWidth();
 
         g.drawImage(image, (int)(widthDiff / 2), (int)(heightDiff / 2), null);
     }
@@ -168,6 +223,6 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer {
      */
     @Override
     public Dimension getPreferredSize() {
-        return new Dimension(90, 90);
+        return m_preferredSize;
     }
 }

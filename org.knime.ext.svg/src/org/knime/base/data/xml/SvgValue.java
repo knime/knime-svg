@@ -110,7 +110,8 @@ public interface SvgValue extends DataValue {
         @Override
         protected DataValueRendererFamily getRendererFamily(
                 final DataColumnSpec spec) {
-            return new DefaultDataValueRendererFamily(new SvgValueRenderer(),
+            return new DefaultDataValueRendererFamily(
+                    new SvgValueRenderer(spec),
                     new MultiLineStringValueRenderer("String"));
         }
     }
