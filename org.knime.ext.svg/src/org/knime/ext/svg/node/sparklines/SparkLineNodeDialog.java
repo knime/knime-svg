@@ -76,7 +76,7 @@ public class SparkLineNodeDialog extends DefaultNodeSettingsPane {
         addDialogComponent(m_columnFilter);
         DialogComponentString m_newColName =
             new DialogComponentString(
-                new SettingsModelString(SparkLineNodeModel.CFG_NEW_COLUMN_NAME, ""),
+                new SettingsModelString(SparkLineNodeModel.CFG_NEW_COLUMN_NAME, "Spark Line Column"),
                 "Name of new Column:");
         addDialogComponent(m_newColName);
         setDefaultTabTitle("SparkLine Properties");

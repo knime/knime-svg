@@ -47,10 +47,12 @@
  */
 package org.knime.ext.svg.node.sparklines;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
@@ -96,7 +98,7 @@ public class SparkLineNodeModel extends NodeModel {
     /** Config identifier: Name of new column. */
     static final String CFG_NEW_COLUMN_NAME = "new_column_name";
 
-    private SettingsModelFilterString m_columns = null;
+    private SettingsModelFilterString m_columns = new SettingsModelFilterString(CFG_COLUMNS);
 
     private SettingsModelString m_newColName = new SettingsModelString(
             CFG_NEW_COLUMN_NAME, "Spark Lines");
@@ -128,31 +130,41 @@ public class SparkLineNodeModel extends NodeModel {
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
-        if (m_columns == null) {
+        DataTableSpec inSpec = inSpecs[0];
+        if (m_columns.getIncludeList().size() == 0
+                && m_columns.getExcludeList().size() == 0) {
             if (inSpecs[0] == null) {
                 throw new InvalidSettingsException("No Settings available!");
             }
-            Vector<String> includedNames = new Vector<String>();
-            for (int i = 0; i < inSpecs[0].getNumColumns(); i++) {
-                if (inSpecs[0].getColumnSpec(i).getType().isCompatible(
-                        DoubleValue.class)) {
-                    includedNames.add(inSpecs[0].getColumnSpec(i).getName());
+            List<String> includedColumns = new ArrayList<String>();
+            List<String> excludedColumns = new ArrayList<String>();
+            for (int i = 0; i < inSpec.getNumColumns(); i++) {
+                DataColumnSpec colSpec = inSpec.getColumnSpec(i);
+                if (colSpec.getType().isCompatible(DoubleValue.class)) {
+                    includedColumns.add(colSpec.getName());
+                } else {
+                    excludedColumns.add(colSpec.getName());
                 }
             }
-            m_columns = new SettingsModelFilterString(CFG_COLUMNS,
-                    includedNames, new Vector<String>());
+            // set all double compatible columns as include list
+            m_columns.setIncludeList(includedColumns);
+            m_columns.setExcludeList(excludedColumns);
         }
-        DataTableSpec spec = inSpecs[0];
+        // check if some columns are included
+        if (m_columns.getIncludeList().size() <= 0) {
+            setWarningMessage("No column in include list! "
+                    + "Produces one huge cluster");
+        }
         for (String s : m_columns.getIncludeList()) {
-            if (!spec.containsName(s)) {
+            if (!inSpec.containsName(s)) {
                 throw new InvalidSettingsException("No such column: " + s);
             }
         }
-        if (spec.containsName(m_newColName.getStringValue())) {
+        if (inSpec.containsName(m_newColName.getStringValue())) {
             throw new InvalidSettingsException("Column already exits: "
                     + m_newColName);
         }
-        ColumnRearranger arranger = createColumnRearranger(spec);
+        ColumnRearranger arranger = createColumnRearranger(inSpec);
         return new DataTableSpec[]{ arranger.createSpec() };
     }
 
@@ -188,20 +200,24 @@ public class SparkLineNodeModel extends NodeModel {
                     spec.getColumnSpec(indices[i]).getDomain().getLowerBound();
             m_rangeMin[i] =
                     lowerBound instanceof DoubleValue ? ((DoubleValue)lowerBound)
-                            .getDoubleValue() : 0.0;
+                            .getDoubleValue() : Double.NaN;
             DataCell upperBound =
                     spec.getColumnSpec(indices[i]).getDomain().getUpperBound();
             m_rangeMax[i] =
                     upperBound instanceof DoubleValue ? ((DoubleValue)upperBound)
-                            .getDoubleValue() : 0.0;
+                            .getDoubleValue() : Double.NaN;
+            if (Double.isNaN(m_rangeMax[i]) || Double.isNaN(m_rangeMax[i])) {
+                throw new IllegalArgumentException("Missing Domain information! Connect Domain Calculator before this node.");
+            }
         }
 
         result.append(new SingleCellFactory(append.createSpec()) {
             @Override
             public DataCell getCell(final DataRow row) {
-                final int xWidth = 200;
+                // setup box and paint border
+                final int xWidth = 500;
                 final int xOffset = 1;
-                final int yHeight = 20;
+                final int yHeight = 100;
                 final int yOffset = 1;
                 DOMImplementation domImpl = new SVGDOMImplementation();
                 String svgNS = "http://www.w3.org/2000/svg";
@@ -212,22 +228,24 @@ public class SparkLineNodeModel extends NodeModel {
                 g.setBackground(Color.WHITE);
                 g.setColor(Color.BLACK);
                 g.drawRect(0, 0, xWidth + 2*xOffset - 1, yHeight + 2*yOffset - 1);
-
+                // draw spark line (skip missing values!)
+                g.setColor(Color.BLUE);
+                g.setStroke(new BasicStroke(5));
                 if (indices.length >= 2) {
                     DataCell c = row.getCell(indices[0]);
-                    double d =
-                            c instanceof DoubleValue ? ((DoubleValue)c)
-                                    .getDoubleValue() : 0.0;
+                    double d = c instanceof DoubleValue ? ((DoubleValue)c)
+                                    .getDoubleValue() : Double.NaN;
                     int y0 = yHeight+yOffset - (int)(yHeight * (d - m_rangeMin[0]) / (m_rangeMax[0] - m_rangeMin[0]));
                     int x0 = xOffset;
                     for (int i = 1; i < indices.length; i++) {
                         c = row.getCell(indices[i]);
                         d = c instanceof DoubleValue ? ((DoubleValue)c)
-                                        .getDoubleValue() : 0.0;
+                                        .getDoubleValue() : Double.NaN;
                         int y1 = yHeight+yOffset - (int)(yHeight * (d - m_rangeMin[i]) / (m_rangeMax[i] - m_rangeMin[i]));
                         int x1 = x0 + xWidth/(indices.length - 1);
-                        g.setColor(Color.BLUE);
-                        g.drawLine(x0, y0, x1, y1);
+                        if (!Double.isNaN(y0) && !Double.isNaN(y1)) {
+                            g.drawLine(x0, y0, x1, y1);
+                        }
                         x0 = x1;
                         y0 = y1;
                     }
@@ -262,11 +280,7 @@ public class SparkLineNodeModel extends NodeModel {
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
         m_columns.validateSettings(settings);
-        String newColName = settings.getString(CFG_NEW_COLUMN_NAME);
-        if (newColName == null || newColName.trim().length() == 0) {
-            throw new InvalidSettingsException(
-                    "Name of new column must not be empty");
-        }
+        m_newColName.validateSettings(settings);
     }
 
     /** {@inheritDoc} */
