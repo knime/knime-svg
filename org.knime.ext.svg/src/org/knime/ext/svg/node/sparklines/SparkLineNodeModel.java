@@ -230,7 +230,7 @@ public class SparkLineNodeModel extends NodeModel {
                 g.drawRect(0, 0, xWidth + 2*xOffset - 1, yHeight + 2*yOffset - 1);
                 // draw spark line (skip missing values!)
                 g.setColor(Color.BLUE);
-                g.setStroke(new BasicStroke(5));
+                g.setStroke(new BasicStroke(3));
                 if (indices.length >= 2) {
                     DataCell c = row.getCell(indices[0]);
                     double d = c instanceof DoubleValue ? ((DoubleValue)c)
