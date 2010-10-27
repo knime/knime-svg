@@ -183,9 +183,9 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer {
         }
 
         double scaleX =
-                (componentBounds.getWidth() - 10) / svgBounds.getWidth();
+                (componentBounds.getWidth() - 2) / svgBounds.getWidth();
         double scaleY =
-                (componentBounds.getHeight() - 10) / svgBounds.getHeight();
+                (componentBounds.getHeight() - 2) / svgBounds.getHeight();
         if (m_keepAspectRatio) {
             scaleX = Math.min(scaleX, scaleY);
             scaleY = Math.min(scaleX, scaleY);
