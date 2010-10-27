@@ -165,8 +165,9 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer {
             return;
         }
 
-        Rectangle clipBounds = g.getClipBounds();
-        if ((clipBounds.getHeight() < 1) || (clipBounds.getWidth() < 1)) {
+        Rectangle componentBounds = getBounds();
+        if ((componentBounds.getHeight() < 1)
+                || (componentBounds.getWidth() < 1)) {
             return;
         }
 
@@ -181,8 +182,10 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer {
             return;
         }
 
-        double scaleX = (clipBounds.getWidth() - 10) / svgBounds.getWidth();
-        double scaleY = (clipBounds.getHeight() - 10) / svgBounds.getHeight();
+        double scaleX =
+                (componentBounds.getWidth() - 10) / svgBounds.getWidth();
+        double scaleY =
+                (componentBounds.getHeight() - 10) / svgBounds.getHeight();
         if (m_keepAspectRatio) {
             scaleX = Math.min(scaleX, scaleY);
             scaleY = Math.min(scaleX, scaleY);
@@ -194,19 +197,20 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer {
 
         StaticRenderer renderer = new StaticRenderer(R_HINTS, transform);
         renderer.setTree(gvtRoot);
-        renderer.updateOffScreen((int)clipBounds.getWidth(),
-                (int)clipBounds.getHeight());
+        renderer.updateOffScreen((int)componentBounds.getWidth(),
+                (int)componentBounds.getHeight());
         renderer.clearOffScreen();
-        renderer.repaint(clipBounds);
+        renderer.repaint(componentBounds);
         final BufferedImage image = renderer.getOffScreen();
 
         double heightDiff =
-                clipBounds.getHeight() - scaleX * svgBounds.getHeight();
+                componentBounds.getHeight() - scaleY * svgBounds.getHeight();
 
         double widthDiff =
-                clipBounds.getWidth() - scaleY * svgBounds.getWidth();
+                componentBounds.getWidth() - scaleX * svgBounds.getWidth();
 
         g.drawImage(image, (int)(widthDiff / 2), (int)(heightDiff / 2), null);
+
     }
 
     /**
