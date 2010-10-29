@@ -30,5 +30,6 @@ Bundle-ClassPath: .
 Export-Package: org.knime.base.data.xml,
  org.knime.ext.batik.svgexport,
  org.knime.ext.svg,
- org.knime.ext.svg.node.sparklines
+ org.knime.ext.svg.node.sparklines,
+ org.knime.ext.svg.node.writer
 Bundle-Activator: org.knime.ext.svg.SvgPluginActivator

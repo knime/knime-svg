@@ -9,6 +9,12 @@
             factory-class="org.knime.ext.svg.node.sparklines.SparkLineNodeFactory"
             id="org.knime.ext.svg.node.sparkline">
       </node>
+      <node
+            category-path="/io/write"
+            expert-flag="false"
+            factory-class="org.knime.ext.svg.node.writer.SVGWriterNodeFactory"
+            id="org.knime.ext.svg.node.writer.SVGWriterNodeFactory">
+      </node>
    </extension>
 
 </plugin>
