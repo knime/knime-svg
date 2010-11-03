@@ -53,6 +53,7 @@ package org.knime.base.data.xml;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
@@ -165,7 +166,28 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer {
             return;
         }
 
-        Rectangle componentBounds = getBounds();
+        paint(m_doc, (Graphics2D)g, getBounds(), m_keepAspectRatio);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDescription() {
+        return "SVG Renderer";
+    }
+
+    /**
+     * @return new Dimension(80, 80);
+     * @see javax.swing.JComponent#getPreferredSize()
+     */
+    @Override
+    public Dimension getPreferredSize() {
+        return m_preferredSize;
+    }
+
+    static void paint(final SVGDocument doc, final Graphics2D g,
+            final Rectangle componentBounds, final boolean keepAspectRatio) {
         if ((componentBounds.getHeight() < 1)
                 || (componentBounds.getWidth() < 1)) {
             return;
@@ -173,7 +195,7 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer {
 
         GVTBuilder gvtBuilder = new GVTBuilder();
         BridgeContext bridgeContext = new BridgeContext(UA);
-        GraphicsNode gvtRoot = gvtBuilder.build(bridgeContext, m_doc);
+        GraphicsNode gvtRoot = gvtBuilder.build(bridgeContext, doc);
 
         Rectangle2D svgBounds = gvtRoot.getBounds();
         if (svgBounds == null) {
@@ -182,11 +204,10 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer {
             return;
         }
 
-        double scaleX =
-                (componentBounds.getWidth() - 2) / svgBounds.getWidth();
+        double scaleX = (componentBounds.getWidth() - 2) / svgBounds.getWidth();
         double scaleY =
                 (componentBounds.getHeight() - 2) / svgBounds.getHeight();
-        if (m_keepAspectRatio) {
+        if (keepAspectRatio) {
             scaleX = Math.min(scaleX, scaleY);
             scaleY = Math.min(scaleX, scaleY);
         }
@@ -210,23 +231,5 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer {
                 componentBounds.getWidth() - scaleX * svgBounds.getWidth();
 
         g.drawImage(image, (int)(widthDiff / 2), (int)(heightDiff / 2), null);
-
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getDescription() {
-        return "SVG Renderer";
-    }
-
-    /**
-     * @return new Dimension(80, 80);
-     * @see javax.swing.JComponent#getPreferredSize()
-     */
-    @Override
-    public Dimension getPreferredSize() {
-        return m_preferredSize;
     }
 }

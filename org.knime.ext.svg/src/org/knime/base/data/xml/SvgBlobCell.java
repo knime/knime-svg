@@ -70,6 +70,8 @@ import org.knime.core.data.DataCellSerializer;
 import org.knime.core.data.DataValue;
 import org.knime.core.data.StringValue;
 import org.knime.core.data.container.BlobDataCell;
+import org.knime.core.data.image.ImageContent;
+import org.knime.core.data.image.ImageValue;
 import org.w3c.dom.Document;
 import org.w3c.dom.svg.SVGDocument;
 import org.xml.sax.SAXException;
@@ -79,7 +81,8 @@ import org.xml.sax.SAXException;
  *
  * @author Thorsten Meinl, University of Konstanz
  */
-public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue {
+public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue,
+        ImageValue {
     private static class SvgSerializer implements
             DataCellSerializer<SvgBlobCell> {
         /**
@@ -136,7 +139,6 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue {
     public static Class<? extends DataValue> getPreferredValueClass() {
         return SvgValue.class;
     }
-
 
     /**
      * Creates a new SVGCell by parsing the passed string. It must contain a
@@ -251,5 +253,13 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue {
         TranscoderInput in = new TranscoderInput(doc);
         TRANSCODER.transcode(in, out);
         return buffer.toString();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ImageContent getImageContent() {
+        return new SvgImageContent(m_doc);
     }
 }
