@@ -56,6 +56,7 @@ import java.awt.Rectangle;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringWriter;
 
 import org.apache.batik.bridge.BridgeContext;
 import org.apache.batik.bridge.GVTBuilder;
@@ -70,6 +71,7 @@ import org.apache.batik.transcoder.svg2svg.SVGTranscoder;
 import org.apache.batik.util.XMLResourceDescriptor;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.image.ImageContent;
+import org.w3c.dom.Document;
 import org.w3c.dom.svg.SVGDocument;
 
 /**
@@ -77,7 +79,7 @@ import org.w3c.dom.svg.SVGDocument;
  *
  * @author Thorsten Meinl, University of Konstanz
  */
-class SvgImageContent implements ImageContent {
+public class SvgImageContent implements ImageContent {
     private static final SVGTranscoder TRANSCODER = new SVGTranscoder();
 
     private SVGDocument m_doc;
@@ -86,19 +88,29 @@ class SvgImageContent implements ImageContent {
 
     private static final UserAgent UA = new UserAgentAdapter();
 
-    public SvgImageContent() {}
-
+    /**
+     * Creates a new SVG image content containing the passed SVG document.
+     *
+     * @param doc an SVG document
+     */
     public SvgImageContent(final SVGDocument doc) {
         m_doc = doc;
-
-        GVTBuilder gvtBuilder = new GVTBuilder();
-        BridgeContext bridgeContext = new BridgeContext(UA);
-        GraphicsNode gvtRoot = gvtBuilder.build(bridgeContext, doc);
-
-        m_preferredSize =
-                new Dimension((int)gvtRoot.getBounds().getWidth(), (int)gvtRoot
-                        .getBounds().getHeight());
     }
+
+    /**
+     * Creates a new SVG image content by reading the XML from the passed
+     * input stream.
+     *
+     * @param in an input stream
+     * @throws IOException if an I/O error occurs
+     */
+    public SvgImageContent(final InputStream in) throws IOException {
+        String parserClass = XMLResourceDescriptor.getXMLParserClassName();
+        SAXSVGDocumentFactory f = new SAXSVGDocumentFactory(parserClass);
+        m_doc = f.createSVGDocument(null, in);
+    }
+
+
 
     /**
      * {@inheritDoc}
@@ -114,7 +126,17 @@ class SvgImageContent implements ImageContent {
      */
     @Override
     public Dimension getPreferredSize() {
+        if (m_preferredSize == null) {
+            GVTBuilder gvtBuilder = new GVTBuilder();
+            BridgeContext bridgeContext = new BridgeContext(UA);
+            GraphicsNode gvtRoot = gvtBuilder.build(bridgeContext, m_doc);
+
+            m_preferredSize =
+                    new Dimension((int)gvtRoot.getBounds().getWidth(),
+                            (int)gvtRoot.getBounds().getHeight());
+        }
         return m_preferredSize;
+
     }
 
     /**
@@ -139,21 +161,25 @@ class SvgImageContent implements ImageContent {
         }
     }
 
+    SVGDocument getSvgDocument() {
+        return m_doc;
+    }
+
+    static String serialize(final Document doc) throws TranscoderException {
+        StringWriter buffer = new StringWriter(1024);
+        TranscoderOutput out = new TranscoderOutput(buffer);
+
+        TranscoderInput in = new TranscoderInput(doc);
+        TRANSCODER.transcode(in, out);
+        return buffer.toString();
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public void load(final InputStream in) throws IOException {
-        String parserClass = XMLResourceDescriptor.getXMLParserClassName();
-        SAXSVGDocumentFactory f = new SAXSVGDocumentFactory(parserClass);
-        m_doc = f.createSVGDocument(null, in);
-
-        GVTBuilder gvtBuilder = new GVTBuilder();
-        BridgeContext bridgeContext = new BridgeContext(UA);
-        GraphicsNode gvtRoot = gvtBuilder.build(bridgeContext, m_doc);
-
-        m_preferredSize =
-                new Dimension((int)gvtRoot.getBounds().getWidth(), (int)gvtRoot
-                        .getBounds().getHeight());
+    public String getSummary() {
+        Dimension dim = getPreferredSize();
+        return "SVG " + dim.width + " x " + dim.height;
     }
 }

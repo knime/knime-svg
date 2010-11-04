@@ -52,16 +52,13 @@ package org.knime.base.data.xml;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.io.StringWriter;
+import java.lang.ref.SoftReference;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.batik.css.engine.value.svg.SVGValue;
 import org.apache.batik.dom.svg.SAXSVGDocumentFactory;
 import org.apache.batik.transcoder.TranscoderException;
-import org.apache.batik.transcoder.TranscoderInput;
-import org.apache.batik.transcoder.TranscoderOutput;
-import org.apache.batik.transcoder.svg2svg.SVGTranscoder;
 import org.apache.batik.util.XMLResourceDescriptor;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataCellDataInput;
@@ -72,7 +69,6 @@ import org.knime.core.data.StringValue;
 import org.knime.core.data.container.BlobDataCell;
 import org.knime.core.data.image.ImageContent;
 import org.knime.core.data.image.ImageValue;
-import org.w3c.dom.Document;
 import org.w3c.dom.svg.SVGDocument;
 import org.xml.sax.SAXException;
 
@@ -111,18 +107,16 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue,
         }
     }
 
-    private static final SVGTranscoder TRANSCODER = new SVGTranscoder();
-
     private final static SvgSerializer SERIALIZER = new SvgSerializer();
 
-    private String m_xmlString;
+    private SoftReference<String> m_xmlString;
 
-    private SVGDocument m_doc;
+    private SvgImageContent m_content;
 
     private boolean m_isNormalized;
 
     /**
-     * Returns the serializer for SVG blob cells.
+     * Returns the serializer for SVG cells.
      *
      * @return a serializer
      */
@@ -131,8 +125,8 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue,
     }
 
     /**
-     * Returns the preferred value class for SVG blob cells which is
-     * {@link SVGValue}.
+     * Returns the preferred value class for SVG cells which is {@link SVGValue}
+     * .
      *
      * @return the preferred value class
      */
@@ -148,11 +142,13 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue,
      * @throws IOException if an error occurs while reading the XML string.
      */
     public SvgBlobCell(final String xmlString) throws IOException {
-        m_xmlString = xmlString;
+        m_xmlString = new SoftReference<String>(xmlString);
         String parserClass = XMLResourceDescriptor.getXMLParserClassName();
         SAXSVGDocumentFactory f = new SAXSVGDocumentFactory(parserClass);
 
-        m_doc = f.createSVGDocument(null, new StringReader(m_xmlString));
+        m_content =
+                new SvgImageContent(f.createSVGDocument(null, new StringReader(
+                        xmlString)));
     }
 
     /**
@@ -161,7 +157,7 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue,
      * @param doc an SVG document
      */
     public SvgBlobCell(final SVGDocument doc) {
-        m_doc = doc;
+        m_content = new SvgImageContent(doc);
     }
 
     /**
@@ -174,7 +170,7 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue,
     @Override
     public SVGDocument getDocument() throws SAXException, IOException,
             ParserConfigurationException {
-        return m_doc;
+        return m_content.getSvgDocument();
     }
 
     /**
@@ -194,16 +190,16 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue,
 
         try {
             String s1, s2;
-            if (this.m_isNormalized) {
-                s1 = this.m_xmlString;
+            if (this.m_isNormalized && (this.m_xmlString.get() != null)) {
+                s1 = this.m_xmlString.get();
             } else {
-                s1 = serialize(getDocument());
+                s1 = SvgImageContent.serialize(getDocument());
             }
 
-            if (cell.m_isNormalized) {
-                s2 = cell.m_xmlString;
+            if (cell.m_isNormalized && (cell.m_xmlString.get() != null)) {
+                s2 = cell.m_xmlString.get();
             } else {
-                s2 = serialize(cell.getDocument());
+                s2 = SvgImageContent.serialize(cell.getDocument());
             }
             return s1.equals(s2);
         } catch (Exception ex) {
@@ -217,11 +213,11 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue,
      */
     @Override
     public int hashCode() {
-        if (m_isNormalized) {
-            return m_xmlString.hashCode();
+        if (m_isNormalized && (m_xmlString.get() != null)) {
+            return m_xmlString.get().hashCode();
         }
         try {
-            return serialize(getDocument()).hashCode();
+            return SvgImageContent.serialize(getDocument()).hashCode();
         } catch (Exception ex) {
             throw new RuntimeException(
                     "Cannot create string representation of XML document", ex);
@@ -233,9 +229,12 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue,
      */
     @Override
     public String getStringValue() {
-        if (m_xmlString == null) {
+        if ((m_xmlString == null) || (m_xmlString.get() == null)) {
             try {
-                m_xmlString = serialize(m_doc);
+                m_xmlString =
+                        new SoftReference<String>(
+                                SvgImageContent.serialize(m_content
+                                        .getSvgDocument()));
                 m_isNormalized = true;
             } catch (TranscoderException ex) {
                 throw new RuntimeException(
@@ -243,16 +242,7 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue,
                         ex);
             }
         }
-        return m_xmlString;
-    }
-
-    private String serialize(final Document doc) throws TranscoderException {
-        StringWriter buffer = new StringWriter(1024);
-        TranscoderOutput out = new TranscoderOutput(buffer);
-
-        TranscoderInput in = new TranscoderInput(doc);
-        TRANSCODER.transcode(in, out);
-        return buffer.toString();
+        return m_xmlString.get();
     }
 
     /**
@@ -260,6 +250,6 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue,
      */
     @Override
     public ImageContent getImageContent() {
-        return new SvgImageContent(m_doc);
+        return m_content;
     }
 }
