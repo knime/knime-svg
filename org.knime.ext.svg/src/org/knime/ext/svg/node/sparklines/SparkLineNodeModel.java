@@ -55,7 +55,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Vector;
 
 import org.apache.batik.dom.svg.SVGDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
@@ -152,8 +151,7 @@ public class SparkLineNodeModel extends NodeModel {
         }
         // check if some columns are included
         if (m_columns.getIncludeList().size() <= 0) {
-            setWarningMessage("No column in include list! "
-                    + "Produces one huge cluster");
+            setWarningMessage("No column in include list!");
         }
         for (String s : m_columns.getIncludeList()) {
             if (!inSpec.containsName(s)) {
@@ -168,7 +166,8 @@ public class SparkLineNodeModel extends NodeModel {
         return new DataTableSpec[]{ arranger.createSpec() };
     }
 
-    private ColumnRearranger createColumnRearranger(final DataTableSpec spec) {
+    private ColumnRearranger createColumnRearranger(final DataTableSpec spec)
+    throws InvalidSettingsException {
         ColumnRearranger result = new ColumnRearranger(spec);
         // add new column
         DataColumnSpecCreator append =
@@ -207,7 +206,8 @@ public class SparkLineNodeModel extends NodeModel {
                     upperBound instanceof DoubleValue ? ((DoubleValue)upperBound)
                             .getDoubleValue() : Double.NaN;
             if (Double.isNaN(m_rangeMax[i]) || Double.isNaN(m_rangeMax[i])) {
-                throw new IllegalArgumentException("Missing Domain information! Connect Domain Calculator before this node.");
+                throw new InvalidSettingsException("Missing Domain "
+                        + "information! Preceed with Domain Calculator.");
             }
         }
 
