@@ -76,7 +76,8 @@ import org.w3c.dom.svg.SVGDocument;
  *
  * @author Thorsten Meinl, University of Konstanz
  */
-public class SvgValueRenderer extends AbstractPainterDataValueRenderer {
+public class SvgValueRenderer extends AbstractPainterDataValueRenderer
+    implements SvgProvider {
     /**
      * Property key that can be used in {@link DataColumnProperties} to specify
      * whether the aspect ration of the SVG should be kept (<code>true</code>)
@@ -231,5 +232,13 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer {
                 componentBounds.getWidth() - scaleX * svgBounds.getWidth();
 
         g.drawImage(image, (int)(widthDiff / 2), (int)(heightDiff / 2), null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SVGDocument getSvg() {
+        return m_doc;
     }
 }

@@ -56,6 +56,7 @@ import org.knime.core.data.DataCell;
 import org.knime.core.data.DataType;
 import org.knime.core.data.container.BlobDataCell;
 import org.knime.core.node.NodeLogger;
+import org.w3c.dom.svg.SVGDocument;
 
 /**
  * Cell factory that creates SVG cells. Depending on the size either normal
@@ -132,5 +133,23 @@ public class SvgCellFactory {
         } else {
             return new SvgCell(string);
         }
+    }
+
+    /**
+     * Factory method to create {@link DataCell} representing SVG documents.
+     * The returned cell is either of type {@link SvgCell} (for small strings)
+     * or {@link SvgBlobCell} (otherwise, default threshold is
+     * {@value #DEF_MIN_BLOB_SIZE_IN_BYTES} bytes or larger).
+     *
+     * @param doc the SVG document
+     * @return DataCell representing the SVG document
+     * @throws NullPointerException if argument is null
+     */
+    public static DataCell create(final SVGDocument doc) {
+        if (doc == null) {
+            throw new NullPointerException("SVG must not be null");
+        }
+        // TODO add a reasonable size check
+        return new SvgCell(doc);
     }
 }
