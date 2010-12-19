@@ -77,7 +77,7 @@ import org.w3c.dom.svg.SVGDocument;
  * @author Thorsten Meinl, University of Konstanz
  */
 public class SvgValueRenderer extends AbstractPainterDataValueRenderer
-    implements SvgProvider {
+        implements SvgProvider {
     /**
      * Property key that can be used in {@link DataColumnProperties} to specify
      * whether the aspect ration of the SVG should be kept (<code>true</code>)
@@ -148,6 +148,11 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer
      */
     @Override
     protected void setValue(final Object value) {
+        if (value == null) {
+            m_doc = null;
+            return;
+        }
+
         try {
             m_doc = ((SvgValue)value).getDocument();
         } catch (Exception ex) {
@@ -187,7 +192,18 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer
         return m_preferredSize;
     }
 
-    static void paint(final SVGDocument doc, final Graphics2D g,
+    /**
+     * Renders an SVG document on a graphics object. The image is scaled to fit
+     * in the specified bounds.
+     *
+     * @param doc an SVG document
+     * @param g the graphics object
+     * @param componentBounds the bound in which the image should be drawn
+     * @param keepAspectRatio <code>true</code> if the aspect ratio should be
+     *            kept, <code>false</code> if the image should be scaled in both
+     *            direction to the maximum
+     */
+    public static void paint(final SVGDocument doc, final Graphics2D g,
             final Rectangle componentBounds, final boolean keepAspectRatio) {
         if ((componentBounds.getHeight() < 1)
                 || (componentBounds.getWidth() < 1)) {
