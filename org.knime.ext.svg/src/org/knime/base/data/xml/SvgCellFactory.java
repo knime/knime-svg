@@ -150,6 +150,6 @@ public class SvgCellFactory {
             throw new NullPointerException("SVG must not be null");
         }
         // TODO add a reasonable size check
-        return new SvgCell(doc);
+        return new SvgBlobCell(doc);
     }
 }
