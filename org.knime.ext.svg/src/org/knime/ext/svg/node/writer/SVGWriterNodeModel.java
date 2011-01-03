@@ -166,7 +166,7 @@ public class SVGWriterNodeModel extends NodeModel {
 
         for (DataRow row : inData[0]) {
             exec.checkCanceled();
-            exec.setProgress(count / max, "Writing " + row.getKey() + ".svg");
+            exec.setProgress(count++ / max, "Writing " + row.getKey() + ".svg");
 
             File svgFile = new File(dir, row.getKey() + ".svg");
             if (!m_overwrite.getBooleanValue() && svgFile.exists()) {

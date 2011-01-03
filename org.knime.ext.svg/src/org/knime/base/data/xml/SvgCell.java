@@ -141,6 +141,10 @@ public class SvgCell extends DataCell implements SvgValue, StringValue,
      * Creates a new SVGCell by parsing the passed string. It must contain a
      * valid SVG document, including all XML headers.
      *
+     * Please consider using {@link SvgCellFactory#create(String)} instead of
+     * this constructor as the latter dynamically decides if a in-table cell or
+     * a blob cell is created (depending on the size).
+     *
      * @param xmlString an SVG document
      * @throws IOException if an error occurs while reading the XML string.
      */
@@ -156,6 +160,10 @@ public class SvgCell extends DataCell implements SvgValue, StringValue,
 
     /**
      * Creates a new SVGCell by using the passed SVG document.
+     *
+     * Please consider using {@link SvgCellFactory#create(SVGDocument)} instead
+     * of this constructor as the latter dynamically decides if a in-table cell
+     * or a blob cell is created (depending on the size).
      *
      * @param doc an SVG document
      */
