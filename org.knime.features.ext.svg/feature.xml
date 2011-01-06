@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.knime.features.ext.svg"
-      label="KNIME SVG support"
+      label="KNIME SVG Support"
       version="2.3.0.qualifier"
       provider-name="KNIME GmbH, Konstanz, Germany">
 
@@ -16,7 +16,7 @@ KNIME GmbH, Konstanz, Germany
    </copyright>
 
    <license>
-GNU GENERAL PUBLIC LICENSE with Additional Permissions according to Sec. 7
+      GNU GENERAL PUBLIC LICENSE with Additional Permissions according to Sec. 7
 *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** 
 Please see below the General Public License (GPL), Version 3, 
 and the Additional Permissions according to Sec. 7 
