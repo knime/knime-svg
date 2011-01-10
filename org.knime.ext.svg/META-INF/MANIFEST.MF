@@ -2,10 +2,15 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SVG support in KNIME
 Bundle-SymbolicName: org.knime.ext.svg;singleton:=true
-Bundle-Version: 2.3.0.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-Version: 2.3.1.qualifier
+Bundle-ClassPath: .
+Bundle-Activator: org.knime.ext.svg.SvgPluginActivator
 Bundle-Vendor: KNIME GmbH, Konstanz, Germany
-Bundle-ActivationPolicy: lazy
+Export-Package: org.knime.base.data.xml,
+ org.knime.ext.batik.svgexport,
+ org.knime.ext.svg,
+ org.knime.ext.svg.node.sparklines,
+ org.knime.ext.svg.node.writer
 Require-Bundle: org.knime.base;bundle-version="2.2.0",
  org.knime.workbench.repository;bundle-version="2.2.0",
  org.eclipse.core.runtime;bundle-version="3.4.0",
@@ -14,22 +19,29 @@ Require-Bundle: org.knime.base;bundle-version="2.2.0",
  org.w3c.dom.svg;bundle-version="1.1.0";visibility:=reexport,
  org.w3c.sac;bundle-version="1.3.0",
  org.apache.xerces;bundle-version="2.9.0";visibility:=reexport,
- org.apache.batik.bridge;bundle-version="[1.6.0,1.7.0)";visibility:=reexport,
- org.apache.batik.css;bundle-version="[1.6.0,1.7.0)",
- org.apache.batik.dom;bundle-version="[1.6.0,1.7.0)";visibility:=reexport,
- org.apache.batik.dom.svg;bundle-version="[1.6.0,1.7.0)";visibility:=reexport,
- org.apache.batik.ext.awt;bundle-version="[1.6.0,1.7.0)";visibility:=reexport,
- org.apache.batik.parser;bundle-version="[1.6.0,1.7.0)";visibility:=reexport,
- org.apache.batik.swing;bundle-version="[1.6.0,1.7.0)";visibility:=reexport,
- org.apache.batik.transcoder;bundle-version="[1.6.0,1.7.0)";visibility:=reexport,
- org.apache.batik.util;bundle-version="[1.6.0,1.7.0)";visibility:=reexport,
- org.apache.batik.util.gui;bundle-version="[1.6.0,1.7.0)",
- org.apache.batik.xml;bundle-version="[1.6.0,1.7.0)";visibility:=reexport,
- org.apache.batik.svggen;bundle-version="[1.6.0,1.7.0)";visibility:=reexport
-Bundle-ClassPath: .
-Export-Package: org.knime.base.data.xml,
- org.knime.ext.batik.svgexport,
- org.knime.ext.svg,
- org.knime.ext.svg.node.sparklines,
- org.knime.ext.svg.node.writer
-Bundle-Activator: org.knime.ext.svg.SvgPluginActivator
+ org.apache.batik.bridge;bundle-version="[1.6.0,
+ 1.7.0)";visibility:=reexport,
+ org.apache.batik.css;bundle-version="[1.6.0,
+ 1.7.0)",
+ org.apache.batik.dom;bundle-version="[1.6.0,
+ 1.7.0)";visibility:=reexport,
+ org.apache.batik.dom.svg;bundle-version="[1.6.0,
+ 1.7.0)";visibility:=reexport,
+ org.apache.batik.ext.awt;bundle-version="[1.6.0,
+ 1.7.0)";visibility:=reexport,
+ org.apache.batik.parser;bundle-version="[1.6.0,
+ 1.7.0)";visibility:=reexport,
+ org.apache.batik.swing;bundle-version="[1.6.0,
+ 1.7.0)";visibility:=reexport,
+ org.apache.batik.transcoder;bundle-version="[1.6.0,
+ 1.7.0)";visibility:=reexport,
+ org.apache.batik.util;bundle-version="[1.6.0,
+ 1.7.0)";visibility:=reexport,
+ org.apache.batik.util.gui;bundle-version="[1.6.0,
+ 1.7.0)",
+ org.apache.batik.xml;bundle-version="[1.6.0,
+ 1.7.0)";visibility:=reexport,
+ org.apache.batik.svggen;bundle-version="[1.6.0,
+ 1.7.0)";visibility:=reexport
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
