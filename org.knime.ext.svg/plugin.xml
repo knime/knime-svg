@@ -5,19 +5,16 @@
          point="org.knime.workbench.repository.nodes">
       <node
             category-path="/view"
-            expert-flag="false"
             factory-class="org.knime.ext.svg.node.sparklines.SparkLineNodeFactory"
             id="org.knime.ext.svg.node.sparkline">
       </node>
       <node
             category-path="/io/write"
-            expert-flag="false"
             factory-class="org.knime.ext.svg.node.writer.SVGWriterNodeFactory"
             id="org.knime.ext.svg.node.writer.SVGWriterNodeFactory">
       </node>
       <node
             category-path="/view/view-util"
-            expert-flag="false"
             factory-class="org.knime.ext.svg.node.renderer2svg.Renderer2SvgNodeFactory"
             id="org.knime.ext.svg.node.renderer2svg.Renderer2SvgNodeFactory">
       </node>
