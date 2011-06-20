@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
+<knimeNode icon="radarplot.png" type="Visualizer">
+	<name>Radar Plot Appender</name>
+	
+	<shortDescription>
+		Creates radar plots for each row, summarizing selected doubles in
+		this row
+	</shortDescription>
+	
+	<fullDescription>
+		<intro>
+		This node adds a column holding radar plots for each row. Each such
+		plot summarizes the selected double values on this row. It also
+		displays a selected range, which eases spotting values outside the given range. Values are
+		drawn as a ribbon connecting the axes. The colors of the ribbon, range, and the background are fully customizable.
+		</intro>
+		<option name="Background color">The color for the background of the drawn radarplots</option>
+		<option name="Range color">The color of the band which shows the selected intervals</option>
+		<option name="Ribbon color">The color of the value-ribbon if all values are within the selected ranges</option>
+		<option name="Ribbon color 2">The color of the value-ribbon if one value is outside of the selected ranges</option>
+	</fullDescription>
+	
+	<ports>
+		<inPort index="0" name="Input">The input data</inPort>
+        <outPort index="0" name="Output">Input with one new column attached.</outPort>
+	</ports>
+</knimeNode>
