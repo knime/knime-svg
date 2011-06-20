@@ -48,7 +48,7 @@
  * History
  *   21.01.2007 (berthold): created
  */
-package org.knime.base.node.radarplot;
+package org.knime.ext.svg.node.radarplot;
 
 import java.awt.Color;
 

@@ -1,4 +1,6 @@
-/*
+/* @(#)$RCSfile$
+ * $Revision$ $Date$ $Author$
+ *
  * ------------------------------------------------------------------------
  *
  *  Copyright (C) 2003 - 2010
@@ -43,97 +45,63 @@
  *  propagated with or for interoperation with KNIME.  The owner of a Node
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
- * --------------------------------------------------------------------- *
+ * -------------------------------------------------------------------
  *
  * History
- *   23.01.2007 (mb): created
+ *   26.08.2006 (mb): created
  */
-package org.knime.base.node.radarplot;
+package org.knime.ext.svg.node.radarplot;
 
-import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.text.DecimalFormat;
-
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTable;
-import javax.swing.table.TableCellRenderer;
+import org.knime.core.node.NodeDialogPane;
+import org.knime.core.node.NodeFactory;
+import org.knime.core.node.NodeView;
 
 /**
- *
+ * @see NodeFactory
  *
  * @author M. Berthold, University of Konstanz
  */
-public class ColumnSettingsTableCellRenderer implements TableCellRenderer {
-
+public class RadarplotAppenderFactory extends
+        NodeFactory<RadarplotAppenderNodeModel> {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public RadarplotAppenderNodeModel createNodeModel() {
+        return new RadarplotAppenderNodeModel();
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Component getTableCellRendererComponent(final JTable table,
-            final Object value, final boolean isSelected,
-            final boolean hasFocus, final int row, final int column) {
-        ColumnSettingsTable myTable = (ColumnSettingsTable)table.getModel();
-        if (column ==1){
-        	JPanel panel = new JPanel(new GridBagLayout());
-        	GridBagConstraints c = new GridBagConstraints();
-        	DecimalFormat f = new DecimalFormat("#0.00");
-        	double min, max, up, low;
-        	low = (Double) myTable.getValueAt(row, 2);
-        	up = (Double) myTable.getValueAt(row, 5);
-        	min = (Double) myTable.getValueAt(row, 3);
-        	max = (Double) myTable.getValueAt(row, 4);
-
-        	low = low+0.2*(max-min);
-        	up = up - 0.3*(max-min);
-        	RadarSlider slider = new RadarSlider(low,up,0,min,max);
-    		RadarSliderUI ui = new RadarSliderUI(slider);
-    		slider.setUI(ui);
-    		c.gridwidth =  GridBagConstraints.REMAINDER;
-    		c.gridheight = 1;
-    		c.weightx = 0.5;
-    		c.gridx = 0;
-    		c.gridy = 0;
-    		panel.add(slider, c);
-
-    		JLabel label1 = new JLabel();
-    		label1.setText("Min.: " + f.format(min));
-    		c.gridwidth = 1;
-    		c.gridheight = GridBagConstraints.REMAINDER;
-    		c.fill = GridBagConstraints.NONE;
-    		c.gridx = 0;
-    		c.gridy = 1;
-    		panel.add(label1,c);
-
-    		JLabel label2 = new JLabel();
-    		label2.setText("Low: " + f.format(low));
-    		c.fill = GridBagConstraints.NONE;
-    		c.gridx = 1;
-
-    		c.gridy = 1;
-    		panel.add(label2,c);
-
-    		JLabel label3 = new JLabel();
-    		label3.setText("High: " +f.format(up));
-    		c.fill = GridBagConstraints.NONE;
-    		c.gridx = 2;
-    		c.gridy = 1;
-    		panel.add(label3,c);
-
-    		JLabel label4 = new JLabel();
-    		label4.setText("Max.: " + f.format(max));
-    		c.fill = GridBagConstraints.NONE;
-    		c.gridx = 3;
-    		c.gridy = 1;
-    		panel.add(label4,c);
-
-
-    		panel.setVisible(true);
-    		return panel;
-        }
-        System.out.println(column);
-        return new JPanel();
+    public int getNrNodeViews() {
+        return 0;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public NodeView<RadarplotAppenderNodeModel> createNodeView(final int i,
+            final RadarplotAppenderNodeModel nodeModel) {
+        throw new IllegalStateException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean hasDialog() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public NodeDialogPane createNodeDialogPane() {
+        return new RadarplotAppenderNodeDialogPane();
+    }
+
 }

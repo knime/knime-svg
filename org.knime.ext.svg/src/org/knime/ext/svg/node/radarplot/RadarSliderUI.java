@@ -1,4 +1,4 @@
-package org.knime.base.node.radarplot;
+package org.knime.ext.svg.node.radarplot;
 
 import java.awt.Color;
 import java.awt.Graphics;

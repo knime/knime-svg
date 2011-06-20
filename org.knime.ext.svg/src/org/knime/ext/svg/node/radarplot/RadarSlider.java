@@ -1,4 +1,4 @@
-package org.knime.base.node.radarplot;
+package org.knime.ext.svg.node.radarplot;
 
 import javax.swing.JSlider;
 

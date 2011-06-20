@@ -7,9 +7,9 @@ Bundle-ClassPath: .
 Bundle-Activator: org.knime.ext.svg.SvgPluginActivator
 Bundle-Vendor: KNIME GmbH, Konstanz, Germany
 Export-Package: org.knime.base.data.xml,
- org.knime.base.node.radarplot,
  org.knime.ext.batik.svgexport,
  org.knime.ext.svg,
+ org.knime.ext.svg.node.radarplot,
  org.knime.ext.svg.node.sparklines,
  org.knime.ext.svg.node.writer
 Require-Bundle: org.knime.base;bundle-version="2.2.0",

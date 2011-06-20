@@ -50,7 +50,7 @@
  * History
  *   26.08.2006 (mb): created
  */
-package org.knime.base.node.radarplot;
+package org.knime.ext.svg.node.radarplot;
 
 import java.awt.BasicStroke;
 import java.awt.Color;

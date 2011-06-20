@@ -48,7 +48,7 @@
  * History
  *   18.01.2007 (mb): created
  */
-package org.knime.base.node.radarplot;
+package org.knime.ext.svg.node.radarplot;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
