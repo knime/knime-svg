@@ -63,6 +63,11 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 
 
+/** Table which holds all the settings for one radarplot node
+ * 
+ * @author Michael Berthold, University of Konstanz
+ * @author Andreas Burger
+ */
 public class ColumnSettingsTable extends AbstractTableModel {
 
     private int m_nrAttr = 0;
@@ -85,6 +90,10 @@ public class ColumnSettingsTable extends AbstractTableModel {
         m_nrAttr = 0;
     }
 
+    /** Loads a new spec from given spec
+     * @param spec Spec to load. Invalid values will be replaced with -1
+     * @throws NotConfigurableException
+     */
     public void setNewSpec(final DataTableSpec spec)
     throws NotConfigurableException {
         initMembers(spec.getNumColumns());
@@ -139,6 +148,9 @@ public class ColumnSettingsTable extends AbstractTableModel {
         return COLNAMES[i];
     }
 
+    /** Generates the background color from the stored values
+     * @return The stored background color
+     */
     public Color getBackgroundColor(){
     	if (m_backgroundColor[0] != null){
 	    	String[] result = m_backgroundColor[0].split("\\.");
@@ -150,7 +162,10 @@ public class ColumnSettingsTable extends AbstractTableModel {
             return new Color(175, 220, 240);
         }
     }
-
+    
+    /** Generates the interval color from the stored values
+     * @return The stored interval color
+     */
     public Color getIntervalColor(){
     	if (m_intervalColor[0] != null){
 	    	String[] result = m_intervalColor[0].split("\\.");
@@ -163,6 +178,9 @@ public class ColumnSettingsTable extends AbstractTableModel {
         }
     }
 
+    /** Generates the ribbon color from the stored values. This is the colour of the ribbon if all values are within the boundaries
+     * @return The ribbon color
+     */
     public Color getBendColor(){
     	if (m_bendColor[0] != null){
 	    	String[] result = m_bendColor[0].split("\\.");
@@ -174,6 +192,21 @@ public class ColumnSettingsTable extends AbstractTableModel {
             return new Color(0, 255, 0);
         }
     }
+    
+    /** Generates the ribbon color from the stored values. This is the colour of the ribbon if some values are outside the boundaries
+     * @return The ribbon color
+     */
+  	public Color getOutlyingBendColor() {
+		if (m_outlyingBendColor[0] != null){
+	    	String[] result = m_outlyingBendColor[0].split("\\.");
+	    	int red = Integer.parseInt(result[0]);
+	    	int green = Integer.parseInt(result[1]);
+	    	int blue = Integer.parseInt(result[2]);
+	    	return new Color(red, green, blue);
+    	} else {
+            return new Color(255, 0, 0);
+        }
+	}
 
     public boolean isSelected(final int i) {
         return m_isSelected[i];
@@ -275,6 +308,9 @@ public class ColumnSettingsTable extends AbstractTableModel {
         return;
 
     }
+    /** Loads the given settings into this table
+     * @param settings Settings to load
+     */
     void loadSettings(final NodeSettingsRO settings) {
         try {
             NodeSettingsRO mySettings = settings.getNodeSettings(m_confName);
@@ -301,6 +337,9 @@ public class ColumnSettingsTable extends AbstractTableModel {
         fireTableDataChanged();
     }
 
+    /** Save settings into a NodeSettingsWO object
+     * @param settings Settings in which to save
+     */
     void saveSettings(final NodeSettingsWO settings) {
         NodeSettingsWO mySettings = settings.addNodeSettings(m_confName);
         mySettings.addInt("NRATTR", m_nrAttr);
@@ -321,6 +360,11 @@ public class ColumnSettingsTable extends AbstractTableModel {
         }
     }
 
+	/** Checks for equality. This table and another table are equal if their column names, maximum and minimum Values are the same. 
+	 * This requires them to share the same number of rows.
+	 * @param table Table against which to test this table
+	 * @return True if the two tables are equal, false otherwise
+	 */
 	public boolean equals(final ColumnSettingsTable table) {
 		if (this.getRowCount() != table.getRowCount()) {
             return false;
@@ -339,6 +383,9 @@ public class ColumnSettingsTable extends AbstractTableModel {
 		return true;
 	}
 
+	/** Checks if this table is proper, i.e. if all values are set.
+	 * @return True if all values are set, false otherwise
+	 */
 	public boolean isProper() {
 		for(int i = 0; i < this.getRowCount(); i++){
 			if (this.getValidMax(i) != this.getValidMin(i)) {
@@ -346,18 +393,6 @@ public class ColumnSettingsTable extends AbstractTableModel {
             }
 		}
 		return false;
-	}
-
-	public Color getOutlyingBendColor() {
-		if (m_outlyingBendColor[0] != null){
-	    	String[] result = m_outlyingBendColor[0].split("\\.");
-	    	int red = Integer.parseInt(result[0]);
-	    	int green = Integer.parseInt(result[1]);
-	    	int blue = Integer.parseInt(result[2]);
-	    	return new Color(red, green, blue);
-    	} else {
-            return new Color(255, 0, 0);
-        }
 	}
 
 

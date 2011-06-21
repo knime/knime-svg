@@ -96,6 +96,7 @@ import org.w3c.dom.svg.SVGDocument;
  * each row.
  *
  * @author M. Berthold, University of Konstanz
+ * @author Andreas Burger
  */
 public class RadarplotAppenderNodeModel extends NodeModel {
 

@@ -10,16 +10,20 @@ import javax.swing.DefaultBoundedRangeModel;
 @SuppressWarnings("serial")
 public class RadarSliderModel extends DefaultBoundedRangeModel {
 
-	private double value1, value2;
-	private int extent;
-	private double minVal, maxVal;
+	private double m_value1, m_value2;
+	private int m_extent;
+	private double m_minVal, m_maxVal;
 
+	/** Returns the value of the selected Thumb. NOTE: Thumbs are numbered 1 and 2!
+	 * @param n The desired thumb
+	 * @return the Value of the thumb or -1 if invalid thumb is selected
+	 */
 	public double getValue(final int n){
 		if (n == 1) {
-            return value1;
+            return m_value1;
         }
 		if (n == 2) {
-            return value2;
+            return m_value2;
         } else {
             return -1;
         }
@@ -32,7 +36,7 @@ public class RadarSliderModel extends DefaultBoundedRangeModel {
 
 	@Override
     public void setValue(final int n) {
-		value1 = n;
+		m_value1 = n;
 		fireStateChanged();
 	}
 
@@ -43,69 +47,69 @@ public class RadarSliderModel extends DefaultBoundedRangeModel {
  */
 	public void setValue(final double n, final int thumb) {
 		if (thumb == 1) {
-            value1 = n;
+            m_value1 = n;
         }
 		if (thumb == 2) {
-            value2 = n;
+            m_value2 = n;
         }
 		fireStateChanged();
 	}
 
 	@Override
 	public int getExtent() {
-		return this.extent;
+		return this.m_extent;
 	}
 
 	@Override
     public int getMaximum() {
-		return (int) this.maxVal;
+		return (int) this.m_maxVal;
 	}
 
 	@Override
 	public int getMinimum() {
-		return (int) this.minVal;
+		return (int) this.m_minVal;
 	}
 
 	public double doubleGetMaximum() {
-		return  this.maxVal;
+		return  this.m_maxVal;
 	}
 
 	public double doubleGetMinimum() {
-		return this.minVal;
+		return this.m_minVal;
 	}
 
 	@Override
 	public void setExtent(final int n) {
 //		if((value2+extent <= maxVal)&&(n >-1))
-		this.extent = n;
+		this.m_extent = n;
 	}
 
 	@Override
 	public void setMaximum(final int n) {
 //		if(value2+extent <= n)
-		maxVal = n;
+		m_maxVal = n;
 	}
 
 	@Override
 	public void setMinimum(final int n) {
 //		if (n <= value1)
-		minVal = n;
+		m_minVal = n;
 	}
 
 	public void setMaximum(final double n) {
 //		if(value2+extent <= n)
-		maxVal = n;
+		m_maxVal = n;
 	}
 
 	public void setMinimum(final double n) {
 //		if (n <= value1)
-		minVal = n;
+		m_minVal = n;
 	}
 
 	@Override
 	public String toString() {
 		String result = "";
-		result = result + "Min. Val.:" + minVal + " Value 1:" +value1+ " Value 2:"+value2+ "Extent:"+ extent +  "Max. Val.:"+maxVal;
+		result = result + "Min. Val.:" + m_minVal + " Value 1:" +m_value1+ " Value 2:"+m_value2+ "Extent:"+ m_extent +  "Max. Val.:"+m_maxVal;
 		return result;
 	}
 

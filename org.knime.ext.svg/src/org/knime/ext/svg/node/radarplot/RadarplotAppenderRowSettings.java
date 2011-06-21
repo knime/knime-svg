@@ -12,72 +12,81 @@ import java.awt.Color;
 
 public class RadarplotAppenderRowSettings {
 	
-	private double minValue;
-	private double maxValue;
-	private double lowerValue;
-	private double upperValue;
-	private Color barColor;
-	private boolean enabled;
-	private String name;
-	private boolean isDouble;
+	private double m_minValue;
+	private double m_maxValue;
+	private double m_lowerValue;
+	private double m_upperValue;
+	private Color m_barColor;
+	private boolean m_enabled;
+	private String m_name;
+	private boolean m_isDouble;
 	
 	public boolean isDouble() {
-		return isDouble;
+		return m_isDouble;
 	}
 	public void setDouble(boolean isDouble) {
-		this.isDouble = isDouble;
+		this.m_isDouble = isDouble;
 	}
 	public double getMinValue() {
-		return minValue;
+		return m_minValue;
 	}
 	public void setMinValue(double minValue) {
-		this.minValue = minValue;
+		this.m_minValue = minValue;
 	}
 	public double getMaxValue() {
-		return maxValue;
+		return m_maxValue;
 	}
 	public void setMaxValue(double maxValue) {
-		this.maxValue = maxValue;
+		this.m_maxValue = maxValue;
 	}
 	public double getLowerValue() {
-		return lowerValue;
+		return m_lowerValue;
 	}
 	public void setLowerValue(double lowerValue) {
-		this.lowerValue = lowerValue;
+		this.m_lowerValue = lowerValue;
 	}
 	public double getUpperValue() {
-		return upperValue;
+		return m_upperValue;
 	}
 	public void setUpperValue(double upperValue) {
-		this.upperValue = upperValue;
+		this.m_upperValue = upperValue;
 	}
 	public boolean isEnabled() {
-		return enabled;
+		return m_enabled;
 	}
 	public void setEnabled(boolean enabled) {
-		this.enabled = enabled;
+		this.m_enabled = enabled;
 	}
 	public String getName() {
-		return name;
+		return m_name;
 	}
 	public void setName(String name) {
-		this.name = name;
+		this.m_name = name;
 	}
 	public Color getBarColor() {
-		return barColor;
+		return m_barColor;
 	}
 	public void setBarColor(Color barColor) {
-		this.barColor = barColor;
+		this.m_barColor = barColor;
 	}
 	
+	/** This method allows setting all the values at once
+	 * @param min Valid minimum
+	 * @param low Lower value
+	 * @param high Higher value
+	 * @param max Valid maximum
+	 * @param enabled Is this row visible in the output?
+	 * @param name The name of this row
+	 * @param isDouble The row contains only doubles?
+	 */
 	public void set(double min, double low, double high, double max, boolean enabled, String name, boolean isDouble){
-		minValue = min;
-		maxValue = max;
-		lowerValue = low;
-		upperValue = high;
-		this.enabled = enabled;
-		this.name = name;
-		this.isDouble = isDouble;
+		m_minValue = min;
+		m_maxValue = max;
+		m_lowerValue = low;
+		m_upperValue = high;
+		m_enabled = enabled;
+		m_name = name;
+		m_isDouble = isDouble;
 	}
 
 }

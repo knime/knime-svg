@@ -88,8 +88,6 @@ import org.knime.core.node.NotConfigurableException;
  */
 public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
 
-    private JPanel m_myPanel;
-
     // private ColumnSettingsTable m_myTable;
     private JPanel m_sliders = new JPanel(new GridLayout());
 
@@ -99,13 +97,6 @@ public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
     private RadarplotAppenderRowSettings[] m_rowSettings;
 
     private String format;
-
-    // private JCheckbox m_includeBand;
-    private DataTableSpec m_oldSpec = null;
-
-    private ColumnSettingsPanel[] m_ranges;
-
-    private int m_nrDoubleCols;
 
     private Color m_backgroundColor = new Color(175, 220, 240);
 

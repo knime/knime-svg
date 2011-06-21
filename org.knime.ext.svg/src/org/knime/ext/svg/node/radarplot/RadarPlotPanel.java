@@ -116,12 +116,11 @@ class RadarPlotPanel extends JPanel {
         setBackground(Color.WHITE);
 	}
 
+    /** Returns a tiny String describing this Panel
+     * @return Descriptive String
+     */
     public String getDescription() {
-        return (m_isDrawLabels ? "Labeled " : "") + "Radar Plot";
-    }
-
-    protected void drawLabels(final boolean f) {
-        m_isDrawLabels = f;
+        return "Labeled Radar Plot";
     }
 
     /** {@inheritDoc} */
@@ -143,6 +142,9 @@ class RadarPlotPanel extends JPanel {
         return new Dimension(200, 175);
     }
 
+    /** Paints the radarplot into a given Graphics-object
+     * @param g The graphics object in which to paint
+     */
     protected void paintComponentSVG(final Graphics g) {
 
     	// This method paints twice. First the basic Radarplot, then the highlighted bend.

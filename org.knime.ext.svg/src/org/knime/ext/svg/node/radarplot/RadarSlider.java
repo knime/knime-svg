@@ -12,7 +12,7 @@ import javax.swing.JSlider;
 @SuppressWarnings("serial")
 public class RadarSlider extends JSlider {
 	
-/**
+/** Creates a new Slider
  * 
  * @param lowVal Value of the left thumb
  * @param highVal Value of the right thumb
