@@ -6,7 +6,7 @@
       <node
             category-path="/view"
             factory-class="org.knime.ext.svg.node.sparklines.SparkLineNodeFactory"
-            id="org.knime.ext.svg.node.sparkline">
+            id="org.knime.ext.svg.node.sparklines.SparkLineNodeFactory">
       </node>
       <node
             category-path="/io/write"
@@ -19,6 +19,7 @@
             id="org.knime.ext.svg.node.renderer2svg.Renderer2SvgNodeFactory">
       </node>
       <node
+            after="org.knime.ext.svg.node.sparklines.SparkLineNodeFactory"
             category-path="/view"
             factory-class="org.knime.ext.svg.node.radarplot.RadarplotAppenderFactory"
             id="org.knime.ext.svg.node.radarplot.RadarplotAppenderFactory"/>      
