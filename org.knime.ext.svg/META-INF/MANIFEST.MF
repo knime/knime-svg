@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: SVG support in KNIME
+Bundle-Name: KNIME SVG Support
 Bundle-SymbolicName: org.knime.ext.svg;singleton:=true
 Bundle-Version: 2.4.0.qualifier
 Bundle-ClassPath: .
