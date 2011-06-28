@@ -310,7 +310,7 @@ public class RadarplotAppenderNodeModel extends NodeModel {
     private ColumnRearranger createColumnRearranger(final DataTableSpec spec) {
         m_adjustedValidRanges = false;
         final DataColumnSpec newColSpec =
-            new DataColumnSpecCreator("Radar Plot",
+            new DataColumnSpecCreator( DataTableSpec.getUniqueColumnName(spec, "Radar Plot"),
             		SvgCell.TYPE).createSpec();
         final int _dim = m_rangeModels.getNrSelected();
         final int[] _indices = new int[_dim];

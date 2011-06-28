@@ -63,7 +63,6 @@ import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.util.LinkedList;
 
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
@@ -105,12 +104,95 @@ public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
     private Color m_bendColor = Color.GREEN;
 
     private Color m_outlyingBendColor = Color.RED;
+    
+    private LinkedList<JCheckBox> m_checkboxes = new LinkedList<JCheckBox>();
 
     public RadarplotAppenderNodeDialogPane() {
         JPanel allPanel = new JPanel();
-        allPanel.setLayout(new BoxLayout(allPanel, BoxLayout.Y_AXIS));
+        allPanel.setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
         JScrollPane scrollPane = new JScrollPane(m_sliders);
-        allPanel.add(scrollPane);
+        
+        c.weightx = 1;
+        c.weighty = 1;
+        c.gridx = 0;
+        c.gridy = 0;
+        c.gridheight = 5;
+        c.gridwidth = GridBagConstraints.REMAINDER;
+        c.fill = GridBagConstraints.BOTH;
+        
+        allPanel.add(scrollPane, c);
+        
+        c.weightx = 0.3;
+        c.weighty = 0;
+        c.gridx = 0;
+        c.gridy = 5;
+        c.gridheight = 1;
+        c.gridwidth = 1;
+        c.insets = new Insets(5, 0, 5, 0);
+
+        
+        allPanel.add(new JPanel(), c);
+        
+        c.weightx = 0;
+        c.weighty = 0;
+        c.gridx = 1;
+        c.gridy = 5;
+        
+        JButton selectAll = new JButton("Display all");
+        selectAll.addActionListener(new ActionListener(){
+
+			public void actionPerformed(ActionEvent arg0) {
+				for (JCheckBox box:m_checkboxes){
+					if (!box.isSelected())
+						box.doClick();
+				}
+				
+			}
+        	
+        });
+        
+        allPanel.add(selectAll,c);
+        
+        c.weightx = 0.3;
+        c.weighty = 0;
+        c.gridx = 2;
+        c.gridy = 5;
+        
+        allPanel.add(new JPanel(), c);
+        
+        c.weightx = 0;
+        c.weighty = 0;
+        c.gridx = 3;
+        c.gridy = 5;
+        c.gridheight = 1;
+        c.gridwidth = 1;
+
+        
+        JButton selectNone = new JButton("Display none");
+        
+        selectNone.addActionListener(new ActionListener(){
+
+			public void actionPerformed(ActionEvent arg0) {
+				for (JCheckBox box:m_checkboxes){
+					if (box.isSelected())
+						box.doClick();
+				}
+				
+			}
+        	
+        });
+
+        allPanel.add(selectNone, c);
+        
+        c.weightx = 0.3;
+        c.weighty = 0;
+        c.gridx = 4;
+        c.gridy = 5;
+        c.gridwidth = GridBagConstraints.REMAINDER;
+        
+        allPanel.add(new JPanel(), c);
+        
         this.addTab("Column Settings", allPanel);
     }
 
@@ -404,6 +486,7 @@ public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
                                                 .isSelected());
                                     }
                                 });
+                                m_checkboxes.add(box);
                             }
                         }
                     }
@@ -413,7 +496,7 @@ public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
                 m_sliders.validate();
 
             }
-        } catch (Exception e) {
+        } catch (InvalidSettingsException e) {
         }
     }
 
