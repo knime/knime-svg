@@ -198,8 +198,7 @@ public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
         try {
             String m_confName = RadarplotAppenderNodeModel.COLUMNRANGEPREFIX;
             ColumnSettingsTable testTable = new ColumnSettingsTable(m_confName);
-            ColumnSettingsTable testTable2 =
-                    new ColumnSettingsTable(m_confName);
+            ColumnSettingsTable testTable2 = new ColumnSettingsTable(m_confName);
             testTable.setNewSpec(specs[0]);
             testTable2.loadSettings(settings);
             boolean equals = testTable.equals(testTable2);

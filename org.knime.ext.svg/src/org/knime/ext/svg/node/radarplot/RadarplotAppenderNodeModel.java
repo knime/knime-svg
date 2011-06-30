@@ -280,18 +280,24 @@ public class RadarplotAppenderNodeModel extends NodeModel {
     			ColumnSettingsTable testTable = new ColumnSettingsTable(COLUMNRANGEPREFIX);
     		try {
     			testTable.setNewSpec(inSpecs[0]);
-    			if (!(testTable.equals(m_rangeModels))){
-    				m_rangeModels = testTable;
-    				int messageSent = 0;
-    				if (!(testTable.isProper())){
-    					this.setWarningMessage("Previous Node not executed! Configuration not entirely possible");
-    					messageSent = 1;
-    				}
-    				if(messageSent != 1) {
-                        this.setWarningMessage("Values might have changed. Resetting configuration...");
-                    }
-
-    			}
+				if ((testTable.isProper())){
+	//    			if (m_rangeModels.equals(testTable)){
+	//    				m_rangeModels = testTable;
+	//    			}
+	    			if (m_rangeModels.isSimilar(testTable, null)){
+	    				this.setWarningMessage("Additional columns detected");
+	    				m_rangeModels = testTable;
+	    			}
+	    			else if (testTable.isSimilar(m_rangeModels, null)){
+	    				this.setWarningMessage("Some columns missing");
+	    				m_rangeModels = testTable;
+	    			}
+	    			else if (!(m_rangeModels.equals(testTable)))
+	    				m_rangeModels = testTable;
+				}
+	    		else{
+	    			this.setWarningMessage("Previous Node not executed! Configuration not entirely possible");
+	    		}
     		} catch (NotConfigurableException nce) {
     			throw new InvalidSettingsException("Could not load" +
     			"configuration!");

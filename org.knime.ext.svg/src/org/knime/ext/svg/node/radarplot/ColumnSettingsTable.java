@@ -51,6 +51,8 @@
 package org.knime.ext.svg.node.radarplot;
 
 import java.awt.Color;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -388,12 +390,58 @@ public class ColumnSettingsTable extends AbstractTableModel {
 	 */
 	public boolean isProper() {
 		for(int i = 0; i < this.getRowCount(); i++){
-			if (this.getValidMax(i) != this.getValidMin(i)) {
-                return true;
-            }
+			if (this.isDouble(i)){
+				if (this.getValidMax(i) == this.getValidMin(i)) {
+	                return false;
+	            }
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * Checks this table and another for similarity. Another Table is similar to this one if it contains all of the columns of this
+	 * Table. Note: It may contain more. 
+	 * @param table the table against which to check for similarity
+	 * @param correspondingColumns (optional) an empty List which will contain the corresponding column-indices after execution (if they are indeed similar)
+	 * @return true if they are similar, false otherwise
+	 */
+	public boolean isSimilar(ColumnSettingsTable table, List<Integer[]> correspondingColumns) {
+//		String names = table.getCompoundColumnNames();
+		if (correspondingColumns == null || correspondingColumns.size() != 0){
+		correspondingColumns = new LinkedList<Integer[]>();
+		}
+		if (this.getRowCount() < table.getRowCount()) {
+			for (int i = 0; i< getColumnCount(); i++){
+				for(int j = 0; j<table.getColumnCount(); j++){
+					if (getRowName(i).equals(getRowName(j))){
+						Integer[] values = {i,j};
+						correspondingColumns.add(values);
+					}
+				}
+				if (correspondingColumns.size() < i+1)
+					return false;
+			}
+			for (Integer[] array : correspondingColumns){
+				if (this.getValidMax(array[0]) != table.getValidMax(array[1])) {
+	                return false;
+	            }
+				if (this.getValidMin(array[0]) != table.getValidMin(array[1])) {
+	                return false;
+				}
+			}
+			return true;
 		}
 		return false;
 	}
+	
+//	protected String getCompoundColumnNames(){
+//		String result = "";
+//		for (int i = 0; i< getColumnCount(); i++){
+//			result = result + "  " + getColumnName(i);
+//		}
+//		return result;
+//	}
 
 
 
