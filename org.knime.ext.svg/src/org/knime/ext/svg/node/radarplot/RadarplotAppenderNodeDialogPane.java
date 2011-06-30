@@ -104,7 +104,7 @@ public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
     private Color m_bendColor = Color.GREEN;
 
     private Color m_outlyingBendColor = Color.RED;
-    
+
     private LinkedList<JCheckBox> m_checkboxes = new LinkedList<JCheckBox>();
 
     public RadarplotAppenderNodeDialogPane() {
@@ -112,7 +112,7 @@ public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
         allPanel.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         JScrollPane scrollPane = new JScrollPane(m_sliders);
-        
+
         c.weightx = 1;
         c.weighty = 1;
         c.gridx = 0;
@@ -120,9 +120,9 @@ public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
         c.gridheight = 5;
         c.gridwidth = GridBagConstraints.REMAINDER;
         c.fill = GridBagConstraints.BOTH;
-        
+
         allPanel.add(scrollPane, c);
-        
+
         c.weightx = 0.3;
         c.weighty = 0;
         c.gridx = 0;
@@ -131,36 +131,35 @@ public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
         c.gridwidth = 1;
         c.insets = new Insets(5, 0, 5, 0);
 
-        
+
         allPanel.add(new JPanel(), c);
-        
+
         c.weightx = 0;
         c.weighty = 0;
         c.gridx = 1;
         c.gridy = 5;
-        
+
         JButton selectAll = new JButton("Display all");
         selectAll.addActionListener(new ActionListener(){
 
-			public void actionPerformed(ActionEvent arg0) {
+			public void actionPerformed(final ActionEvent arg0) {
 				for (JCheckBox box:m_checkboxes){
-					if (!box.isSelected())
-						box.doClick();
+					box.setSelected(true);
 				}
-				
+
 			}
-        	
+
         });
-        
+
         allPanel.add(selectAll,c);
-        
+
         c.weightx = 0.3;
         c.weighty = 0;
         c.gridx = 2;
         c.gridy = 5;
-        
+
         allPanel.add(new JPanel(), c);
-        
+
         c.weightx = 0;
         c.weighty = 0;
         c.gridx = 3;
@@ -168,31 +167,28 @@ public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
         c.gridheight = 1;
         c.gridwidth = 1;
 
-        
+
         JButton selectNone = new JButton("Display none");
-        
+
         selectNone.addActionListener(new ActionListener(){
 
-			public void actionPerformed(ActionEvent arg0) {
+			public void actionPerformed(final ActionEvent arg0) {
 				for (JCheckBox box:m_checkboxes){
-					if (box.isSelected())
-						box.doClick();
+				    box.setSelected(false);
 				}
-				
 			}
-        	
         });
 
         allPanel.add(selectNone, c);
-        
+
         c.weightx = 0.3;
         c.weighty = 0;
         c.gridx = 4;
         c.gridy = 5;
         c.gridwidth = GridBagConstraints.REMAINDER;
-        
+
         allPanel.add(new JPanel(), c);
-        
+
         this.addTab("Column Settings", allPanel);
     }
 
