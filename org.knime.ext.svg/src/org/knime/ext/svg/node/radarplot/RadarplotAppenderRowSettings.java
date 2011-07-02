@@ -20,6 +20,7 @@ public class RadarplotAppenderRowSettings {
 	private boolean m_enabled;
 	private String m_name;
 	private boolean m_isDouble;
+	private boolean m_set = false;
 	
 	public boolean isDouble() {
 		return m_isDouble;
@@ -70,6 +71,9 @@ public class RadarplotAppenderRowSettings {
 		this.m_barColor = barColor;
 	}
 	
+	public boolean isSet() {
+		return m_set;
+	}
 	/** This method allows setting all the values at once
 	 * @param min Valid minimum
 	 * @param low Lower value
@@ -87,6 +91,7 @@ public class RadarplotAppenderRowSettings {
 		m_enabled = enabled;
 		m_name = name;
 		m_isDouble = isDouble;
+		m_set = true;
 	}
 
 }

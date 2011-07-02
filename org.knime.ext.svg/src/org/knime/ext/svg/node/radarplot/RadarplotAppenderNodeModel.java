@@ -280,23 +280,26 @@ public class RadarplotAppenderNodeModel extends NodeModel {
     			ColumnSettingsTable testTable = new ColumnSettingsTable(COLUMNRANGEPREFIX);
     		try {
     			testTable.setNewSpec(inSpecs[0]);
+    			boolean subset = false, tesbus = false, equal = false;
 				if ((testTable.isProper())){
-	//    			if (m_rangeModels.equals(testTable)){
-	//    				m_rangeModels = testTable;
-	//    			}
-	    			if (m_rangeModels.isSimilar(testTable, null)){
-	    				this.setWarningMessage("Additional columns detected");
-	    				m_rangeModels = testTable;
+	    			if (m_rangeModels.isSimilarTo(testTable, null)){
+	    				this.setWarningMessage("Additional columns detected!");
+	    				subset = true;
 	    			}
-	    			else if (testTable.isSimilar(m_rangeModels, null)){
-	    				this.setWarningMessage("Some columns missing");
-	    				m_rangeModels = testTable;
+	    			if (testTable.isSimilarTo(m_rangeModels, null)){
+	    				this.setWarningMessage("Some columns missing!");
+	    				tesbus = true;
 	    			}
-	    			else if (!(m_rangeModels.equals(testTable)))
-	    				m_rangeModels = testTable;
+	    			if (m_rangeModels.equals(testTable)){
+	    				equal = true;
+	    			}
+	    			if (!subset && ! tesbus && !equal){
+	    			throw new InvalidSettingsException("New input Table found!");
+
+	    			}
 				}
 	    		else{
-	    			this.setWarningMessage("Previous Node not executed! Configuration not entirely possible");
+	    			this.setWarningMessage("Previous Node not executed! Configuration not entirely possible.");
 	    		}
     		} catch (NotConfigurableException nce) {
     			throw new InvalidSettingsException("Could not load" +
@@ -326,7 +329,7 @@ public class RadarplotAppenderNodeModel extends NodeModel {
         final double[] _validMax = new double[_dim];
         final String[] _labels = new String[_dim];
         int nrSelCol = 0;  // keep track of selected (and double) columns
-        for (int i = 0; i < spec.getNumColumns(); i++) {
+        for (int i = 0; i < Math.min(spec.getNumColumns(),m_rangeModels.getColumnCount()); i++) {
             if (m_rangeModels.isSelected(i)) {
                 // retrieve min/max values. We know that they exist
                 // because we precomputed them in the execute if

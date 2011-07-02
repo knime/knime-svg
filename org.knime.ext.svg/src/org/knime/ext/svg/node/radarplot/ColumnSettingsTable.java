@@ -112,6 +112,10 @@ public class ColumnSettingsTable extends AbstractTableModel {
             	   m_min[i] = -1;
             	   m_max[i] = -1;
                }
+               	m_backgroundColor[i] = "175.220.240";
+               	m_intervalColor[i] = "105.150.170";
+               	m_bendColor[i] = "0.255.0" ;
+               	m_outlyingBendColor[i] = "255.0.0";
                 m_validMin[i] = m_min[i];
                 m_validMax[i] = m_max[i];
                 m_isDouble[i] = true;
@@ -142,12 +146,12 @@ public class ColumnSettingsTable extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return COLNAMES.length;
+        return m_attrName.length;
     }
 
     @Override
     public String getColumnName(final int i) {
-        return COLNAMES[i];
+        return m_attrName[i];
     }
 
     /** Generates the background color from the stored values
@@ -406,17 +410,18 @@ public class ColumnSettingsTable extends AbstractTableModel {
 	 * @param correspondingColumns (optional) an empty List which will contain the corresponding column-indices after execution (if they are indeed similar)
 	 * @return true if they are similar, false otherwise
 	 */
-	public boolean isSimilar(ColumnSettingsTable table, List<Integer[]> correspondingColumns) {
+	public boolean isSimilarTo(ColumnSettingsTable table, List<Integer[]> correspondingColumns) {
 //		String names = table.getCompoundColumnNames();
 		if (correspondingColumns == null || correspondingColumns.size() != 0){
 		correspondingColumns = new LinkedList<Integer[]>();
 		}
 		if (this.getRowCount() < table.getRowCount()) {
-			for (int i = 0; i< getColumnCount(); i++){
-				for(int j = 0; j<table.getColumnCount(); j++){
-					if (getRowName(i).equals(getRowName(j))){
+			for (int i = 0; i< getRowCount(); i++){
+				for(int j = 0; j<table.getRowCount(); j++){
+					if (getRowName(i).equals(table.getRowName(j))){
 						Integer[] values = {i,j};
 						correspondingColumns.add(values);
+						break;
 					}
 				}
 				if (correspondingColumns.size() < i+1)
