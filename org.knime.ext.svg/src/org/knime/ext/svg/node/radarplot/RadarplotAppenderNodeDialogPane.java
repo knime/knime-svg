@@ -321,7 +321,15 @@ public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
 			
 				for (int i = 0; i < nrAttr; i++) {
 					if(m_rowSettings[i].isDouble()){
-						DecimalFormat g = new DecimalFormat(format[i]);
+						boolean isValid = (m_rowSettings[i].getMinValue() !=  m_rowSettings[i].getMaxValue());
+						DecimalFormat g = null;
+						if (isValid){
+							g = new DecimalFormat(format[i]);
+						}
+						else {
+							g = new DecimalFormat("#.#");
+						}
+							
 		
 						JLabel space1 = new JLabel();
 						space1.setPreferredSize(new Dimension(25, 15));
@@ -331,8 +339,15 @@ public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
 						c.gridwidth = GridBagConstraints.REMAINDER;
 						c.insets = new Insets(0, 15, 0, 0);
 						data.add(space1, c);
+						
+						String colName = "";
+						
+						if (isValid)
+							colName = m_rowSettings[i].getName();
+						else
+							colName = m_rowSettings[i].getName() + " (DISABLED)";
 		
-						JLabel label = new JLabel(m_rowSettings[i].getName());
+						JLabel label = new JLabel(colName);
 						c.gridx = 0;
 						c.gridy = 3 * i + 2;
 						c.gridheight = 2;
@@ -347,12 +362,27 @@ public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
 						c.gridwidth = 1;
 						c.insets = new Insets(0, 10, 0, 0);
 						data.add(box, c);
-		
+						if(!isValid){
+							box.setSelected(false);
+							m_rowSettings[i].setEnabled(false);
+							box.setEnabled(false);
+						}
+						
+						double lowerValue = 0;
+						double upperValue = 1;
+						double minValue = lowerValue; 
+						double maxValue = upperValue;
+						if(isValid){
+							lowerValue = m_rowSettings[i].getLowerValue();
+							upperValue = m_rowSettings[i].getUpperValue();
+							minValue = m_rowSettings[i].getMinValue(); 
+							maxValue = m_rowSettings[i].getMaxValue();
+						}
 						final RadarSlider slider = new RadarSlider(
-								m_rowSettings[i].getLowerValue(),
-								m_rowSettings[i].getUpperValue(), 0,
-								m_rowSettings[i].getMinValue(),
-								m_rowSettings[i].getMaxValue());
+								lowerValue,
+								upperValue, 0,
+								minValue,
+								maxValue);
 						slider.setUI(new RadarSliderUI(slider));
 						((RadarSliderUI) slider.getUI())
 								.setBarColor(m_intervalColor);
@@ -368,6 +398,9 @@ public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
 						c.insets = new Insets(0, 0, 0, 0);
 						data.add(slider, c);
 						m_sliderList.add(slider);
+						
+						if(!isValid)
+							slider.setEnabled(false);
 		
 						final JLabel spacer = new JLabel();
 						c.insets = new Insets(0, 10, 0, 0);
@@ -386,11 +419,22 @@ public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
 						c.gridwidth = 1;
 						c.insets = new Insets(0, 0, 0, 0);
 						data.add(ValueLabel1, c);
+						
+						int labelWidth = 0;
+						String lowerLabelText = "";
+						String upperLabelText = "";
+						if (isValid){
+							labelWidth = format[i].length()*6;
+							lowerLabelText = g.format(slider.getValue(1));
+							upperLabelText = g.format(slider.getValue(2));
+							
+						}
+						else
+							labelWidth = 24;
 		
-						final JLabel lowerValueLabel = new JLabel(g.format(slider
-								.getValue(1)));
+						final JLabel lowerValueLabel = new JLabel(lowerLabelText);
 						 lowerValueLabel.setPreferredSize(new
-						 Dimension(format[i].length()*6,15));
+						 Dimension(labelWidth,15));
 						c.gridx = 3;
 						c.gridy = 3 * (i + 1);
 						c.gridheight = 1;
@@ -406,9 +450,8 @@ public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
 						c.weightx = 0;
 						data.add(ValueLabel2, c);
 		
-						final JLabel upperValueLabel = new JLabel(g.format(slider
-								.getValue(2)));
-						upperValueLabel.setPreferredSize(new Dimension(format[i].length()*6, 15));
+						final JLabel upperValueLabel = new JLabel(upperLabelText);
+						upperValueLabel.setPreferredSize(new Dimension(labelWidth, 15));
 						c.gridx = 5;
 						c.gridy = 3 * (i + 1);
 						c.gridheight = 1;

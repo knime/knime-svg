@@ -75,17 +75,33 @@ public class RadarSliderUI extends BasicSliderUI {
 	 */
 	@Override
 	public void paintTrack(final Graphics g) {
-		if (((RadarSliderModel)slider.getModel()).getValue(1) < ((RadarSliderModel)slider.getModel()).getValue(2)){
-			g.setColor(backgroundColor);
-			g.fill3DRect(xPositionForValue(slider.doubleGetMinimum()), (trackRect.height>>1)-5, xPositionForValue(((RadarSliderModel)slider.getModel()).getValue(1))-xPositionForValue(slider.doubleGetMinimum()),  10, true);
-			g.setColor(barColor);
-			g.fill3DRect(xPositionForValue(((RadarSliderModel)slider.getModel()).getValue(1)), (trackRect.height>>1)-5, xPositionForValue(((RadarSliderModel)slider.getModel()).getValue(2))-xPositionForValue(((RadarSliderModel)slider.getModel()).getValue(1)),  10, true);
-			g.setColor(backgroundColor);
-			g.fill3DRect(xPositionForValue(((RadarSliderModel)slider.getModel()).getValue(2)), (trackRect.height>>1)-5, xPositionForValue(slider.doubleGetMaximum())-xPositionForValue(((RadarSliderModel)slider.getModel()).getValue(2)), 10, true);
+		if (slider.isEnabled()){
+			if (((RadarSliderModel)slider.getModel()).getValue(1) < ((RadarSliderModel)slider.getModel()).getValue(2)){
+				g.setColor(backgroundColor);
+				g.fill3DRect(xPositionForValue(slider.doubleGetMinimum()), (trackRect.height>>1)-5, xPositionForValue(((RadarSliderModel)slider.getModel()).getValue(1))-xPositionForValue(slider.doubleGetMinimum()),  10, true);
+				g.setColor(barColor);
+				g.fill3DRect(xPositionForValue(((RadarSliderModel)slider.getModel()).getValue(1)), (trackRect.height>>1)-5, xPositionForValue(((RadarSliderModel)slider.getModel()).getValue(2))-xPositionForValue(((RadarSliderModel)slider.getModel()).getValue(1)),  10, true);
+				g.setColor(backgroundColor);
+				g.fill3DRect(xPositionForValue(((RadarSliderModel)slider.getModel()).getValue(2)), (trackRect.height>>1)-5, xPositionForValue(slider.doubleGetMaximum())-xPositionForValue(((RadarSliderModel)slider.getModel()).getValue(2)), 10, true);
+			}
+			if (((RadarSliderModel)slider.getModel()).getValue(1) == ((RadarSliderModel)slider.getModel()).getValue(2)){
+				g.setColor(backgroundColor);
+				g.fill3DRect(xPositionForValue(0), (trackRect.height>>1)-5, trackRect.width,  10, true);
+			}
 		}
-		if (((RadarSliderModel)slider.getModel()).getValue(1) == ((RadarSliderModel)slider.getModel()).getValue(2)){
-			g.setColor(backgroundColor);
-			g.fill3DRect(xPositionForValue(0), (trackRect.height>>1)-5, trackRect.width,  10, true);
+		else{
+			if (((RadarSliderModel)slider.getModel()).getValue(1) < ((RadarSliderModel)slider.getModel()).getValue(2)){
+				g.setColor(Color.DARK_GRAY);
+				g.fill3DRect(xPositionForValue(slider.doubleGetMinimum()), (trackRect.height>>1)-5, xPositionForValue(((RadarSliderModel)slider.getModel()).getValue(1))-xPositionForValue(slider.doubleGetMinimum()),  10, true);
+				g.setColor(Color.GRAY);
+				g.fill3DRect(xPositionForValue(((RadarSliderModel)slider.getModel()).getValue(1)), (trackRect.height>>1)-5, xPositionForValue(((RadarSliderModel)slider.getModel()).getValue(2))-xPositionForValue(((RadarSliderModel)slider.getModel()).getValue(1)),  10, true);
+				g.setColor(Color.DARK_GRAY);
+				g.fill3DRect(xPositionForValue(((RadarSliderModel)slider.getModel()).getValue(2)), (trackRect.height>>1)-5, xPositionForValue(slider.doubleGetMaximum())-xPositionForValue(((RadarSliderModel)slider.getModel()).getValue(2)), 10, true);
+			}
+			if (((RadarSliderModel)slider.getModel()).getValue(1) == ((RadarSliderModel)slider.getModel()).getValue(2)){
+				g.setColor(Color.DARK_GRAY);
+				g.fill3DRect(xPositionForValue(0), (trackRect.height>>1)-5, trackRect.width,  10, true);
+			}
 		}
 	}
 
@@ -129,12 +145,21 @@ public class RadarSliderUI extends BasicSliderUI {
 	}
 	@Override
 	public void paintThumb(final Graphics g) {
-		int q = (this.xPositionForValue(((RadarSliderModel)slider.getModel()).getValue(1)) -4);
-		g.setColor(new Color(192,192,192));
-		g.fill3DRect(q, (int) (trackRect.height*0.125), 8, (int) (trackRect.height*0.75), true);
-		q = (this.xPositionForValue(((RadarSliderModel)slider.getModel()).getValue(2)) -4);
-		g.fill3DRect(q, (int) (trackRect.height*0.125), 8, (int) (trackRect.height*0.75), true);
-//		horizThumbIcon.paintIcon(slider, g, q, 0);
+		if(slider.isEnabled()){
+			int q = (this.xPositionForValue(((RadarSliderModel)slider.getModel()).getValue(1)) -4);
+			g.setColor(new Color(192,192,192));
+			g.fill3DRect(q, (int) (trackRect.height*0.125), 8, (int) (trackRect.height*0.75), true);
+			q = (this.xPositionForValue(((RadarSliderModel)slider.getModel()).getValue(2)) -4);
+			g.fill3DRect(q, (int) (trackRect.height*0.125), 8, (int) (trackRect.height*0.75), true);
+	//		horizThumbIcon.paintIcon(slider, g, q, 0);
+		}
+		else{
+			int q = (this.xPositionForValue(((RadarSliderModel)slider.getModel()).getMinimum()) -4);
+			g.setColor(new Color(192,192,192));
+			g.fill3DRect(q, (int) (trackRect.height*0.125), 8, (int) (trackRect.height*0.75), true);
+			q = (this.xPositionForValue(((RadarSliderModel)slider.getModel()).getMaximum()) -4);
+			g.fill3DRect(q, (int) (trackRect.height*0.125), 8, (int) (trackRect.height*0.75), true);
+		}
 	}
 
 	public RadarSlider getSlider(){

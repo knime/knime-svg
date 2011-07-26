@@ -389,18 +389,18 @@ public class ColumnSettingsTable extends AbstractTableModel {
 		return true;
 	}
 
-	/** Checks if this table is proper, i.e. if all values are set.
-	 * @return True if all values are set, false otherwise
+	/** Checks if this table is proper (at least one Column has valid Values).
+	 * @return True if at least one valid Column exists, false otherwise
 	 */
 	public boolean isProper() {
 		for(int i = 0; i < this.getRowCount(); i++){
 			if (this.isDouble(i)){
-				if (this.getValidMax(i) == this.getValidMin(i)) {
-	                return false;
+				if (this.getValidMax(i) != this.getValidMin(i)) {
+	                return true;
 	            }
 			}
 		}
-		return true;
+		return false;
 	}
 	
 	/**

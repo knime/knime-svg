@@ -13,6 +13,7 @@ public class RadarSliderModel extends DefaultBoundedRangeModel {
 	private double m_value1, m_value2;
 	private int m_extent;
 	private double m_minVal, m_maxVal;
+	private boolean m_enabled = true;
 
 	/** Returns the value of the selected Thumb. NOTE: Thumbs are numbered 1 and 2!
 	 * @param n The desired thumb
@@ -46,13 +47,15 @@ public class RadarSliderModel extends DefaultBoundedRangeModel {
  * @param thumb The thumb whose value should be changed. (1 or 2!)
  */
 	public void setValue(final double n, final int thumb) {
-		if (thumb == 1) {
-            m_value1 = n;
-        }
-		if (thumb == 2) {
-            m_value2 = n;
-        }
-		fireStateChanged();
+		if (m_enabled){
+			if (thumb == 1) {
+	            m_value1 = n;
+	        }
+			if (thumb == 2) {
+	            m_value2 = n;
+	        }
+			fireStateChanged();
+		}
 	}
 
 	@Override
@@ -111,6 +114,11 @@ public class RadarSliderModel extends DefaultBoundedRangeModel {
 		String result = "";
 		result = result + "Min. Val.:" + m_minVal + " Value 1:" +m_value1+ " Value 2:"+m_value2+ "Extent:"+ m_extent +  "Max. Val.:"+m_maxVal;
 		return result;
+	}
+
+	public void setEnabled(boolean enabled) {
+		m_enabled = enabled;
+		
 	}
 
 }

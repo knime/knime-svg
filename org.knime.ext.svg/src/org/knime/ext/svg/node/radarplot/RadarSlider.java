@@ -60,7 +60,17 @@ public class RadarSlider extends JSlider {
 	 * @param thumb Which thumb to set.
 	 */
 	public void setValue(double value, int thumb){
-		((RadarSliderModel)getModel()).setValue(value, thumb);
+			((RadarSliderModel)getModel()).setValue(value, thumb);
 	}
+
+	@Override
+	public void setEnabled(boolean enabled) {
+		// TODO Auto-generated method stub
+		super.setEnabled(enabled);
+		if (this.getModel() instanceof RadarSliderModel)
+			((RadarSliderModel)this.getModel()).setEnabled(enabled);
+	}
+	
+	
 
 }
