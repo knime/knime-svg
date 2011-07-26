@@ -211,7 +211,7 @@ public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
 
 		int tableCompare = compareTables(incomingValues, settingsTable);
 		int nrAttr = 0;
-		if (incomingValues.isProper()){
+		if (incomingValues.isProper() >= 0){
 			nrAttr = incomingValues.getRowCount();
 			m_rowSettings = new RadarplotAppenderRowSettings[nrAttr];
 			format = new String[nrAttr];
@@ -316,7 +316,7 @@ public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
 
 		if (nrAttr != 0) {
 			
-			if (incomingValues.isProper()){
+			if (incomingValues.isProper()>=0){
 				SetupRows(tableCompare, incomingValues, settingsTable);
 			
 				for (int i = 0; i < nrAttr; i++) {

@@ -279,9 +279,14 @@ public class RadarplotAppenderNodeModel extends NodeModel {
     		else{
     			ColumnSettingsTable testTable = new ColumnSettingsTable(COLUMNRANGEPREFIX);
     		try {
+    			int isProper = 0;
     			testTable.setNewSpec(inSpecs[0]);
     			boolean subset = false, tesbus = false, equal = false;
-				if ((testTable.isProper())){
+    			isProper = testTable.isProper();
+				if ((isProper>=0)){
+					if (isProper == 0){
+						this.setWarningMessage("Some columns were disabled!");
+					}
 	    			if (m_rangeModels.isSimilarTo(testTable, null)){
 	    				this.setWarningMessage("Additional columns detected!");
 	    				subset = true;
