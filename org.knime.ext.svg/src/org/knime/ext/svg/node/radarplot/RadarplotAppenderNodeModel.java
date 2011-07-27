@@ -92,8 +92,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.svg.SVGDocument;
 
 /**
- * Model that attaches a new column holding individual radar plots to
- * each row.
+ * Model that attaches a new column holding individual radar plots to each row.
  *
  * @author M. Berthold, University of Konstanz
  * @author Andreas Burger
@@ -105,15 +104,14 @@ public class RadarplotAppenderNodeModel extends NodeModel {
             .getLogger(RadarplotAppenderNodeModel.class);
 
     /**
-     * The following strings are used by the dialog and the model
-     * as key to store settings in the settings object.
+     * The following strings are used by the dialog and the model as key to
+     * store settings in the settings object.
      */
     static final String COLUMNRANGEPREFIX = "COL_";
 
     /*
-     * these are the members storing user settings.
-     * Use the same settings model (but a new instance) as in
-     * the node dialog for that value.
+     * these are the members storing user settings. Use the same settings model
+     * (but a new instance) as in the node dialog for that value.
      */
     private ColumnSettingsTable m_rangeModels = null;
 
@@ -136,8 +134,8 @@ public class RadarplotAppenderNodeModel extends NodeModel {
     @Override
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-            // TODO
-//            m_rangeModels[i].validateSettings(settings);
+        // TODO
+        // m_rangeModels[i].validateSettings(settings);
     }
 
     /**
@@ -165,8 +163,8 @@ public class RadarplotAppenderNodeModel extends NodeModel {
             if (spec.getColumnSpec(colIndex).getType()
                     .isCompatible(DoubleValue.class)) {
                 if (!spec.getColumnSpec(colIndex).getDomain().hasLowerBound()
-                        || !spec.getColumnSpec(
-                                colIndex).getDomain().hasUpperBound()) {
+                        || !spec.getColumnSpec(colIndex).getDomain()
+                                .hasUpperBound()) {
                     needDomainComputing = true;
                 }
                 if (!spec.getColumnSpec(colIndex).getDomain().getLowerBound()
@@ -185,7 +183,7 @@ public class RadarplotAppenderNodeModel extends NodeModel {
             DataCell[] mins = new DataCell[colCount];
             DataCell[] maxs = new DataCell[colCount];
             DataValueComparator[] comparators =
-                new DataValueComparator[colCount];
+                    new DataValueComparator[colCount];
             for (int i = 0; i < colCount; i++) {
                 DataColumnSpec col = spec.getColumnSpec(i);
                 if (col.getType().isCompatible(DoubleValue.class)) {
@@ -226,14 +224,16 @@ public class RadarplotAppenderNodeModel extends NodeModel {
             DataColumnSpec[] colSpec = new DataColumnSpec[colCount];
             for (int i = 0; i < colSpec.length; i++) {
                 DataColumnSpec original = spec.getColumnSpec(i);
-                DataCell min = mins[i] != null && !mins[i].isMissing()
-                    ? mins[i] : null;
-                DataCell max = maxs[i] != null && !maxs[i].isMissing()
-                    ? maxs[i] : null;
+                DataCell min =
+                        mins[i] != null && !mins[i].isMissing() ? mins[i]
+                                : null;
+                DataCell max =
+                        maxs[i] != null && !maxs[i].isMissing() ? maxs[i]
+                                : null;
                 DataColumnDomainCreator domainCreator =
-                    new DataColumnDomainCreator(min, max);
+                        new DataColumnDomainCreator(min, max);
                 DataColumnSpecCreator specCreator =
-                    new DataColumnSpecCreator(original);
+                        new DataColumnSpecCreator(original);
                 specCreator.setDomain(domainCreator.createDomain());
                 colSpec[i] = specCreator.createSpec();
             }
@@ -242,10 +242,10 @@ public class RadarplotAppenderNodeModel extends NodeModel {
         }
         ColumnRearranger c = createColumnRearranger(spec);
         BufferedDataTable o =
-            exec.createColumnRearrangeTable(inData[0], c, mon);
+                exec.createColumnRearrangeTable(inData[0], c, mon);
         if (m_adjustedValidRanges) {
-            this.setWarningMessage("Entries for 'Valid Range' outside of" +
-                    " domain were automatically adjusted.");
+            this.setWarningMessage("Entries for 'Valid Range' outside of"
+                    + " domain were automatically adjusted.");
         }
         return new BufferedDataTable[]{o};
     }
@@ -255,8 +255,8 @@ public class RadarplotAppenderNodeModel extends NodeModel {
      */
     @Override
     protected void reset() {
-//    	this.m_oldSpec = null;
-//    	this.m_rangeModels = null;
+        // this.m_oldSpec = null;
+        // this.m_rangeModels = null;
     }
 
     /**
@@ -265,50 +265,57 @@ public class RadarplotAppenderNodeModel extends NodeModel {
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
-    		if (m_rangeModels == null){
+        if (m_rangeModels == null) {
 
-    			m_rangeModels = new ColumnSettingsTable(COLUMNRANGEPREFIX);
-    			try {
-                    m_rangeModels.setNewSpec(inSpecs[0]);
-                } catch (NotConfigurableException nce) {
-                    throw new InvalidSettingsException("Could not load" +
-                            "configuration!");
+            m_rangeModels = new ColumnSettingsTable(COLUMNRANGEPREFIX);
+            try {
+                m_rangeModels.setNewSpec(inSpecs[0]);
+            } catch (NotConfigurableException nce) {
+                throw new InvalidSettingsException("Could not load"
+                        + "configuration!");
+            }
+            this.setWarningMessage("Guessing that you want to use all Doubles");
+        } else {
+            ColumnSettingsTable testTable =
+                    new ColumnSettingsTable(COLUMNRANGEPREFIX);
+            try {
+                int isProper = 0;
+                testTable.setNewSpec(inSpecs[0]);
+                boolean subset = false, tesbus = false, equal = false;
+                isProper = testTable.isProper();
+                if ((isProper >= 0)) {
+                    if (isProper == 0) {
+                        this.setWarningMessage("Some columns disabled because "
+                                + "they contain only one value");
+                    }
+                    if (m_rangeModels.isSimilarTo(testTable, null)) {
+                        this.setWarningMessage("Additional columns detected");
+                        subset = true;
+                    }
+                    if (testTable.isSimilarTo(m_rangeModels, null)) {
+                        this.setWarningMessage("Some columns are missing");
+                        tesbus = true;
+                    }
+                    if (m_rangeModels.equals(testTable)) {
+                        equal = true;
+                    }
+                    if (!subset && !tesbus && !equal) {
+                        throw new InvalidSettingsException(
+                                "New input Table found");
+
+                    }
+                } else {
+                    this.setWarningMessage("Previous node is not executed, "
+                            + "configuration not possible");
                 }
-                this.setWarningMessage("Guessing that you want to use all Doubles");
-    		}
-    		else{
-    			ColumnSettingsTable testTable = new ColumnSettingsTable(COLUMNRANGEPREFIX);
-    		try {
-    			testTable.setNewSpec(inSpecs[0]);
-    			boolean subset = false, tesbus = false, equal = false;
-				if ((testTable.isProper())){
-	    			if (m_rangeModels.isSimilarTo(testTable, null)){
-	    				this.setWarningMessage("Additional columns detected!");
-	    				subset = true;
-	    			}
-	    			if (testTable.isSimilarTo(m_rangeModels, null)){
-	    				this.setWarningMessage("Some columns missing!");
-	    				tesbus = true;
-	    			}
-	    			if (m_rangeModels.equals(testTable)){
-	    				equal = true;
-	    			}
-	    			if (!subset && ! tesbus && !equal){
-	    			throw new InvalidSettingsException("New input Table found!");
-
-	    			}
-				}
-	    		else{
-	    			this.setWarningMessage("Previous Node not executed! Configuration not entirely possible.");
-	    		}
-    		} catch (NotConfigurableException nce) {
-    			throw new InvalidSettingsException("Could not load" +
-    			"configuration!");
-            	}
-    		}
+            } catch (NotConfigurableException nce) {
+                throw new InvalidSettingsException("Could not load"
+                        + "configuration");
+            }
+        }
         if (m_rangeModels.getNrSelected() < 3) {
-            throw new InvalidSettingsException("Requires at least 3 double" +
-                    " columns!");
+            throw new InvalidSettingsException("At least 3 double columns are "
+                    + "required");
         }
         ColumnRearranger result = createColumnRearranger(inSpecs[0]);
         return new DataTableSpec[]{result.createSpec()};
@@ -319,8 +326,8 @@ public class RadarplotAppenderNodeModel extends NodeModel {
     private ColumnRearranger createColumnRearranger(final DataTableSpec spec) {
         m_adjustedValidRanges = false;
         final DataColumnSpec newColSpec =
-            new DataColumnSpecCreator( DataTableSpec.getUniqueColumnName(spec, "Radar Plot"),
-            		SvgCell.TYPE).createSpec();
+                new DataColumnSpecCreator(DataTableSpec.getUniqueColumnName(
+                        spec, "Radar Plot"), SvgCell.TYPE).createSpec();
         final int _dim = m_rangeModels.getNrSelected();
         final int[] _indices = new int[_dim];
         final double[] _min = new double[_dim];
@@ -328,8 +335,9 @@ public class RadarplotAppenderNodeModel extends NodeModel {
         final double[] _validMin = new double[_dim];
         final double[] _validMax = new double[_dim];
         final String[] _labels = new String[_dim];
-        int nrSelCol = 0;  // keep track of selected (and double) columns
-        for (int i = 0; i < Math.min(spec.getNumColumns(),m_rangeModels.getColumnCount()); i++) {
+        int nrSelCol = 0; // keep track of selected (and double) columns
+        for (int i = 0; i < Math.min(spec.getNumColumns(),
+                m_rangeModels.getColumnCount()); i++) {
             if (m_rangeModels.isSelected(i)) {
                 // retrieve min/max values. We know that they exist
                 // because we precomputed them in the execute if
@@ -339,30 +347,30 @@ public class RadarplotAppenderNodeModel extends NodeModel {
                 try {
                     if (spec.getColumnSpec(i).getDomain().hasLowerBound()) {
                         _validMin[nrSelCol] =
-                            ((DoubleValue)spec.getColumnSpec(i).getDomain()
-                                .getLowerBound()).getDoubleValue();
+                                ((DoubleValue)spec.getColumnSpec(i).getDomain()
+                                        .getLowerBound()).getDoubleValue();
                     }
                     if (spec.getColumnSpec(i).getDomain().hasUpperBound()) {
                         _validMax[nrSelCol] =
-                            ((DoubleValue)spec.getColumnSpec(i).getDomain()
-                                    .getUpperBound()).getDoubleValue();
+                                ((DoubleValue)spec.getColumnSpec(i).getDomain()
+                                        .getUpperBound()).getDoubleValue();
                     }
                 } catch (Exception e) {
                     assert false;
                 }
                 assert !Double.isNaN(_validMin[nrSelCol]);
                 assert !Double.isNaN(_validMax[nrSelCol]);
-                // we know that min/max are set properly so we can   !-!
+                // we know that min/max are set properly so we can !-!
                 // force valid ranges into this range as well:
                 _min[nrSelCol] = m_rangeModels.getMin(i);
                 _max[nrSelCol] = m_rangeModels.getMax(i);
                 if (_validMin[nrSelCol] > _min[nrSelCol]) {
                     _min[nrSelCol] = _validMin[nrSelCol];
-//                    m_adjustedValidRanges = true;
+                    // m_adjustedValidRanges = true;
                 }
                 if (_validMax[nrSelCol] < _max[nrSelCol]) {
                     _max[nrSelCol] = _validMax[nrSelCol];
-//                    m_adjustedValidRanges = true;
+                    // m_adjustedValidRanges = true;
                 }
                 _labels[nrSelCol] = spec.getColumnSpec(i).getName();
                 _indices[nrSelCol] = i;
@@ -373,12 +381,13 @@ public class RadarplotAppenderNodeModel extends NodeModel {
         CellFactory cc = new SingleCellFactory(newColSpec) {
             @Override
             public DataCell getCell(final DataRow row) {
-            	double[] values = new double[_dim];
+                double[] values = new double[_dim];
                 for (int j = 0; j < _dim; j++) {
                     if (!row.getCell(_indices[j]).isMissing()) {
                         // value is double and not missing
-                        values[j] = ((DoubleValue)row.getCell(_indices[j]))
-                                                          .getDoubleValue();
+                        values[j] =
+                                ((DoubleValue)row.getCell(_indices[j]))
+                                        .getDoubleValue();
                     } else {
                         // represent missing value with NotANumber
                         values[j] = Double.NaN;
@@ -386,35 +395,41 @@ public class RadarplotAppenderNodeModel extends NodeModel {
                 }
 
                 Color[] colors = new Color[4];
-                colors[0] =  m_rangeModels.getBackgroundColor();
-                colors[1] =  m_rangeModels.getIntervalColor();
-                colors[2] =  m_rangeModels.getBendColor();
-                colors[3] =  m_rangeModels.getOutlyingBendColor();
+                colors[0] = m_rangeModels.getBackgroundColor();
+                colors[1] = m_rangeModels.getIntervalColor();
+                colors[2] = m_rangeModels.getBendColor();
+                colors[3] = m_rangeModels.getOutlyingBendColor();
 
-                RadarPlotPanel panel = new RadarPlotPanel(values, _min, _max, _validMin,
-                        _validMax, _labels, colors);
+                RadarPlotPanel panel =
+                        new RadarPlotPanel(values, _min, _max, _validMin,
+                                _validMax, _labels, colors);
 
                 int maxWidth = 0;
                 int maxHeight = 0;
 
-                for(int i = 0; i<_labels.length; i++){
-	                Font font = panel.getFont();
-	                maxWidth = Math.max(SwingUtilities.computeStringWidth(panel.getFontMetrics(font), _labels[i]), maxWidth);
-	                maxHeight = Math.max(panel.getFontMetrics(font).getHeight(), maxHeight);
+                for (int i = 0; i < _labels.length; i++) {
+                    Font font = panel.getFont();
+                    maxWidth =
+                            Math.max(SwingUtilities.computeStringWidth(
+                                    panel.getFontMetrics(font), _labels[i]),
+                                    maxWidth);
+                    maxHeight =
+                            Math.max(panel.getFontMetrics(font).getHeight(),
+                                    maxHeight);
                 }
 
-            	 // setup box and paint border
-                final int xWidth = 200 + 2* maxWidth + 10;
+                // setup box and paint border
+                final int xWidth = 200 + 2 * maxWidth + 10;
                 final int yHeight = 175 + 2 * maxHeight + 5;
                 DOMImplementation domImpl = new SVGDOMImplementation();
                 String svgNS = "http://www.w3.org/2000/svg";
                 Document myFactory = domImpl.createDocument(svgNS, "svg", null);
                 SVGGraphics2D g = new SVGGraphics2D(myFactory);
-//                g.setColor(Color.GREEN);
+                // g.setColor(Color.GREEN);
                 g.setSVGCanvasSize(new Dimension(xWidth, yHeight));
                 g.translate(maxWidth, maxHeight);
-//                g.setBackground(Color.WHITE);
-//                g.setColor(Color.BLACK);
+                // g.setBackground(Color.WHITE);
+                // g.setColor(Color.BLACK);
                 g.setColor(Color.BLUE);
 
                 g.setStroke(new BasicStroke(1));
@@ -424,12 +439,6 @@ public class RadarplotAppenderNodeModel extends NodeModel {
                         myFactory.getDocumentElement());
                 DataCell dc = new SvgCell((SVGDocument)myFactory);
                 return dc;
-
-
-
-
-
-
 
             }
         };

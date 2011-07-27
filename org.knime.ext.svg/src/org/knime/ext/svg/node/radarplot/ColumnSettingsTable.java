@@ -66,7 +66,7 @@ import org.knime.core.node.NotConfigurableException;
 
 
 /** Table which holds all the settings for one radarplot node
- * 
+ *
  * @author Michael Berthold, University of Konstanz
  * @author Andreas Burger
  */
@@ -105,17 +105,17 @@ public class ColumnSettingsTable extends AbstractTableModel {
             if (thisSpec.getType().isCompatible(DoubleValue.class)) {
                 m_isSelected[i] = true;
                if ((thisSpec.getDomain().getLowerBound()) != null){
-            	   m_min[i] = ((DoubleValue)(thisSpec.getDomain().getLowerBound())).getDoubleValue();
-            	   m_max[i] = ((DoubleValue)(thisSpec.getDomain().getUpperBound())).getDoubleValue();
+                   m_min[i] = ((DoubleValue)(thisSpec.getDomain().getLowerBound())).getDoubleValue();
+                   m_max[i] = ((DoubleValue)(thisSpec.getDomain().getUpperBound())).getDoubleValue();
                }
                else {
-            	   m_min[i] = -1;
-            	   m_max[i] = -1;
+                   m_min[i] = -1;
+                   m_max[i] = -1;
                }
-               	m_backgroundColor[i] = "175.220.240";
-               	m_intervalColor[i] = "105.150.170";
-               	m_bendColor[i] = "0.255.0" ;
-               	m_outlyingBendColor[i] = "255.0.0";
+                m_backgroundColor[i] = "175.220.240";
+                m_intervalColor[i] = "105.150.170";
+                m_bendColor[i] = "0.255.0" ;
+                m_outlyingBendColor[i] = "255.0.0";
                 m_validMin[i] = m_min[i];
                 m_validMax[i] = m_max[i];
                 m_isDouble[i] = true;
@@ -158,28 +158,28 @@ public class ColumnSettingsTable extends AbstractTableModel {
      * @return The stored background color
      */
     public Color getBackgroundColor(){
-    	if (m_backgroundColor[0] != null){
-	    	String[] result = m_backgroundColor[0].split("\\.");
-	    	int red = Integer.parseInt(result[0]);
-	    	int green = Integer.parseInt(result[1]);
-	    	int blue = Integer.parseInt(result[2]);
-	    	return new Color(red, green, blue);
-    	} else {
+        if (m_backgroundColor[0] != null){
+            String[] result = m_backgroundColor[0].split("\\.");
+            int red = Integer.parseInt(result[0]);
+            int green = Integer.parseInt(result[1]);
+            int blue = Integer.parseInt(result[2]);
+            return new Color(red, green, blue);
+        } else {
             return new Color(175, 220, 240);
         }
     }
-    
+
     /** Generates the interval color from the stored values
      * @return The stored interval color
      */
     public Color getIntervalColor(){
-    	if (m_intervalColor[0] != null){
-	    	String[] result = m_intervalColor[0].split("\\.");
-	    	int red = Integer.parseInt(result[0]);
-	    	int green = Integer.parseInt(result[1]);
-	    	int blue = Integer.parseInt(result[2]);
-	    	return new Color(red, green, blue);
-    	} else {
+        if (m_intervalColor[0] != null){
+            String[] result = m_intervalColor[0].split("\\.");
+            int red = Integer.parseInt(result[0]);
+            int green = Integer.parseInt(result[1]);
+            int blue = Integer.parseInt(result[2]);
+            return new Color(red, green, blue);
+        } else {
             return new Color(105, 150, 170);
         }
     }
@@ -188,31 +188,31 @@ public class ColumnSettingsTable extends AbstractTableModel {
      * @return The ribbon color
      */
     public Color getBendColor(){
-    	if (m_bendColor[0] != null){
-	    	String[] result = m_bendColor[0].split("\\.");
-	    	int red = Integer.parseInt(result[0]);
-	    	int green = Integer.parseInt(result[1]);
-	    	int blue = Integer.parseInt(result[2]);
-	    	return new Color(red, green, blue);
-    	} else {
+        if (m_bendColor[0] != null){
+            String[] result = m_bendColor[0].split("\\.");
+            int red = Integer.parseInt(result[0]);
+            int green = Integer.parseInt(result[1]);
+            int blue = Integer.parseInt(result[2]);
+            return new Color(red, green, blue);
+        } else {
             return new Color(0, 255, 0);
         }
     }
-    
+
     /** Generates the ribbon color from the stored values. This is the colour of the ribbon if some values are outside the boundaries
      * @return The ribbon color
      */
-  	public Color getOutlyingBendColor() {
-		if (m_outlyingBendColor[0] != null){
-	    	String[] result = m_outlyingBendColor[0].split("\\.");
-	    	int red = Integer.parseInt(result[0]);
-	    	int green = Integer.parseInt(result[1]);
-	    	int blue = Integer.parseInt(result[2]);
-	    	return new Color(red, green, blue);
-    	} else {
+    public Color getOutlyingBendColor() {
+        if (m_outlyingBendColor[0] != null){
+            String[] result = m_outlyingBendColor[0].split("\\.");
+            int red = Integer.parseInt(result[0]);
+            int green = Integer.parseInt(result[1]);
+            int blue = Integer.parseInt(result[2]);
+            return new Color(red, green, blue);
+        } else {
             return new Color(255, 0, 0);
         }
-	}
+    }
 
     public boolean isSelected(final int i) {
         return m_isSelected[i];
@@ -268,7 +268,7 @@ public class ColumnSettingsTable extends AbstractTableModel {
     }
 
     public String getRowName(final int i){
-    	return m_attrName[i];
+        return m_attrName[i];
     }
 
     @Override
@@ -366,87 +366,98 @@ public class ColumnSettingsTable extends AbstractTableModel {
         }
     }
 
-	/** Checks for equality. This table and another table are equal if their column names, maximum and minimum Values are the same. 
-	 * This requires them to share the same number of rows.
-	 * @param table Table against which to test this table
-	 * @return True if the two tables are equal, false otherwise
-	 */
-	public boolean equals(final ColumnSettingsTable table) {
-		if (this.getRowCount() != table.getRowCount()) {
+    /** Checks for equality. This table and another table are equal if their column names, maximum and minimum Values are the same.
+     * This requires them to share the same number of rows.
+     * @param table Table against which to test this table
+     * @return True if the two tables are equal, false otherwise
+     */
+    public boolean equals(final ColumnSettingsTable table) {
+        if (this.getRowCount() != table.getRowCount()) {
             return false;
         }
-		for (int i = 0; i < this.getRowCount(); i++){
-			if (!(this.m_attrName[i].equals(table.m_attrName[i]))) {
+        for (int i = 0; i < this.getRowCount(); i++){
+            if (!(this.m_attrName[i].equals(table.m_attrName[i]))) {
                 return false;
             }
-			if (this.getValidMax(i) != table.getValidMax(i)) {
+            if (this.getValidMax(i) != table.getValidMax(i)) {
                 return false;
             }
-			if (this.getValidMin(i) != table.getValidMin(i)) {
+            if (this.getValidMin(i) != table.getValidMin(i)) {
                 return false;
             }
-		}
-		return true;
-	}
+        }
+        return true;
+    }
 
-	/** Checks if this table is proper, i.e. if all values are set.
-	 * @return True if all values are set, false otherwise
-	 */
-	public boolean isProper() {
-		for(int i = 0; i < this.getRowCount(); i++){
-			if (this.isDouble(i)){
-				if (this.getValidMax(i) == this.getValidMin(i)) {
-	                return false;
-	            }
-			}
-		}
-		return true;
-	}
-	
-	/**
-	 * Checks this table and another for similarity. Another Table is similar to this one if it contains all of the columns of this
-	 * Table. Note: It may contain more. 
-	 * @param table the table against which to check for similarity
-	 * @param correspondingColumns (optional) an empty List which will contain the corresponding column-indices after execution (if they are indeed similar)
-	 * @return true if they are similar, false otherwise
-	 */
-	public boolean isSimilarTo(ColumnSettingsTable table, List<Integer[]> correspondingColumns) {
-//		String names = table.getCompoundColumnNames();
-		if (correspondingColumns == null || correspondingColumns.size() != 0){
-		correspondingColumns = new LinkedList<Integer[]>();
-		}
-		if (this.getRowCount() < table.getRowCount()) {
-			for (int i = 0; i< getRowCount(); i++){
-				for(int j = 0; j<table.getRowCount(); j++){
-					if (getRowName(i).equals(table.getRowName(j))){
-						Integer[] values = {i,j};
-						correspondingColumns.add(values);
-						break;
-					}
-				}
-				if (correspondingColumns.size() < i+1)
-					return false;
-			}
-			for (Integer[] array : correspondingColumns){
-				if (this.getValidMax(array[0]) != table.getValidMax(array[1])) {
-	                return false;
-	            }
-				if (this.getValidMin(array[0]) != table.getValidMin(array[1])) {
-	                return false;
-				}
-			}
-			return true;
-		}
-		return false;
-	}
-	
-//	protected String getCompoundColumnNames(){
-//		String result = "";
-//		for (int i = 0; i< getColumnCount(); i++){
-//			result = result + "  " + getColumnName(i);
-//		}
-//		return result;
-//	}
+    /** Checks if this table is proper (at least one column has valid values).
+     * @return 1 if all Double columns are valid, 0 if some are invalid, -1 if ALL are invalid.
+     */
+    public int isProper() {
+        int numCols = 0;
+        int numValidCols = 0;
+        for(int i = 0; i < this.getRowCount(); i++){
+            if (this.isDouble(i)){
+                numCols++;
+                if (this.getValidMax(i) != this.getValidMin(i)) {
+                    numValidCols++;
+                }
+            }
+        }
+        if (numCols != numValidCols){
+            if (numValidCols == 0) {
+                return -1;
+            } else {
+                return 0;
+            }
+        }
+        return 1;
+    }
+
+    /**
+     * Checks this table and another for similarity. Another Table is similar to this one if it contains all of the columns of this
+     * Table. Note: It may contain more.
+     * @param table the table against which to check for similarity
+     * @param correspondingColumns (optional) an empty List which will contain the corresponding column-indices after execution (if they are indeed similar)
+     * @return true if they are similar, false otherwise
+     */
+    public boolean isSimilarTo(final ColumnSettingsTable table, List<Integer[]> correspondingColumns) {
+//      String names = table.getCompoundColumnNames();
+        if (correspondingColumns == null || correspondingColumns.size() != 0){
+        correspondingColumns = new LinkedList<Integer[]>();
+        }
+        if (this.getRowCount() < table.getRowCount()) {
+            for (int i = 0; i< getRowCount(); i++){
+                for(int j = 0; j<table.getRowCount(); j++){
+                    if (getRowName(i).equals(table.getRowName(j))){
+                        Integer[] values = {i,j};
+                        correspondingColumns.add(values);
+                        break;
+                    }
+                }
+                if (correspondingColumns.size() < i+1) {
+                    return false;
+                }
+            }
+            for (Integer[] array : correspondingColumns){
+                if (this.getValidMax(array[0]) != table.getValidMax(array[1])) {
+                    return false;
+                }
+                if (this.getValidMin(array[0]) != table.getValidMin(array[1])) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+//  protected String getCompoundColumnNames(){
+//      String result = "";
+//      for (int i = 0; i< getColumnCount(); i++){
+//          result = result + "  " + getColumnName(i);
+//      }
+//      return result;
+//  }
 
 
 
