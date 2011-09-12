@@ -56,7 +56,9 @@ import java.awt.Rectangle;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.StringWriter;
+import java.io.Writer;
 
 import org.apache.batik.bridge.BridgeContext;
 import org.apache.batik.bridge.GVTBuilder;
@@ -98,8 +100,8 @@ public class SvgImageContent implements ImageContent {
     }
 
     /**
-     * Creates a new SVG image content by reading the XML from the passed
-     * input stream.
+     * Creates a new SVG image content by reading the XML from the passed input
+     * stream.
      *
      * @param in an input stream
      * @throws IOException if an I/O error occurs
@@ -109,8 +111,6 @@ public class SvgImageContent implements ImageContent {
         SAXSVGDocumentFactory f = new SAXSVGDocumentFactory(parserClass);
         m_doc = f.createSVGDocument(null, in);
     }
-
-
 
     /**
      * {@inheritDoc}
@@ -152,13 +152,13 @@ public class SvgImageContent implements ImageContent {
      */
     @Override
     public void save(final OutputStream out) throws IOException {
-        TranscoderOutput tout = new TranscoderOutput(out);
-        TranscoderInput in = new TranscoderInput(m_doc);
+        OutputStreamWriter osw = new OutputStreamWriter(out);
         try {
-            TRANSCODER.transcode(in, tout);
-        } catch (TranscoderException ex) {
-            throw new IOException(ex);
+            serialize(m_doc, osw);
+        } catch (TranscoderException e) {
+            throw new IOException(e);
         }
+        osw.flush();
     }
 
     SVGDocument getSvgDocument() {
@@ -167,11 +167,15 @@ public class SvgImageContent implements ImageContent {
 
     static String serialize(final Document doc) throws TranscoderException {
         StringWriter buffer = new StringWriter(1024);
-        TranscoderOutput out = new TranscoderOutput(buffer);
+        serialize(doc, buffer);
+        return buffer.toString();
+    }
 
+    private static void serialize(final Document doc,
+            final Writer writer) throws TranscoderException {
+        TranscoderOutput out = new TranscoderOutput(writer);
         TranscoderInput in = new TranscoderInput(doc);
         TRANSCODER.transcode(in, out);
-        return buffer.toString();
     }
 
     /**
