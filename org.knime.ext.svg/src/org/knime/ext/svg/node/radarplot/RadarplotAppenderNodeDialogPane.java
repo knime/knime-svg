@@ -142,7 +142,7 @@ public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
 
 		JButton selectAll = new JButton("Display all");
 		selectAll.addActionListener(new ActionListener() {
-
+            @Override
 			public void actionPerformed(final ActionEvent arg0) {
 				for (JCheckBox box : m_checkboxes) {
 					box.setSelected(true);
@@ -171,7 +171,7 @@ public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
 		JButton selectNone = new JButton("Display none");
 
 		selectNone.addActionListener(new ActionListener() {
-
+            @Override
 			public void actionPerformed(final ActionEvent arg0) {
 				for (JCheckBox box : m_checkboxes) {
 					box.setSelected(false);
@@ -340,14 +340,15 @@ public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
 						c.insets = new Insets(0, 15, 0, 0);
 						data.add(space1, c);
 						
-						String colName = "";
-						
-						if (isValid)
-							colName = m_rowSettings[i].getName();
-						else
-							colName = m_rowSettings[i].getName() + " (DISABLED)";
-		
-						JLabel label = new JLabel(colName);
+                        String colName = "";
+
+                        if (isValid) {
+                            colName = m_rowSettings[i].getName();
+                        } else {
+                            colName = m_rowSettings[i].getName() + " (DISABLED)";
+                        }
+
+                        JLabel label = new JLabel(colName);
 						c.gridx = 0;
 						c.gridy = 3 * i + 2;
 						c.gridheight = 2;
@@ -399,8 +400,9 @@ public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
 						data.add(slider, c);
 						m_sliderList.add(slider);
 						
-						if(!isValid)
-							slider.setEnabled(false);
+                        if(!isValid) {
+                            slider.setEnabled(false);
+                        }
 		
 						final JLabel spacer = new JLabel();
 						c.insets = new Insets(0, 10, 0, 0);
@@ -420,19 +422,19 @@ public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
 						c.insets = new Insets(0, 0, 0, 0);
 						data.add(ValueLabel1, c);
 						
-						int labelWidth = 0;
-						String lowerLabelText = "";
-						String upperLabelText = "";
-						if (isValid){
-							labelWidth = format[i].length()*6;
-							lowerLabelText = g.format(slider.getValue(1));
-							upperLabelText = g.format(slider.getValue(2));
-							
-						}
-						else
-							labelWidth = 24;
-		
-						final JLabel lowerValueLabel = new JLabel(lowerLabelText);
+                        int labelWidth = 0;
+                        String lowerLabelText = "";
+                        String upperLabelText = "";
+                        if (isValid){
+                            labelWidth = format[i].length()*6;
+                            lowerLabelText = g.format(slider.getValue(1));
+                            upperLabelText = g.format(slider.getValue(2));
+
+                        } else {
+                            labelWidth = 24;
+                        }
+
+                        final JLabel lowerValueLabel = new JLabel(lowerLabelText);
 						 lowerValueLabel.setPreferredSize(new
 						 Dimension(labelWidth,15));
 						c.gridx = 3;
@@ -534,21 +536,24 @@ public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
 		}
 	}
 	
-	private int compareTables(ColumnSettingsTable incomingTable, ColumnSettingsTable settingsTable){
-		if (settingsTable.equals(incomingTable))
+    private int compareTables(final ColumnSettingsTable incomingTable, final ColumnSettingsTable settingsTable){
+        if (settingsTable.equals(incomingTable)) {
 			return 0;
+        }
 		m_correspondingColumns = new LinkedList<Integer[]>();
-		if (settingsTable.isSimilarTo(incomingTable, m_correspondingColumns))
+        if (settingsTable.isSimilarTo(incomingTable, m_correspondingColumns)) {
 			return 1;
+        }
 		m_correspondingColumns = new LinkedList<Integer[]>();
-		if (incomingTable.isSimilarTo(settingsTable, m_correspondingColumns))
+        if (incomingTable.isSimilarTo(settingsTable, m_correspondingColumns)) {
 			return 2;
+        }
 
 		return -1;
 		
 	}
 	
-	private void SetupRows(int comparedTableInfo, ColumnSettingsTable incomingTable, ColumnSettingsTable settingsTable){
+    private void SetupRows(final int comparedTableInfo, final ColumnSettingsTable incomingTable, final ColumnSettingsTable settingsTable){
 		if (comparedTableInfo == 0){ // Both tables equal, take Values from Settings
 			for( int i = 0; i< settingsTable.getColumnCount(); i++){
 				m_rowSettings[i].set(

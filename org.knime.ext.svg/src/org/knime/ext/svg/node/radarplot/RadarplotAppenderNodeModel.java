@@ -305,8 +305,9 @@ public class RadarplotAppenderNodeModel extends NodeModel {
 
                     }
                 } else {
-                    this.setWarningMessage("Previous node is not executed, "
-                            + "configuration not possible");
+                    throw new InvalidSettingsException("Some columns have no "
+                            + "valid domain, maybe the previous node is not "
+                            + "executed.");
                 }
             } catch (NotConfigurableException nce) {
                 throw new InvalidSettingsException("Could not load"

@@ -148,7 +148,7 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer
      */
     @Override
     protected void setValue(final Object value) {
-        if (value == null) {
+        if (!(value instanceof SvgValue)) {
             m_doc = null;
             return;
         }
