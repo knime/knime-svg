@@ -93,9 +93,12 @@ public class SvgImageContent implements ImageContent {
     /**
      * Creates a new SVG image content containing the passed SVG document.
      *
-     * @param doc an SVG document
+     * @param doc an SVG document, must not be <code>null</code>
      */
     public SvgImageContent(final SVGDocument doc) {
+        if (m_doc == null) {
+            throw new NullPointerException("Document must not be null");
+        }
         m_doc = doc;
     }
 
@@ -171,8 +174,8 @@ public class SvgImageContent implements ImageContent {
         return buffer.toString();
     }
 
-    private static void serialize(final Document doc,
-            final Writer writer) throws TranscoderException {
+    private static void serialize(final Document doc, final Writer writer)
+            throws TranscoderException {
         TranscoderOutput out = new TranscoderOutput(writer);
         TranscoderInput in = new TranscoderInput(doc);
         TRANSCODER.transcode(in, out);
