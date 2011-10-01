@@ -98,6 +98,20 @@ public class SvgImageContent implements ImageContent {
      *             not contain a proper SVG image
      */
     public SvgImageContent(final SVGDocument doc) {
+        this(doc, true);
+    }
+
+    /**
+     * Creates a new SVG image content containing the passed SVG document.
+     *
+     * @param doc an SVG document, must not be <code>null</code>
+     * @param check <code>true</code> if the passed SVGDocument should be
+     *            checked for validity, <code>false</code> otherwise
+     * @throws IllegalArgumentException if the SVG document is corrupt or does
+     *             not contain a proper SVG image; only if check is
+     *             <code>true</code>
+     */
+    public SvgImageContent(final SVGDocument doc, final boolean check) {
         if (m_doc == null) {
             throw new NullPointerException("Document must not be null");
         }

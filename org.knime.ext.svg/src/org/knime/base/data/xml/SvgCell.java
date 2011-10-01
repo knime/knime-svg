@@ -155,7 +155,7 @@ public class SvgCell extends DataCell implements SvgValue, StringValue,
 
         m_content =
                 new SvgImageContent(f.createSVGDocument(null, new StringReader(
-                        xmlString)));
+                        xmlString)), false);
     }
 
     /**
@@ -168,7 +168,7 @@ public class SvgCell extends DataCell implements SvgValue, StringValue,
      * @param doc an SVG document
      */
     public SvgCell(final SVGDocument doc) {
-        m_content = new SvgImageContent(doc);
+        m_content = new SvgImageContent(doc, true);
     }
 
     /**
