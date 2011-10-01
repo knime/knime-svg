@@ -94,12 +94,28 @@ public class SvgImageContent implements ImageContent {
      * Creates a new SVG image content containing the passed SVG document.
      *
      * @param doc an SVG document, must not be <code>null</code>
+     * @throws IllegalArgumentException if the SVG document is corrupt or does
+     *             not contain a proper SVG image
      */
     public SvgImageContent(final SVGDocument doc) {
         if (m_doc == null) {
             throw new NullPointerException("Document must not be null");
         }
         m_doc = doc;
+
+        // check if the SVG document is valid
+        GVTBuilder gvtBuilder = new GVTBuilder();
+        BridgeContext bridgeContext = new BridgeContext(UA);
+        GraphicsNode gvtRoot = gvtBuilder.build(bridgeContext, m_doc);
+        if (gvtRoot == null || gvtRoot.getBounds() == null) {
+            throw new IllegalArgumentException(
+                    "SVG document seems to be corrupt or does not "
+                            + " contain a proper SVG image");
+        } else {
+            m_preferredSize =
+                    new Dimension((int)gvtRoot.getBounds().getWidth(),
+                            (int)gvtRoot.getBounds().getHeight());
+        }
     }
 
     /**
@@ -133,6 +149,11 @@ public class SvgImageContent implements ImageContent {
             GVTBuilder gvtBuilder = new GVTBuilder();
             BridgeContext bridgeContext = new BridgeContext(UA);
             GraphicsNode gvtRoot = gvtBuilder.build(bridgeContext, m_doc);
+            if (gvtRoot == null || gvtRoot.getBounds() == null) {
+                // should not happen since we already checked this
+                // in the constructor
+                return new Dimension(100, 100);
+            }
 
             m_preferredSize =
                     new Dimension((int)gvtRoot.getBounds().getWidth(),
