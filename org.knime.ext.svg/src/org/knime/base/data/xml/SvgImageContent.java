@@ -112,7 +112,7 @@ public class SvgImageContent implements ImageContent {
      *             <code>true</code>
      */
     public SvgImageContent(final SVGDocument doc, final boolean check) {
-        if (m_doc == null) {
+        if (doc == null) {
             throw new NullPointerException("Document must not be null");
         }
         m_doc = doc;
