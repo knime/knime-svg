@@ -76,6 +76,7 @@ import org.w3c.dom.svg.SVGDocument;
  *
  * @author Thorsten Meinl, University of Konstanz
  */
+@SuppressWarnings("serial")
 public class SvgValueRenderer extends AbstractPainterDataValueRenderer
         implements SvgProvider {
     /**

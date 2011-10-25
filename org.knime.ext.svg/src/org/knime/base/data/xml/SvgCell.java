@@ -68,7 +68,6 @@ import org.knime.core.data.DataType;
 import org.knime.core.data.DataValue;
 import org.knime.core.data.StringValue;
 import org.knime.core.data.image.ImageContent;
-import org.knime.core.data.image.ImageValue;
 import org.w3c.dom.svg.SVGDocument;
 import org.xml.sax.SAXException;
 
@@ -77,9 +76,8 @@ import org.xml.sax.SAXException;
  *
  * @author Thorsten Meinl, University of Konstanz
  */
-public class SvgCell extends DataCell implements SvgValue, StringValue,
-        ImageValue {
-
+@SuppressWarnings("serial")
+public class SvgCell extends DataCell implements SvgValue, StringValue {
     /** Type for this cell implementation. */
     public static final DataType TYPE = DataType.getType(SvgCell.class);
 

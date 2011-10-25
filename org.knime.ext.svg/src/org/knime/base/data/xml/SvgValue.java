@@ -57,6 +57,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataValue;
+import org.knime.core.data.image.ImageValue;
 import org.knime.core.data.renderer.DataValueRendererFamily;
 import org.knime.core.data.renderer.DefaultDataValueRendererFamily;
 import org.knime.core.data.renderer.MultiLineStringValueRenderer;
@@ -68,7 +69,7 @@ import org.xml.sax.SAXException;
  *
  * @author Thorsten Meinl, University of Konstanz
  */
-public interface SvgValue extends DataValue {
+public interface SvgValue extends ImageValue {
     /**
      * Returns the root node of the parsed XML document.
      *

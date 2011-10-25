@@ -68,7 +68,6 @@ import org.knime.core.data.DataValue;
 import org.knime.core.data.StringValue;
 import org.knime.core.data.container.BlobDataCell;
 import org.knime.core.data.image.ImageContent;
-import org.knime.core.data.image.ImageValue;
 import org.w3c.dom.svg.SVGDocument;
 import org.xml.sax.SAXException;
 
@@ -77,8 +76,8 @@ import org.xml.sax.SAXException;
  *
  * @author Thorsten Meinl, University of Konstanz
  */
-public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue,
-        ImageValue {
+@SuppressWarnings("serial")
+public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue {
     private static class SvgSerializer implements
             DataCellSerializer<SvgBlobCell> {
         /**
