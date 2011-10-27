@@ -112,7 +112,7 @@ public class SvgCell extends DataCell implements SvgValue, StringValue {
 
     private SoftReference<String> m_xmlString;
 
-    private SvgImageContent m_content;
+    private final SvgImageContent m_content;
 
     private boolean m_isNormalized;
 
@@ -260,5 +260,13 @@ public class SvgCell extends DataCell implements SvgValue, StringValue {
     @Override
     public ImageContent getImageContent() {
         return m_content;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getImageExtension() {
+        return "svg";
     }
 }
