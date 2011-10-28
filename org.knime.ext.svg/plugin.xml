@@ -9,11 +9,6 @@
             id="org.knime.ext.svg.node.sparklines.SparkLineNodeFactory">
       </node>
       <node
-            category-path="/io/write"
-            factory-class="org.knime.ext.svg.node.writer.SVGWriterNodeFactory"
-            id="org.knime.ext.svg.node.writer.SVGWriterNodeFactory">
-      </node>
-      <node
             category-path="/view/view-util"
             factory-class="org.knime.ext.svg.node.renderer2svg.Renderer2SvgNodeFactory"
             id="org.knime.ext.svg.node.renderer2svg.Renderer2SvgNodeFactory">
