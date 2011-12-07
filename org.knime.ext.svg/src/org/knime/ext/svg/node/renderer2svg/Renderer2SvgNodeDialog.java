@@ -124,7 +124,8 @@ public class Renderer2SvgNodeDialog extends NodeDialogPane {
                 m_comboModel.removeAllElements();
 
                 if (m_column.getSelectedItem() != null) {
-                    DataColumnSpec cs = (DataColumnSpec)m_column.getSelectedItem();
+                    DataColumnSpec cs =
+                            (DataColumnSpec)m_column.getSelectedItem();
                     DataType type = cs.getType();
                     DataValueRendererFamily rFamily = type.getRenderer(cs);
 
@@ -147,6 +148,8 @@ public class Renderer2SvgNodeDialog extends NodeDialogPane {
         m_settings.loadSettingsForDialog(settings);
 
         m_column.update(specs[0], m_settings.columnName());
+        m_rendererDescriptions
+                .setSelectedItem(m_settings.rendererDescription());
     }
 
     /**
