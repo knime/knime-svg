@@ -52,17 +52,9 @@
  */
 package org.knime.ext.svg.node.radarplot;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
 import java.io.File;
 import java.io.IOException;
 
-import javax.swing.SwingUtilities;
-
-import org.apache.batik.dom.svg.SVGDOMImplementation;
-import org.apache.batik.svggen.SVGGraphics2D;
 import org.knime.base.data.xml.SvgCell;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnDomainCreator;
@@ -76,7 +68,6 @@ import org.knime.core.data.DoubleValue;
 import org.knime.core.data.RowIterator;
 import org.knime.core.data.container.CellFactory;
 import org.knime.core.data.container.ColumnRearranger;
-import org.knime.core.data.container.SingleCellFactory;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -86,10 +77,6 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.NotConfigurableException;
-import org.w3c.dom.DOMImplementation;
-import org.w3c.dom.Document;
-import org.w3c.dom.svg.SVGDocument;
 
 /**
  * Model that attaches a new column holding individual radar plots to each row.
@@ -125,7 +112,9 @@ public class RadarplotAppenderNodeModel extends NodeModel {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
-        m_rangeModels.saveSettings(settings);
+        if (m_rangeModels != null) {
+            m_rangeModels.saveSettings(settings);
+        }
     }
 
     /**
@@ -133,9 +122,14 @@ public class RadarplotAppenderNodeModel extends NodeModel {
      */
     @Override
     protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-        // TODO
-        // m_rangeModels[i].validateSettings(settings);
+            throws InvalidSettingsException {        
+        // validate settings, check for at least 3 attributes
+        ColumnSettingsTable cst = new ColumnSettingsTable(COLUMNRANGEPREFIX);
+        cst.loadSettingsModel(settings);
+        if (cst.getNrSelected() < 3) {
+            throw new InvalidSettingsException("At least 3 double "
+                    + "columns need to be selected!");
+        }
     }
 
     /**
@@ -145,7 +139,7 @@ public class RadarplotAppenderNodeModel extends NodeModel {
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
         m_rangeModels = new ColumnSettingsTable(COLUMNRANGEPREFIX);
-        m_rangeModels.loadSettings(settings);
+        m_rangeModels.loadSettingsModel(settings);
     }
 
     /**
@@ -264,59 +258,56 @@ public class RadarplotAppenderNodeModel extends NodeModel {
      */
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
-            throws InvalidSettingsException {
+            throws InvalidSettingsException {        
+        // if settings no settings object exist, meaning node has not been 
+        // configured yet
         if (m_rangeModels == null) {
-
             m_rangeModels = new ColumnSettingsTable(COLUMNRANGEPREFIX);
-            try {
-                m_rangeModels.setNewSpec(inSpecs[0]);
-            } catch (NotConfigurableException nce) {
-                throw new InvalidSettingsException("Could not load"
-                        + "configuration!");
-            }
+            m_rangeModels.setNewSpec(inSpecs[0]);
+            
             this.setWarningMessage("Guessing that you want to use all Doubles");
-        } else {
-            ColumnSettingsTable testTable =
-                    new ColumnSettingsTable(COLUMNRANGEPREFIX);
-            try {
-                int isProper = 0;
-                testTable.setNewSpec(inSpecs[0]);
-                boolean subset = false, tesbus = false, equal = false;
-                isProper = testTable.isProper();
-                if ((isProper >= 0)) {
-                    if (isProper == 0) {
-                        this.setWarningMessage("Some columns disabled because "
-                                + "they contain only one value");
-                    }
-                    if (m_rangeModels.isSimilarTo(testTable, null)) {
-                        this.setWarningMessage("Additional columns detected");
-                        subset = true;
-                    }
-                    if (testTable.isSimilarTo(m_rangeModels, null)) {
-                        this.setWarningMessage("Some columns are missing");
-                        tesbus = true;
-                    }
-                    if (m_rangeModels.equals(testTable)) {
-                        equal = true;
-                    }
-                    if (!subset && !tesbus && !equal) {
-                        throw new InvalidSettingsException(
-                                "New input Table found");
-
-                    }
-                } else {
-                    throw new InvalidSettingsException("Some columns have no "
-                            + "valid domain, maybe the previous node is not "
-                            + "executed.");
-                }
-            } catch (NotConfigurableException nce) {
-                throw new InvalidSettingsException("Could not load"
-                        + "configuration");
+            
+            // check for valid domains and fail if domains are not provided
+            if (m_rangeModels.isProper() <= 0) {
+                throw new InvalidSettingsException("Some columns have no "
+                        + "valid domain, maybe the previous node is not "
+                        + "executed.");
             }
-        }
-        if (m_rangeModels.getNrSelected() < 3) {
-            throw new InvalidSettingsException("At least 3 double columns are "
-                    + "required");
+            
+        // else, the settings object exists, meaning the node has been 
+        // configured some time. The configuration need to be matched against
+        // the input data table spec.
+        } else {
+            ColumnSettingsTable testSettings = 
+                new ColumnSettingsTable(COLUMNRANGEPREFIX);
+            // take over as many settings specified by the user via
+            // dialog as possible, ignore additional columns
+            testSettings.setNewSpecAndTakeoverSettings(inSpecs[0], 
+                    m_rangeModels);
+            
+            // check for valid and existing domains
+            int isProper = 0;
+            isProper = testSettings.isProper();
+            if ((isProper > 0)) {                
+                // check for missing columns and fail if specified
+                if (!testSettings.allColumnAvailable(m_rangeModels)
+                        && m_rangeModels.getFailOnMissingCols()) {
+                    throw new InvalidSettingsException(
+                            "Specified column is missing");
+                }
+                
+                // need to check if still at least three columns
+                // (attributes) are selected and available since input
+                // data may have changed
+                if (testSettings.getNrSelected() < 3) {
+                    throw new InvalidSettingsException("At least 3 double "
+                            + "columns need to be selected!");
+                }  
+            } else {
+                throw new InvalidSettingsException("Some columns have no "
+                        + "valid domain, maybe the previous node is not "
+                        + "executed.");
+            }
         }
         ColumnRearranger result = createColumnRearranger(inSpecs[0]);
         return new DataTableSpec[]{result.createSpec()};
@@ -324,126 +315,22 @@ public class RadarplotAppenderNodeModel extends NodeModel {
 
     private boolean m_adjustedValidRanges = false;
 
+    /**
+     * Creates and returns the column rearranger used to create spec and output 
+     * data table.
+     * @param spec The original input spec.
+     * @return The column rearranger used to create spec and output data table.
+     * @since 2.6
+     */
     private ColumnRearranger createColumnRearranger(final DataTableSpec spec) {
+        ColumnRearranger result = new ColumnRearranger(spec);
         m_adjustedValidRanges = false;
         final DataColumnSpec newColSpec =
                 new DataColumnSpecCreator(DataTableSpec.getUniqueColumnName(
                         spec, "Radar Plot"), SvgCell.TYPE).createSpec();
-        final int _dim = m_rangeModels.getNrSelected();
-        final int[] _indices = new int[_dim];
-        final double[] _min = new double[_dim];
-        final double[] _max = new double[_dim];
-        final double[] _validMin = new double[_dim];
-        final double[] _validMax = new double[_dim];
-        final String[] _labels = new String[_dim];
-        int nrSelCol = 0; // keep track of selected (and double) columns
-        for (int i = 0; i < Math.min(spec.getNumColumns(),
-                m_rangeModels.getColumnCount()); i++) {
-            if (m_rangeModels.isSelected(i)) {
-                // retrieve min/max values. We know that they exist
-                // because we precomputed them in the execute if
-                // necessary!
-                _validMin[nrSelCol] = Double.NaN;
-                _validMax[nrSelCol] = Double.NaN;
-                try {
-                    if (spec.getColumnSpec(i).getDomain().hasLowerBound()) {
-                        _validMin[nrSelCol] =
-                                ((DoubleValue)spec.getColumnSpec(i).getDomain()
-                                        .getLowerBound()).getDoubleValue();
-                    }
-                    if (spec.getColumnSpec(i).getDomain().hasUpperBound()) {
-                        _validMax[nrSelCol] =
-                                ((DoubleValue)spec.getColumnSpec(i).getDomain()
-                                        .getUpperBound()).getDoubleValue();
-                    }
-                } catch (Exception e) {
-                    assert false;
-                }
-                assert !Double.isNaN(_validMin[nrSelCol]);
-                assert !Double.isNaN(_validMax[nrSelCol]);
-                // we know that min/max are set properly so we can !-!
-                // force valid ranges into this range as well:
-                _min[nrSelCol] = m_rangeModels.getMin(i);
-                _max[nrSelCol] = m_rangeModels.getMax(i);
-                if (_validMin[nrSelCol] > _min[nrSelCol]) {
-                    _min[nrSelCol] = _validMin[nrSelCol];
-                    // m_adjustedValidRanges = true;
-                }
-                if (_validMax[nrSelCol] < _max[nrSelCol]) {
-                    _max[nrSelCol] = _validMax[nrSelCol];
-                    // m_adjustedValidRanges = true;
-                }
-                _labels[nrSelCol] = spec.getColumnSpec(i).getName();
-                _indices[nrSelCol] = i;
-                nrSelCol++;
-            }
-        }
 
-        CellFactory cc = new SingleCellFactory(newColSpec) {
-            @Override
-            public DataCell getCell(final DataRow row) {
-                double[] values = new double[_dim];
-                for (int j = 0; j < _dim; j++) {
-                    if (!row.getCell(_indices[j]).isMissing()) {
-                        // value is double and not missing
-                        values[j] =
-                                ((DoubleValue)row.getCell(_indices[j]))
-                                        .getDoubleValue();
-                    } else {
-                        // represent missing value with NotANumber
-                        values[j] = Double.NaN;
-                    }
-                }
-
-                Color[] colors = new Color[4];
-                colors[0] = m_rangeModels.getBackgroundColor();
-                colors[1] = m_rangeModels.getIntervalColor();
-                colors[2] = m_rangeModels.getBendColor();
-                colors[3] = m_rangeModels.getOutlyingBendColor();
-
-                RadarPlotPanel panel =
-                        new RadarPlotPanel(values, _min, _max, _validMin,
-                                _validMax, _labels, colors);
-
-                int maxWidth = 0;
-                int maxHeight = 0;
-
-                for (int i = 0; i < _labels.length; i++) {
-                    Font font = panel.getFont();
-                    maxWidth =
-                            Math.max(SwingUtilities.computeStringWidth(
-                                    panel.getFontMetrics(font), _labels[i]),
-                                    maxWidth);
-                    maxHeight =
-                            Math.max(panel.getFontMetrics(font).getHeight(),
-                                    maxHeight);
-                }
-
-                // setup box and paint border
-                final int xWidth = 200 + 2 * maxWidth + 10;
-                final int yHeight = 175 + 2 * maxHeight + 5;
-                DOMImplementation domImpl = new SVGDOMImplementation();
-                String svgNS = "http://www.w3.org/2000/svg";
-                Document myFactory = domImpl.createDocument(svgNS, "svg", null);
-                SVGGraphics2D g = new SVGGraphics2D(myFactory);
-                // g.setColor(Color.GREEN);
-                g.setSVGCanvasSize(new Dimension(xWidth, yHeight));
-                g.translate(maxWidth, maxHeight);
-                // g.setBackground(Color.WHITE);
-                // g.setColor(Color.BLACK);
-                g.setColor(Color.BLUE);
-
-                g.setStroke(new BasicStroke(1));
-                panel.paintComponentSVG(g);
-
-                myFactory.replaceChild(g.getRoot(),
-                        myFactory.getDocumentElement());
-                DataCell dc = new SvgCell((SVGDocument)myFactory);
-                return dc;
-
-            }
-        };
-        ColumnRearranger result = new ColumnRearranger(spec);
+        CellFactory cc = new RadarPlotCellFactory(newColSpec, spec, 
+                m_rangeModels);
         result.append(cc);
         return result;
     }

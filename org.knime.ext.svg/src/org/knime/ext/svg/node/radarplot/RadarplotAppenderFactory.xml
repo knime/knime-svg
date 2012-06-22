@@ -19,6 +19,8 @@
 		<option name="Range color">The color of the band which shows the selected intervals</option>
 		<option name="Ribbon color">The color of the value-ribbon if all values are within the selected ranges</option>
 		<option name="Ribbon color 2">The color of the value-ribbon if one value is outside of the selected ranges</option>
+		<option name="Ribbon color 2">The color of the value-ribbon if one value is outside of the selected ranges</option>
+		<option name="Fail if any column is missing">If checked, node will fail if any of the specified columns is missing, otherwise not.</option>
 	</fullDescription>
 	
 	<ports>

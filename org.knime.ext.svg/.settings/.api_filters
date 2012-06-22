@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<component id="org.knime.ext.svg" version="2">
+    <resource path="src/org/knime/ext/svg/node/radarplot/ColumnSettingsTable.java" type="org.knime.ext.svg.node.radarplot.ColumnSettingsTable">
+        <filter id="338792546">
+            <message_arguments>
+                <message_argument value="org.knime.ext.svg.node.radarplot.ColumnSettingsTable"/>
+                <message_argument value="isSimilarTo(ColumnSettingsTable, List&lt;Integer[]&gt;)"/>
+            </message_arguments>
+        </filter>
+    </resource>
+</component>

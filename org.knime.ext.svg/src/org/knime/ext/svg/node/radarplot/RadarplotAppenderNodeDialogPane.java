@@ -87,7 +87,6 @@ import org.knime.core.node.NotConfigurableException;
  */
 public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
 
-	// private ColumnSettingsTable m_myTable;
 	private JPanel m_sliders = new JPanel(new GridLayout());
 
 	private LinkedList<RadarSlider> m_sliderList = new LinkedList<RadarSlider>();
@@ -107,6 +106,12 @@ public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
 	private LinkedList<JCheckBox> m_checkboxes = new LinkedList<JCheckBox>();
 	
 	private LinkedList<Integer[]> m_correspondingColumns = new LinkedList<Integer[]>();
+	
+	/**
+	 * Checkbox to specify whether node should fail on missing columns or not.
+	 * @since 2.6
+	 */
+	private JCheckBox m_failOnMissingCols;
 
 	public RadarplotAppenderNodeDialogPane() {
 		JPanel allPanel = new JPanel();
@@ -180,10 +185,29 @@ public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
 		});
 
 		allPanel.add(selectNone, c);
+		
+        c.weightx = 0.3;
+        c.weighty = 0;
+        c.gridx = 4;
+        c.gridy = 5;
+
+        allPanel.add(new JPanel(), c);
+		
+        c.weightx = 0;
+        c.weighty = 0;
+        c.gridx = 5;
+        c.gridy = 5;
+        c.gridheight = 1;
+        c.gridwidth = 1;
+
+        m_failOnMissingCols =
+                new JCheckBox("Fail if any column is missing");
+
+        allPanel.add(m_failOnMissingCols, c);
 
 		c.weightx = 0.3;
 		c.weighty = 0;
-		c.gridx = 4;
+		c.gridx = 6;
 		c.gridy = 5;
 		c.gridwidth = GridBagConstraints.REMAINDER;
 
@@ -191,322 +215,357 @@ public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
 
 		this.addTab("Column Settings", allPanel);
 	}
+	
+    @Override
+    protected void loadSettingsFrom(final NodeSettingsRO settings,
+            final DataTableSpec[] specs) throws NotConfigurableException {
+        String m_confName = RadarplotAppenderNodeModel.COLUMNRANGEPREFIX;
+        ColumnSettingsTable colSettings = new ColumnSettingsTable(m_confName);
+        colSettings.loadSettingsDialog(settings, specs[0]);
 
-	@Override
-	protected void loadSettingsFrom(final NodeSettingsRO settings,
-			final DataTableSpec[] specs) throws NotConfigurableException {
-		String m_confName = RadarplotAppenderNodeModel.COLUMNRANGEPREFIX;
-		// ColumnSettingsTable testTable = new
-		// ColumnSettingsTable(m_confName);
-		// ColumnSettingsTable testTable2 = new
-		// ColumnSettingsTable(m_confName);
-		// testTable.setNewSpec(specs[0]);
-		// testTable2.loadSettings(settings);
-		// boolean equals = testTable.equals(testTable2);
+        // load colors
+        m_backgroundColor = colSettings.getBackgroundColor();
+        m_bendColor = colSettings.getBendColor();
+        m_outlyingBendColor = colSettings.getOutlyingBendColor();
+        m_intervalColor = colSettings.getIntervalColor();
 
-		ColumnSettingsTable incomingValues = new ColumnSettingsTable(m_confName);
-		ColumnSettingsTable settingsTable = new ColumnSettingsTable(m_confName);
-		incomingValues.setNewSpec(specs[0]);
-		settingsTable.loadSettings(settings);
+        int nrAttr = 0;
+        if (colSettings.isProper() >= 0) {
+            nrAttr = colSettings.getRowCount();
+            m_rowSettings = new RadarplotAppenderRowSettings[nrAttr];
+            format = new String[nrAttr];
+            for (int i = 0; i < nrAttr; i++) {
+                m_rowSettings[i] = new RadarplotAppenderRowSettings();
+            }
+        }
 
-		int tableCompare = compareTables(incomingValues, settingsTable);
-		int nrAttr = 0;
-		if (incomingValues.isProper() >= 0){
-			nrAttr = incomingValues.getRowCount();
-			m_rowSettings = new RadarplotAppenderRowSettings[nrAttr];
-			format = new String[nrAttr];
-			for (int i = 0; i < nrAttr; i++) {
-				m_rowSettings[i] = new RadarplotAppenderRowSettings();
-			}
-		}
+        JPanel data = new JPanel();
+        m_sliders.removeAll();
+        data.setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.weightx = 0;
+        c.weighty = 0;
+        c.fill = GridBagConstraints.HORIZONTAL;
 
-		JPanel data = new JPanel();
-		m_sliders.removeAll();
-		data.setLayout(new GridBagLayout());
-		GridBagConstraints c = new GridBagConstraints();
-		c.weightx = 0;
-		c.weighty = 0;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		
-		JPanel buttonPanel = new JPanel();
+        JPanel buttonPanel = new JPanel();
 
-		final JButton backgroundColor = new JButton("Background color...");
-//		 c.gridx = 1;
-//		 c.gridy =0;
-//		 c.gridheight = 1;
-//		 c.gridwidth = 1;
-		buttonPanel.add(backgroundColor, c);
+        final JButton backgroundColor = createBackgroundButton();
+        buttonPanel.add(backgroundColor, c);
 
-		backgroundColor.addActionListener(new ActionListener() {
+        final JButton intervalColor = createIntervalButton();
+        buttonPanel.add(intervalColor, c);
 
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				Color barColor = JColorChooser.showDialog(backgroundColor,
-						"Choose Background Color", m_backgroundColor);
-				if (barColor != null) {
-					m_backgroundColor = barColor;
-					for (RadarSlider slider : m_sliderList) {
-						((RadarSliderUI) slider.getUI())
-								.setBackgroundColor(m_backgroundColor);
-					}
-				}
-			}
-		});
+        final JButton bendColor = createBendButton();
+        buttonPanel.add(bendColor, c);
 
-		final JButton intervalColor = new JButton("Range color...");
-//		 c.gridx = 2;
-//		 c.gridy =0;
-//		 c.gridheight = 1;
-//		 c.gridwidth = 1;
-		buttonPanel.add(intervalColor, c);
+        final JButton outlyingBendColor = outlyingBendButton();
+        buttonPanel.add(outlyingBendColor, c);
 
-		intervalColor.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				Color barColor = JColorChooser.showDialog(intervalColor,
-						"Choose Range Color", m_intervalColor);
-				if (barColor != null) {
-					m_intervalColor = barColor;
-					for (RadarSlider slider : m_sliderList) {
-						((RadarSliderUI) slider.getUI())
-								.setBarColor(m_intervalColor);
-					}
-				}
-			}
-		});
+        c.gridx = 0;
+        c.gridy = 0;
+        c.gridheight = 1;
+        c.gridwidth = GridBagConstraints.REMAINDER;
+        c.anchor = GridBagConstraints.NORTH;
+        data.add(buttonPanel, c);
+        c.fill = GridBagConstraints.BOTH;
 
-		final JButton bendColor = new JButton("Ribbon color...");
-		buttonPanel.add(bendColor, c);
+        if (nrAttr != 0 && colSettings.isProper() >= 0) {
+            setupRows(colSettings);
 
-		bendColor.addActionListener(new ActionListener() {
+            for (int i = 0; i < nrAttr; i++) {
+                if (m_rowSettings[i].isDouble()) {
+                    createSliderRow(data, c, i);
+                }
+            }
+            data.setVisible(true);
+            m_sliders.add(data);
+            m_sliders.validate();
 
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				Color barColor = JColorChooser.showDialog(bendColor,
-						"Choose Ribbon Color", m_bendColor);
-				if (barColor != null) {
-					m_bendColor = barColor;
-				}
-			}
-		});
+        }
 
-		final JButton outlyingBendColor = new JButton("Ribbon color 2...");
-		buttonPanel.add(outlyingBendColor, c);
+        m_failOnMissingCols.setSelected(colSettings.getFailOnMissingCols());
+    }
 
-		outlyingBendColor.addActionListener(new ActionListener() {
+    /**
+     * Creates and returns the background color button.
+     * @return The background color button.
+     * @since 2.6
+     */
+    private JButton createBackgroundButton() {
+        final JButton backgroundColor = new JButton("Background color...");
+        backgroundColor.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                Color barColor = JColorChooser.showDialog(backgroundColor,
+                        "Choose Background Color", m_backgroundColor);
+                if (barColor != null) {
+                    m_backgroundColor = barColor;
+                    for (RadarSlider slider : m_sliderList) {
+                        ((RadarSliderUI) slider.getUI())
+                                .setBackgroundColor(m_backgroundColor);
+                    }
+                }
+            }
+        });
+        return backgroundColor;
+    }
+    
+    /**
+     * Creates and returns the interval color button.
+     * @return The interval color button.
+     * @since 2.6
+     */
+    private JButton createIntervalButton() {
+        final JButton intervalColor = new JButton("Range color...");
+        intervalColor.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                Color barColor = JColorChooser.showDialog(intervalColor,
+                        "Choose Range Color", m_intervalColor);
+                if (barColor != null) {
+                    m_intervalColor = barColor;
+                    for (RadarSlider slider : m_sliderList) {
+                        ((RadarSliderUI) slider.getUI())
+                                .setBarColor(m_intervalColor);
+                    }
+                }
+            }
+        });
+        return intervalColor;
+    }
+    
+    /**
+     * Creates and returns the bend color button.
+     * @return The bend color button.
+     * @since 2.6
+     */
+    private JButton createBendButton() {
+        final JButton bendColor = new JButton("Ribbon color...");
+        bendColor.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                Color barColor = JColorChooser.showDialog(bendColor,
+                        "Choose Ribbon Color", m_bendColor);
+                if (barColor != null) {
+                    m_bendColor = barColor;
+                }
+            }
+        });
+        return bendColor;
+    }
+    
+    /**
+     * Creates and returns the out lying bend color button.
+     * @return The out lying bend color button.
+     * @since 2.6
+     */
+    private JButton outlyingBendButton() {
+        final JButton outlyingBendColor = new JButton("Ribbon color 2...");
+        outlyingBendColor.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                Color outlierColor = JColorChooser.showDialog(
+                        outlyingBendColor, "Choose alternate Ribbon Color",
+                        m_outlyingBendColor);
+                if (outlierColor != null) {
+                    m_outlyingBendColor = outlierColor;
+                }
+            }
+        });
+        return outlyingBendColor;
+    }    
+    
+    /**
+     * Creates a row containing a checkbox and a jslider to specify the 
+     * settings of a column.
+     * @param data The panel to add the components
+     * @param c A gridbagconstraints specifying the layout settings
+     * @param rowIndex The index of the row
+     * @since 2.6
+     */
+    private void createSliderRow(JPanel data, GridBagConstraints c, 
+            int rowIndex) {        
+        boolean isValid = (m_rowSettings[rowIndex].getMinValue() 
+                        != m_rowSettings[rowIndex].getMaxValue());
+        DecimalFormat g = null;
+        if (isValid) {
+            g = new DecimalFormat(format[rowIndex]);
+        } else {
+            g = new DecimalFormat("#.#");
+        }
 
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				Color outlierColor = JColorChooser.showDialog(
-						outlyingBendColor, "Choose alternate Ribbon Color",
-						m_outlyingBendColor);
-				if (outlierColor != null) {
-					m_outlyingBendColor = outlierColor;
-				}
-			}
-		});
+        JLabel space1 = new JLabel();
+        space1.setPreferredSize(new Dimension(25, 15));
+        c.gridx = 0;
+        c.gridy = 3 * rowIndex + 1;
+        c.gridheight = 1;
+        c.gridwidth = GridBagConstraints.REMAINDER;
+        c.insets = new Insets(0, 15, 0, 0);
+        data.add(space1, c);
 
-		c.gridx = 0;
-		c.gridy = 0;
-		c.gridheight = 1;
-		c.gridwidth = GridBagConstraints.REMAINDER;
-		c.anchor = GridBagConstraints.NORTH;
-		data.add(buttonPanel, c);
-		c.fill = GridBagConstraints.BOTH;
+        String colName = "";
 
-		if (nrAttr != 0) {
-			
-			if (incomingValues.isProper()>=0){
-				SetupRows(tableCompare, incomingValues, settingsTable);
-			
-				for (int i = 0; i < nrAttr; i++) {
-					if(m_rowSettings[i].isDouble()){
-						boolean isValid = (m_rowSettings[i].getMinValue() !=  m_rowSettings[i].getMaxValue());
-						DecimalFormat g = null;
-						if (isValid){
-							g = new DecimalFormat(format[i]);
-						}
-						else {
-							g = new DecimalFormat("#.#");
-						}
-							
-		
-						JLabel space1 = new JLabel();
-						space1.setPreferredSize(new Dimension(25, 15));
-						c.gridx = 0;
-						c.gridy = 3 * i + 1;
-						c.gridheight = 1;
-						c.gridwidth = GridBagConstraints.REMAINDER;
-						c.insets = new Insets(0, 15, 0, 0);
-						data.add(space1, c);
-						
-                        String colName = "";
+        if (isValid) {
+            colName = m_rowSettings[rowIndex].getName();
+        } else {
+            colName = m_rowSettings[rowIndex].getName() + " (DISABLED)";
+        }
 
-                        if (isValid) {
-                            colName = m_rowSettings[i].getName();
-                        } else {
-                            colName = m_rowSettings[i].getName() + " (DISABLED)";
-                        }
+        JLabel label = new JLabel(colName);
+        c.gridx = 0;
+        c.gridy = 3 * rowIndex + 2;
+        c.gridheight = 2;
+        c.gridwidth = 1;
+        data.add(label, c);
 
-                        JLabel label = new JLabel(colName);
-						c.gridx = 0;
-						c.gridy = 3 * i + 2;
-						c.gridheight = 2;
-						c.gridwidth = 1;
-						data.add(label, c);
-		
-						final JCheckBox box = new JCheckBox("Display? ");
-						box.setSelected(m_rowSettings[i].isEnabled());
-						c.gridx = 1;
-						c.gridy = 3 * i + 2;
-						c.gridheight = 2;
-						c.gridwidth = 1;
-						c.insets = new Insets(0, 10, 0, 0);
-						data.add(box, c);
-						if(!isValid){
-							box.setSelected(false);
-							m_rowSettings[i].setEnabled(false);
-							box.setEnabled(false);
-						}
-						
-						double lowerValue = 0;
-						double upperValue = 1;
-						double minValue = lowerValue; 
-						double maxValue = upperValue;
-						if(isValid){
-							lowerValue = m_rowSettings[i].getLowerValue();
-							upperValue = m_rowSettings[i].getUpperValue();
-							minValue = m_rowSettings[i].getMinValue(); 
-							maxValue = m_rowSettings[i].getMaxValue();
-						}
-						final RadarSlider slider = new RadarSlider(
-								lowerValue,
-								upperValue, 0,
-								minValue,
-								maxValue);
-						slider.setUI(new RadarSliderUI(slider));
-						((RadarSliderUI) slider.getUI())
-								.setBarColor(m_intervalColor);
-						((RadarSliderUI) slider.getUI())
-								.setBackgroundColor(m_backgroundColor);
-						slider.setSize((int) (slider.getSize().width * 0.75),
-								slider.getSize().height);
-						c.gridx = 2;
-						c.gridy = 3 * i + 2;
-						c.gridheight = 1;
-						c.gridwidth = 4;
-						c.weightx = 1;
-						c.insets = new Insets(0, 0, 0, 0);
-						data.add(slider, c);
-						m_sliderList.add(slider);
-						
-                        if(!isValid) {
-                            slider.setEnabled(false);
-                        }
-		
-						final JLabel spacer = new JLabel();
-						c.insets = new Insets(0, 10, 0, 0);
-						c.gridx = 6;
-						c.gridy = 3 * i + 2;
-						c.weightx = 0;
-						c.gridheight = 2;
-						c.gridwidth = GridBagConstraints.REMAINDER;
-						data.add(spacer, c);
-		
-						JLabel ValueLabel1 = new JLabel("Lower value: ");
-						c.gridx = 2;
-						c.gridy = 3 * (i + 1);
-						c.gridheight = 1;
-						c.weightx = 0;
-						c.gridwidth = 1;
-						c.insets = new Insets(0, 0, 0, 0);
-						data.add(ValueLabel1, c);
-						
-                        int labelWidth = 0;
-                        String lowerLabelText = "";
-                        String upperLabelText = "";
-                        if (isValid){
-                            labelWidth = format[i].length()*6;
-                            lowerLabelText = g.format(slider.getValue(1));
-                            upperLabelText = g.format(slider.getValue(2));
+        final JCheckBox box = new JCheckBox("Display? ");
+        box.setSelected(m_rowSettings[rowIndex].isEnabled());
+        c.gridx = 1;
+        c.gridy = 3 * rowIndex + 2;
+        c.gridheight = 2;
+        c.gridwidth = 1;
+        c.insets = new Insets(0, 10, 0, 0);
+        data.add(box, c);
+        if (!isValid) {
+            box.setSelected(false);
+            m_rowSettings[rowIndex].setEnabled(false);
+            box.setEnabled(false);
+        }
 
-                        } else {
-                            labelWidth = 24;
-                        }
+        double lowerValue = 0;
+        double upperValue = 1;
+        double minValue = lowerValue;
+        double maxValue = upperValue;
+        if (isValid) {
+            lowerValue = m_rowSettings[rowIndex].getLowerValue();
+            upperValue = m_rowSettings[rowIndex].getUpperValue();
+            minValue = m_rowSettings[rowIndex].getMinValue();
+            maxValue = m_rowSettings[rowIndex].getMaxValue();
+        }
+        final RadarSlider slider =
+                new RadarSlider(lowerValue, upperValue, 0,
+                        minValue, maxValue);
+        slider.setUI(new RadarSliderUI(slider));
+        ((RadarSliderUI)slider.getUI())
+                .setBarColor(m_intervalColor);
+        ((RadarSliderUI)slider.getUI())
+                .setBackgroundColor(m_backgroundColor);
+        slider.setSize((int)(slider.getSize().width * 0.75),
+                slider.getSize().height);
+        c.gridx = 2;
+        c.gridy = 3 * rowIndex + 2;
+        c.gridheight = 1;
+        c.gridwidth = 4;
+        c.weightx = 1;
+        c.insets = new Insets(0, 0, 0, 0);
+        data.add(slider, c);
+        m_sliderList.add(slider);
 
-                        final JLabel lowerValueLabel = new JLabel(lowerLabelText);
-						 lowerValueLabel.setPreferredSize(new
-						 Dimension(labelWidth,15));
-						c.gridx = 3;
-						c.gridy = 3 * (i + 1);
-						c.gridheight = 1;
-						c.gridwidth = 1;
-						c.weightx = 1;
-						data.add(lowerValueLabel, c);
-		
-						JLabel ValueLabel2 = new JLabel("Upper value: ");
-						c.gridx = 4;
-						c.gridy = 3 * (i + 1);
-						c.gridheight = 1;
-						c.gridwidth = 1;
-						c.weightx = 0;
-						data.add(ValueLabel2, c);
-		
-						final JLabel upperValueLabel = new JLabel(upperLabelText);
-						upperValueLabel.setPreferredSize(new Dimension(labelWidth, 15));
-						c.gridx = 5;
-						c.gridy = 3 * (i + 1);
-						c.gridheight = 1;
-						c.insets = new Insets(0, 0, 0, 15);
-						c.gridwidth = 1;
-						c.weightx = 1;
-						data.add(upperValueLabel, c);
-		
-						final int counter = i;
-		
-						slider.addChangeListener(new ChangeListener() {
-		
-							String numberformat = format[counter];
-		
-							@Override
-							public void stateChanged(final ChangeEvent e) {
-								DecimalFormat f = new DecimalFormat(numberformat);
-								double minimum = slider.doubleGetMinimum();
-								double maximum = slider.doubleGetMaximum();
-								double lowerValue = slider.getValue(1);
-								double upperValue = slider.getValue(2);
-								m_rowSettings[counter].setLowerValue(lowerValue);
-								m_rowSettings[counter].setUpperValue(upperValue);
-								m_rowSettings[counter].setMinValue(minimum);
-								m_rowSettings[counter].setMaxValue(maximum);
-								lowerValueLabel.setText(f.format(lowerValue));
-								upperValueLabel.setText(f.format(upperValue));
-							}
-						});
-		
-						box.addChangeListener(new ChangeListener() {
-							@Override
-							public void stateChanged(final ChangeEvent e) {
-								m_rowSettings[counter].setEnabled(box.isSelected());
-							}
-						});
-						m_checkboxes.add(box);
-					}
-				}
-			}
-			data.setVisible(true);
-			m_sliders.add(data);
-			m_sliders.validate();
+        if (!isValid) {
+            slider.setEnabled(false);
+        }
 
-		}
-	}
+        final JLabel spacer = new JLabel();
+        c.insets = new Insets(0, 10, 0, 0);
+        c.gridx = 6;
+        c.gridy = 3 * rowIndex + 2;
+        c.weightx = 0;
+        c.gridheight = 2;
+        c.gridwidth = GridBagConstraints.REMAINDER;
+        data.add(spacer, c);
+
+        JLabel ValueLabel1 = new JLabel("Lower value: ");
+        c.gridx = 2;
+        c.gridy = 3 * (rowIndex + 1);
+        c.gridheight = 1;
+        c.weightx = 0;
+        c.gridwidth = 1;
+        c.insets = new Insets(0, 0, 0, 0);
+        data.add(ValueLabel1, c);
+
+        int labelWidth = 0;
+        String lowerLabelText = "";
+        String upperLabelText = "";
+        if (isValid) {
+            labelWidth = format[rowIndex].length() * 6;
+            lowerLabelText = g.format(slider.getValue(1));
+            upperLabelText = g.format(slider.getValue(2));
+
+        } else {
+            labelWidth = 24;
+        }
+
+        final JLabel lowerValueLabel = new JLabel(lowerLabelText);
+        lowerValueLabel.setPreferredSize(new Dimension(labelWidth,
+                15));
+        c.gridx = 3;
+        c.gridy = 3 * (rowIndex + 1);
+        c.gridheight = 1;
+        c.gridwidth = 1;
+        c.weightx = 1;
+        data.add(lowerValueLabel, c);
+
+        JLabel ValueLabel2 = new JLabel("Upper value: ");
+        c.gridx = 4;
+        c.gridy = 3 * (rowIndex + 1);
+        c.gridheight = 1;
+        c.gridwidth = 1;
+        c.weightx = 0;
+        data.add(ValueLabel2, c);
+
+        final JLabel upperValueLabel = new JLabel(upperLabelText);
+        upperValueLabel.setPreferredSize(new Dimension(labelWidth,
+                15));
+        c.gridx = 5;
+        c.gridy = 3 * (rowIndex + 1);
+        c.gridheight = 1;
+        c.insets = new Insets(0, 0, 0, 15);
+        c.gridwidth = 1;
+        c.weightx = 1;
+        data.add(upperValueLabel, c);
+
+        final int counter = rowIndex;
+
+        slider.addChangeListener(new ChangeListener() {
+            String numberformat = format[counter];
+
+            @Override
+            public void stateChanged(final ChangeEvent e) {
+                DecimalFormat f = new DecimalFormat(numberformat);
+                double minimum = slider.doubleGetMinimum();
+                double maximum = slider.doubleGetMaximum();
+                double lVal = slider.getValue(1);
+                double uVal = slider.getValue(2);
+                m_rowSettings[counter].setLowerValue(lVal);
+                m_rowSettings[counter].setUpperValue(uVal);
+                m_rowSettings[counter].setMinValue(minimum);
+                m_rowSettings[counter].setMaxValue(maximum);
+                lowerValueLabel.setText(f.format(lVal));
+                upperValueLabel.setText(f.format(uVal));
+            }
+        });
+
+        box.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(final ChangeEvent e) {
+                m_rowSettings[counter].setEnabled(box.isSelected());
+            }
+        });
+        m_checkboxes.add(box);
+    }
 
 	@Override
 	protected void saveSettingsTo(final NodeSettingsWO settings)
 			throws InvalidSettingsException {
+	    if (m_rowSettings == null) {
+	        throw new InvalidSettingsException("No attributes set to save!");
+	    }
+	    
 		NodeSettingsWO mySettings = settings
 				.addNodeSettings(RadarplotAppenderNodeModel.COLUMNRANGEPREFIX);
 		mySettings.addInt("NRATTR", m_rowSettings.length);
+		mySettings.addBoolean("FAILONMISSINGCOLS", 
+		        m_failOnMissingCols.isSelected());
 		for (int i = 0; i < m_rowSettings.length; i++) {
 			NodeSettingsWO thisSettings = mySettings
 					.addNodeSettings("Attribute_" + i);
@@ -536,170 +595,37 @@ public class RadarplotAppenderNodeDialogPane extends NodeDialogPane {
 		}
 	}
 	
-    private int compareTables(final ColumnSettingsTable incomingTable, final ColumnSettingsTable settingsTable){
-        if (settingsTable.equals(incomingTable)) {
-			return 0;
+    /**
+     * Takes over all loaded and matched settings and prepares them for use
+     * on components such as jslider and others. 
+     * @param settingsTable The loaded and matched settings to show in dialog.
+     */
+    private void setupRows(final ColumnSettingsTable settingsTable) {
+        for (int i = 0; i < settingsTable.getColumnCount(); i++) {
+            m_rowSettings[i].set(settingsTable.getValidMin(i),
+                    settingsTable.getMin(i), settingsTable.getMax(i),
+                    settingsTable.getValidMax(i), settingsTable.isSelected(i),
+                    settingsTable.getColumnName(i), settingsTable.isDouble(i));
+            m_rowSettings[i].setBarColor(settingsTable.getBackgroundColor());
+            if (m_rowSettings[i].isDouble()) {
+                if (m_rowSettings[i].getMaxValue() != m_rowSettings[i]
+                        .getMinValue()) {
+                    format[i] = "#";
+                    double interval =
+                            (m_rowSettings[i].getMaxValue() - m_rowSettings[i]
+                                    .getMinValue());
+                    if (interval <= 10 && interval > 1) {
+                        format[i] = format[i] + ".##";
+                    }
+                    if (interval != 0 && interval <= 1) {
+                        format[i] = format[i] + ".#";
+                        while (interval <= 1) {
+                            format[i] = format[i] + "#";
+                            interval = interval * 10;
+                        }
+                    }
+                }
+            }
         }
-		m_correspondingColumns = new LinkedList<Integer[]>();
-        if (settingsTable.isSimilarTo(incomingTable, m_correspondingColumns)) {
-			return 1;
-        }
-		m_correspondingColumns = new LinkedList<Integer[]>();
-        if (incomingTable.isSimilarTo(settingsTable, m_correspondingColumns)) {
-			return 2;
-        }
-
-		return -1;
-		
-	}
-	
-    private void SetupRows(final int comparedTableInfo, final ColumnSettingsTable incomingTable, final ColumnSettingsTable settingsTable){
-		if (comparedTableInfo == 0){ // Both tables equal, take Values from Settings
-			for( int i = 0; i< settingsTable.getColumnCount(); i++){
-				m_rowSettings[i].set(
-						settingsTable.getValidMin(i),
-						settingsTable.getMin(i),
-						settingsTable.getMax(i),
-						settingsTable.getValidMax(i),
-						settingsTable.isSelected(i),
-						settingsTable.getColumnName(i),
-						settingsTable.isDouble(i));
-				m_rowSettings[i].setBarColor(settingsTable.getBackgroundColor());
-				if (m_rowSettings[i].isDouble()) {
-					if (m_rowSettings[i].getMaxValue() != m_rowSettings[i].getMinValue()) {
-						format[i] = "#";
-						double interval = (m_rowSettings[i].getMaxValue() - m_rowSettings[i].getMinValue());
-						if (interval <= 10 && interval > 1) {
-							format[i] = format[i] + ".##";
-						}
-						if (interval != 0 && interval <= 1) {
-							format[i] = format[i] + ".#";
-							while (interval <= 1) {
-								format[i] = format[i] + "#";
-								interval = interval * 10;
-							}
-						}
-					}
-				}
-			}
-		}
-		if (comparedTableInfo == 1){ // All Rows from Settings in Incoming Values (in no particular order).
-			for( int i = 0; i< settingsTable.getColumnCount(); i++){
-				int j = m_correspondingColumns.get(i)[1];
-				m_rowSettings[j].set(
-						settingsTable.getValidMin(i),
-						settingsTable.getMin(i),
-						settingsTable.getMax(i),
-						settingsTable.getValidMax(i),
-						settingsTable.isSelected(i),
-						settingsTable.getColumnName(i),
-						settingsTable.isDouble(i));
-				m_rowSettings[j].setBarColor(settingsTable.getBackgroundColor());
-				if (m_rowSettings[j].isDouble()) {
-					if (m_rowSettings[j].getMaxValue() != m_rowSettings[j].getMinValue()) {
-						format[j] = "#";
-						double interval = (m_rowSettings[j].getMaxValue() - m_rowSettings[j].getMinValue());
-						if (interval <= 10 && interval > 1) {
-							format[j] = format[j] + ".##";
-						}
-						if (interval != 0 && interval <= 1) {
-							format[j] = format[j] + ".#";
-							while (interval <= 1) {
-								format[j] = format[j] + "#";
-								interval = interval * 10;
-							}
-						}
-					}
-				}
-			}
-			for(int i = 0; i < m_rowSettings.length; i++){  //Add the rows for which no settings exist - simply load from incoming data
-				if (!m_rowSettings[i].isSet()){
-					m_rowSettings[i].set(
-							incomingTable.getValidMin(i),
-							incomingTable.getMin(i),
-							incomingTable.getMax(i),
-							incomingTable.getValidMax(i),
-							incomingTable.isSelected(i),
-							incomingTable.getColumnName(i),
-							incomingTable.isDouble(i));
-					m_rowSettings[i].setBarColor(incomingTable.getBackgroundColor());
-					if (m_rowSettings[i].isDouble()) {
-						if (m_rowSettings[i].getMaxValue() != m_rowSettings[i].getMinValue()) {
-							format[i] = "#";
-							double interval = (m_rowSettings[i].getMaxValue() - m_rowSettings[i].getMinValue());
-							if (interval <= 10 && interval > 1) {
-								format[i] = format[i] + ".##";
-							}
-							if (interval != 0 && interval <= 1) {
-								format[i] = format[i] + ".#";
-								while (interval <= 1) {
-									format[i] = format[i] + "#";
-									interval = interval * 10;
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		if (comparedTableInfo == 2){ // Settings has more columns than incoming data -> some columns are missing.
-			for( int i = 0; i< incomingTable.getColumnCount(); i++){
-				int j = m_correspondingColumns.get(i)[1];
-				m_rowSettings[i].set(
-						settingsTable.getValidMin(j),
-						settingsTable.getMin(j),
-						settingsTable.getMax(j),
-						settingsTable.getValidMax(j),
-						settingsTable.isSelected(j),
-						settingsTable.getColumnName(j),
-						settingsTable.isDouble(j));
-				m_rowSettings[i].setBarColor(settingsTable.getBackgroundColor());
-				if (m_rowSettings[i].isDouble()) {
-					if (m_rowSettings[i].getMaxValue() != m_rowSettings[i].getMinValue()) {
-						format[i] = "#";
-						double interval = (m_rowSettings[i].getMaxValue() - m_rowSettings[i].getMinValue());
-						if (interval <= 10 && interval > 1) {
-							format[i] = format[i] + ".##";
-						}
-						if (interval != 0 && interval <= 1) {
-							format[i] = format[i] + ".#";
-							while (interval <= 1) {
-								format[i] = format[i] + "#";
-								interval = interval * 10;
-							}
-						}
-					}
-				}
-			}
-		}
-		if (comparedTableInfo == -1){ // The two tables are considered unlinked. Load the incoming data.
-			for( int i = 0; i< m_rowSettings.length; i++){
-				m_rowSettings[i].set(
-						incomingTable.getValidMin(i),
-						incomingTable.getMin(i),
-						incomingTable.getMax(i),
-						incomingTable.getValidMax(i),
-						incomingTable.isSelected(i),
-						incomingTable.getColumnName(i),
-						incomingTable.isDouble(i));
-				m_rowSettings[i].setBarColor(incomingTable.getBackgroundColor());
-				if (m_rowSettings[i].isDouble()) {
-					if (m_rowSettings[i].getMaxValue() != m_rowSettings[i].getMinValue()) {
-						format[i] = "#";
-						double interval = (m_rowSettings[i].getMaxValue() - m_rowSettings[i].getMinValue());
-						if (interval <= 10 && interval > 1) {
-							format[i] = format[i] + ".##";
-						}
-						if (interval != 0 && interval <= 1) {
-							format[i] = format[i] + ".#";
-							while (interval <= 1) {
-								format[i] = format[i] + "#";
-								interval = interval * 10;
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+    }
 }

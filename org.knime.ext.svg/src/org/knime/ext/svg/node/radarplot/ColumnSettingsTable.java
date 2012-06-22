@@ -51,8 +51,7 @@
 package org.knime.ext.svg.node.radarplot;
 
 import java.awt.Color;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Arrays;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -62,13 +61,11 @@ import org.knime.core.data.DoubleValue;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.NotConfigurableException;
 
 
 /** Table which holds all the settings for one radarplot node
- * 
- * @author Michael Berthold, University of Konstanz
- * @author Andreas Burger
+ *
+ * @author Kilian Thiel, University of Konstanz
  */
 public class ColumnSettingsTable extends AbstractTableModel {
 
@@ -87,17 +84,26 @@ public class ColumnSettingsTable extends AbstractTableModel {
 
 	private final String m_confName;
 
-	public ColumnSettingsTable(final String confName) {
+	/**
+	 * Flag specifying if execution should fail on missing columns.
+	 * @since 2.6
+	 */
+	private boolean m_failOnMissingCols = false;
+
+    /**
+     * Constructor of <code>ColumnSettingsTable</code>.
+     * @param confName The name of the configuration to load and save.
+     */
+    public ColumnSettingsTable(final String confName) {
 		m_confName = confName;
 		m_nrAttr = 0;
 	}
 
 	/** Loads a new spec from given spec
 	 * @param spec Spec to load. Invalid values will be replaced with -1
-	 * @throws NotConfigurableException
+	 * @since 2.6
 	 */
-	public void setNewSpec(final DataTableSpec spec)
-	throws NotConfigurableException {
+	public void setNewSpec(final DataTableSpec spec) {
 		initMembers(spec.getNumColumns());
 		for (int i = 0; i < m_nrAttr; i++) {
 			DataColumnSpec thisSpec = spec.getColumnSpec(i);
@@ -105,10 +111,11 @@ public class ColumnSettingsTable extends AbstractTableModel {
 			if (thisSpec.getType().isCompatible(DoubleValue.class)) {
 				m_isSelected[i] = true;
 				if ((thisSpec.getDomain().getLowerBound()) != null){
-					m_min[i] = ((DoubleValue)(thisSpec.getDomain().getLowerBound())).getDoubleValue();
-					m_max[i] = ((DoubleValue)(thisSpec.getDomain().getUpperBound())).getDoubleValue();
-				}
-				else {
+                    m_min[i] = ((DoubleValue)(thisSpec.getDomain()
+                            .getLowerBound())).getDoubleValue();
+                    m_max[i] = ((DoubleValue)(thisSpec.getDomain()
+                            .getUpperBound())).getDoubleValue();
+				} else {
 					m_min[i] = -1;
 					m_max[i] = -1;
 				}
@@ -127,6 +134,10 @@ public class ColumnSettingsTable extends AbstractTableModel {
 		fireTableDataChanged();
 	}
 
+	/**
+	 * Creates empty arrays for members.
+	 * @param nrAttr Length of arrays.
+	 */
 	private void initMembers(final int nrAttr) {
 		m_nrAttr = nrAttr;
 		m_isSelected = new boolean[m_nrAttr];
@@ -154,65 +165,64 @@ public class ColumnSettingsTable extends AbstractTableModel {
 		return m_attrName[i];
 	}
 
-	/** Generates the background color from the stored values
-	 * @return The stored background color
+	/**
+	 * @return Creates and returns a color, generated from the given string
+	 * array. If no color could be generated the specified default color is
+	 * returned.
+	 * @since 2.6
 	 */
-	public Color getBackgroundColor(){
-		if (m_backgroundColor[0] != null){
-			String[] result = m_backgroundColor[0].split("\\.");
-			int red = Integer.parseInt(result[0]);
-			int green = Integer.parseInt(result[1]);
-			int blue = Integer.parseInt(result[2]);
-			return new Color(red, green, blue);
-		} else {
-			return new Color(175, 220, 240);
-		}
+	private Color getColor(final String[] colArr, final Color defaultColor) {
+        for (String colStr : colArr) {
+            if (colStr != null) {
+                String[] result = colStr.split("\\.");
+                int red = Integer.parseInt(result[0]);
+                int green = Integer.parseInt(result[1]);
+                int blue = Integer.parseInt(result[2]);
+                return new Color(red, green, blue);
+            } else {
+                continue;
+            }
+        }
+        return defaultColor;
 	}
 
-	/** Generates the interval color from the stored values
-	 * @return The stored interval color
-	 */
-	public Color getIntervalColor(){
-		if (m_intervalColor[0] != null){
-			String[] result = m_intervalColor[0].split("\\.");
-			int red = Integer.parseInt(result[0]);
-			int green = Integer.parseInt(result[1]);
-			int blue = Integer.parseInt(result[2]);
-			return new Color(red, green, blue);
-		} else {
-			return new Color(105, 150, 170);
-		}
-	}
+    /**
+     * Generates the background color from the stored values
+     *
+     * @return The stored background color
+     */
+    public Color getBackgroundColor() {
+        return getColor(m_backgroundColor, new Color(175, 220, 240));
+    }
 
-	/** Generates the ribbon color from the stored values. This is the colour of the ribbon if all values are within the boundaries
-	 * @return The ribbon color
-	 */
-	public Color getBendColor(){
-		if (m_bendColor[0] != null){
-			String[] result = m_bendColor[0].split("\\.");
-			int red = Integer.parseInt(result[0]);
-			int green = Integer.parseInt(result[1]);
-			int blue = Integer.parseInt(result[2]);
-			return new Color(red, green, blue);
-		} else {
-			return new Color(0, 255, 0);
-		}
-	}
+    /**
+     * Generates the interval color from the stored values
+     *
+     * @return The stored interval color
+     */
+    public Color getIntervalColor() {
+        return getColor(m_intervalColor, new Color(105, 150, 170));
+    }
 
-	/** Generates the ribbon color from the stored values. This is the colour of the ribbon if some values are outside the boundaries
-	 * @return The ribbon color
-	 */
-	public Color getOutlyingBendColor() {
-		if (m_outlyingBendColor[0] != null){
-			String[] result = m_outlyingBendColor[0].split("\\.");
-			int red = Integer.parseInt(result[0]);
-			int green = Integer.parseInt(result[1]);
-			int blue = Integer.parseInt(result[2]);
-			return new Color(red, green, blue);
-		} else {
-			return new Color(255, 0, 0);
-		}
-	}
+    /**
+     * Generates the ribbon color from the stored values. This is the colour of
+     * the ribbon if all values are within the boundaries
+     *
+     * @return The ribbon color
+     */
+    public Color getBendColor() {
+        return getColor(m_bendColor, new Color(0, 255, 0));
+    }
+
+    /**
+     * Generates the ribbon color from the stored values. This is the colour of
+     * the ribbon if some values are outside the boundaries
+     *
+     * @return The ribbon color
+     */
+    public Color getOutlyingBendColor() {
+        return getColor(m_outlyingBendColor, new Color(255, 0, 0));
+    }
 
 	public boolean isSelected(final int i) {
 		return m_isSelected[i];
@@ -312,36 +322,209 @@ public class ColumnSettingsTable extends AbstractTableModel {
 		case 4: m_validMax[row] = val; return;
 		}
 		return;
-
 	}
-	/** Loads the given settings into this table
-	 * @param settings Settings to load
-	 */
-	void loadSettings(final NodeSettingsRO settings) {
-		try {
+
+
+    /**
+     * Loads the given settings into this table.
+     *
+     * @param settings Settings to load
+     * @throws InvalidSettingsException If settings could not be loaded.
+     * @since 2.6
+     */
+	void loadSettingsModel(final NodeSettingsRO settings)
+	throws InvalidSettingsException {
 			NodeSettingsRO mySettings = settings.getNodeSettings(m_confName);
+	        if (mySettings == null) {
+	            throw new InvalidSettingsException("No settings available");
+	        }
+
 			int nrAttr = mySettings.getInt("NRATTR");
+	        // check for key before loading to ensure backwards compatibility
+            // (old node configurations may have not this setting set already)
+            if (mySettings.containsKey("FAILONMISSINGCOLS")) {
+                m_failOnMissingCols =
+                    mySettings.getBoolean("FAILONMISSINGCOLS");
+            } else {
+                m_failOnMissingCols = false;
+            }
+
 			initMembers(nrAttr);
 			for (int i = 0; i < m_nrAttr; i++) {
 				NodeSettingsRO thisSettings = mySettings.getNodeSettings(
 						"Attribute_" + i);
-				m_attrName[i] = thisSettings.getString("NAME");
+				String name = thisSettings.getString("NAME");
+				if (name == null) {
+				    throw new InvalidSettingsException("Name must not be null!");
+				} else {
+				    m_attrName[i] = name;
+				}
+
+                String background = thisSettings.getString("BACKGROUND");
+                if (background == null) {
+                    throw new InvalidSettingsException(
+                            "Background must not be null!");
+                } else {
+                    m_backgroundColor[i] = background;
+                }
+
+                String intervalColor = thisSettings.getString("INTERVAL");
+                if (intervalColor == null) {
+                    throw new InvalidSettingsException(
+                            "Interval color must not be null!");
+                } else {
+                    m_intervalColor[i] = intervalColor;
+                }
+
+                String bendColor = thisSettings.getString("BEND");
+                if (bendColor == null) {
+                    throw new InvalidSettingsException(
+                            "Bend color must not be null!");
+                } else {
+                    m_bendColor[i] = bendColor;
+                }
+
+                String outlyingBendColor =
+                    thisSettings.getString("OUTLYINGBEND");
+                if (outlyingBendColor == null) {
+                    throw new InvalidSettingsException(
+                            "Outlying bend color must not be null!");
+                } else {
+                    m_outlyingBendColor[i] = outlyingBendColor;
+                }
+
 				m_validMin[i] = thisSettings.getDouble("VALIDMIN");
 				m_validMax[i] = thisSettings.getDouble("VALIDMAX");
 				m_min[i] = thisSettings.getDouble("MIN");
 				m_max[i] = thisSettings.getDouble("MAX");
-				m_backgroundColor[i] = thisSettings.getString("BACKGROUND");
-				m_intervalColor[i] = thisSettings.getString("INTERVAL");
-				m_bendColor[i] = thisSettings.getString("BEND");
-				m_outlyingBendColor[i] = thisSettings.getString("OUTLYINGBEND");
 				m_isSelected[i] = thisSettings.getBoolean("SELECTED");
 				m_isDouble[i] = thisSettings.getBoolean("ISDOUBLE");
 			}
-		} catch (InvalidSettingsException ise) {
-			// ignore - try to set as much as possible in the dialog
-		}
 		fireTableDataChanged();
 	}
+
+	/**
+	 * Loads settings for dialog. First all saved settings are loaded and
+	 * second the given input spec is matched against the loaded settings.
+	 * Only the settings of proper existing columns will be taken over and
+	 * handed to the dialog. Settings of non existing or invalid columns will
+	 * not be handed to the dialog.
+	 * @param settings Settings to load.
+	 * @param spec Spec of input data.
+	 * @since 2.6
+	 */
+	void loadSettingsDialog(final NodeSettingsRO settings,
+            final DataTableSpec spec) {
+	    ColumnSettingsTable origSettings = new ColumnSettingsTable(m_confName);
+	    origSettings.loadSettingsDialogInternal(settings);
+	    this.setNewSpecAndTakeoverSettings(spec, origSettings);
+	}
+
+    /**
+     * Internal method to load settings for dialog.
+     * @param settings Settings to load for dialog.
+     * @since 2.6
+     */
+    private void loadSettingsDialogInternal(final NodeSettingsRO settings) {
+        NodeSettingsRO mySettings = null;
+        try {
+            mySettings = settings.getNodeSettings(m_confName);
+        } catch (InvalidSettingsException ise) {
+            // do not throw exception here
+        }
+
+        if (mySettings != null) {
+            int nrAttr = mySettings.getInt("NRATTR", 0);
+            m_failOnMissingCols = mySettings.getBoolean("FAILONMISSINGCOLS",
+                    false);
+
+            boolean[] isSelected = new boolean[nrAttr];
+            String[] attrName = new String[nrAttr];
+            double[] min = new double[nrAttr];
+            double[] max = new double[nrAttr];
+            double[] validMin = new double[nrAttr];
+            double[] validMax = new double[nrAttr];
+            String[] backgroundColor = new String[nrAttr];
+            String[] intervalColor = new String[nrAttr];
+            String[] bendColor = new String[nrAttr];
+            String[] outlyingBendColor = new String[nrAttr];
+            boolean[] isDouble = new boolean[nrAttr];
+
+            int nrValidAttr = 0;
+            boolean[] validSettings = new boolean[nrAttr];
+            Arrays.fill(validSettings, true);
+
+            for (int i = 0; i < nrAttr; i++) {
+                NodeSettingsRO thisSettings = null;
+                try {
+                    thisSettings = mySettings.getNodeSettings("Attribute_" + i);
+                }  catch (InvalidSettingsException ise) {
+                    // do not throw exception here
+                }
+                if (thisSettings != null) {
+                    attrName[i] = thisSettings.getString("NAME", null);
+                    if (attrName[i] == null) {
+                        validSettings[i] = false;
+                    }
+
+                    backgroundColor[i] =
+                        thisSettings.getString("BACKGROUND", null);
+                    if (backgroundColor[i] == null) {
+                        validSettings[i] = false;
+                    }
+
+                    intervalColor[i] = thisSettings.getString("INTERVAL", null);
+                    if (intervalColor[i] == null) {
+                        validSettings[i] = false;
+                    }
+
+                    bendColor[i] = thisSettings.getString("BEND", null);
+                    if (bendColor[i] == null) {
+                        validSettings[i] = false;
+                    }
+
+                    outlyingBendColor[i] =
+                            thisSettings.getString("OUTLYINGBEND", null);
+                    if (outlyingBendColor[i] == null) {
+                        validSettings[i] = false;
+                    }
+
+                    validMin[i] = thisSettings.getDouble("VALIDMIN", 0);
+                    validMax[i] = thisSettings.getDouble("VALIDMAX", 0);
+                    min[i] = thisSettings.getDouble("MIN", 0);
+                    max[i] = thisSettings.getDouble("MAX", 0);
+                    isSelected[i] =
+                            thisSettings.getBoolean("SELECTED", false);
+                    isDouble[i] = thisSettings.getBoolean("ISDOUBLE", false);
+
+                    if (validSettings[i]) {
+                        nrValidAttr++;
+                    }
+                }
+            }
+
+            // load valid settings (that could properly be loaded) into members
+            initMembers(nrValidAttr);
+            int validIndex = 0;
+            for (int i = 0; i < nrAttr; i++) {
+                if (validSettings[i]) {
+                    m_attrName[validIndex] = attrName[i];
+                    m_backgroundColor[validIndex] = backgroundColor[i];
+                    m_intervalColor[validIndex] = intervalColor[i];
+                    m_bendColor[validIndex] = bendColor[i];
+                    m_outlyingBendColor[validIndex] = outlyingBendColor[i];
+                    m_validMax[validIndex] = validMax[i];
+                    m_validMin[validIndex] = validMin[i];
+                    m_min[validIndex] = min[i];
+                    m_max[validIndex] = max[i];
+                    m_isSelected[validIndex] = isSelected[i];
+                    m_isDouble[validIndex] = isDouble[i];
+                    validIndex++;
+                }
+            }
+        }
+        fireTableDataChanged();
+    }
 
 	/** Save settings into a NodeSettingsWO object
 	 * @param settings Settings in which to save
@@ -349,6 +532,7 @@ public class ColumnSettingsTable extends AbstractTableModel {
 	void saveSettings(final NodeSettingsWO settings) {
 		NodeSettingsWO mySettings = settings.addNodeSettings(m_confName);
 		mySettings.addInt("NRATTR", m_nrAttr);
+		mySettings.addBoolean("FAILONMISSINGCOLS", m_failOnMissingCols);
 		for (int i = 0; i < m_nrAttr; i++) {
 			NodeSettingsWO thisSettings = mySettings.addNodeSettings(
 					"Attribute_" + i);
@@ -366,11 +550,14 @@ public class ColumnSettingsTable extends AbstractTableModel {
 		}
 	}
 
-	/** Checks for equality. This table and another table are equal if their column names, maximum and minimum Values are the same. 
-	 * This requires them to share the same number of rows.
-	 * @param table Table against which to test this table
-	 * @return True if the two tables are equal, false otherwise
-	 */
+    /**
+     * Checks for equality. This table and another table are equal if their
+     * column names, maximum and minimum Values are the same. This requires them
+     * to share the same number of rows.
+     *
+     * @param table Table against which to test this table
+     * @return True if the two tables are equal, false otherwise
+     */
 	public boolean equals(final ColumnSettingsTable table) {
 		if (this.getRowCount() != table.getRowCount()) {
 			return false;
@@ -389,9 +576,12 @@ public class ColumnSettingsTable extends AbstractTableModel {
 		return true;
 	}
 
-	/** Checks if this table is proper (at least one column has valid values).
-	 * @return 1 if all Double columns are valid, 0 if some are invalid, -1 if ALL are invalid.
-	 */
+    /**
+     * Checks if this table is proper (at least one column has valid values).
+     *
+     * @return 1 if all Double columns are valid, 0 if some are invalid, -1 if
+     *         ALL are invalid.
+     */
 	public int isProper() {
 		int numCols = 0;
 		int numValidCols = 0;
@@ -414,51 +604,178 @@ public class ColumnSettingsTable extends AbstractTableModel {
 	}
 
 	/**
-	 * Checks this table and another for similarity. Another Table is similar to this one if it contains all of the columns of this
-	 * Table. Note: It may contain more. 
-	 * @param table the table against which to check for similarity
-	 * @param correspondingColumns (optional) an empty List which will contain the corresponding column-indices after execution (if they are indeed similar)
-	 * @return true if they are similar, false otherwise
+	 * Returns the index of the specified attribute or -1 is attribute does not
+	 * exist.
+	 * @param attr Attribute to search index for.
+	 * @return The index of the specified attribute.
+	 * @since 2.6
 	 */
-	public boolean isSimilarTo(final ColumnSettingsTable table, List<Integer[]> correspondingColumns) {
-		//		String names = table.getCompoundColumnNames();
-		if (correspondingColumns == null || correspondingColumns.size() != 0){
-			correspondingColumns = new LinkedList<Integer[]>();
-		}
-		if (this.getRowCount() < table.getRowCount()) {
-			for (int i = 0; i< getRowCount(); i++){
-				for(int j = 0; j<table.getRowCount(); j++){
-					if (getRowName(i).equals(table.getRowName(j))){
-						Integer[] values = {i,j};
-						correspondingColumns.add(values);
-						break;
-					}
-				}
-				if (correspondingColumns.size() < i+1) {
-					return false;
-				}
-			}
-			for (Integer[] array : correspondingColumns){
-				if (this.getValidMax(array[0]) != table.getValidMax(array[1])) {
-					return false;
-				}
-				if (this.getValidMin(array[0]) != table.getValidMin(array[1])) {
-					return false;
-				}
-			}
-			return true;
-		}
-		return false;
+	int getIndexOfAttr(final String attr) {
+	    for (int i = 0; i < m_attrName.length; i++) {
+	        if (m_attrName[i].equals(attr)) {
+	            return i;
+	        }
+	    }
+	    return -1;
 	}
 
-	//	protected String getCompoundColumnNames(){
-	//		String result = "";
-	//		for (int i = 0; i< getColumnCount(); i++){
-	//			result = result + "  " + getColumnName(i);
-	//		}
-	//		return result;
-	//	}
 
+    /**
+     * Sets a new spec. All settings for columns are first set to default.
+     * Second the given settings will be taken over if possible. If the a column
+     * exist in the input spec and the column is a double column, all settings
+     * will be taken over. Settings for columns that do not exist in the spec
+     * will be ignored. Columns in the spec, for which no settings are specified
+     * will be set to default.
+     * @param spec The spec of the input data table
+     * @param settings The settings to take over (as good as possible)
+     * @since 2.6
+     */
+    void setNewSpecAndTakeoverSettings(final DataTableSpec spec,
+            final ColumnSettingsTable settings) {
+        // set settings data taken from given spec
+        setNewSpec(spec);
 
+        // take over all settings that from given settings that match with the
+        // spec settings, and take care of valid domain min/max and
+        // ribbon min/max
+        int foundAttributes = 0;
+        m_failOnMissingCols = settings.getFailOnMissingCols();
+        for (int i = 0; i < getRowCount(); i++) {
+            boolean foundAttribute = false;
 
+            for (int j = 0; j < settings.getRowCount(); j++) {
+                // found column in old settings which is available in new
+                // settings as well => take values from new settings
+                if (getRowName(i).equals(settings.getRowName(j))
+                        && (isDouble(i) == settings.isDouble(j))) {
+                    foundAttribute = true;
+                    // count selected and found attributes
+                    if (settings.isSelected(j)) {
+                        foundAttributes++;
+                    }
+
+                    m_isSelected[i] = settings.isSelected(j);
+
+                    // if in given settings min == max, this means
+                    // default min/max is set, which can be overwritten by the
+                    // domain min/max
+                    if (settings.getMax(j) == settings.getMin(j)) {
+                        m_max[i] = m_validMax[i];
+                        m_min[i] = m_validMin[i];
+
+                    // else, take over specified settings but only if in valid
+                    // range if out of valid range adjust min/max
+                    } else {
+                        // take ribbon max from settings unless the domain max
+                        // is less than the ribbon max
+                        m_max[i] = Math.min(settings.getMax(j), m_validMax[i]);
+                        // take ribbon min from settings unless the domain min
+                        // is grater than the ribbon min.
+                        m_min[i] = Math.max(settings.getMin(j), m_validMin[i]);
+                    }
+
+                    // colors can be simply taken over
+                    m_backgroundColor[i] = settings.getBackgroundAt(j);
+                    m_intervalColor[i] = settings.getIntervalColorAt(j);
+                    m_bendColor[i] = settings.getBendColorAt(j);
+                    m_outlyingBendColor[i] = settings.getOutlyingBendColorAt(j);
+
+                // if attribute names are equal but one is double attribute and
+                // the other not, just take over color settings and mark as non
+                // double/selected
+                } else if(getRowName(i).equals(settings.getRowName(j))) {
+                    m_isSelected[i] = false;
+                    m_isDouble[i] = false;
+                    m_backgroundColor[i] = settings.getBackgroundAt(j);
+                    m_intervalColor[i] = settings.getIntervalColorAt(j);
+                    m_bendColor[i] = settings.getBendColorAt(j);
+                    m_outlyingBendColor[i] = settings.getOutlyingBendColorAt(j);
+                }
+            }
+
+            // if attribute is not available in new settings, disable it
+            if (!foundAttribute) {
+                m_isSelected[i] = false;
+            }
+        }
+    }
+
+    /**
+     * Checks if all selected columns from given settings are available and
+     * returns <code>true</code> if so, otherwise <code>true</code>.
+     * @param settings Settings to check for available columns.
+     * @return <code>true</code> is all selected columns in given settings
+     * are available, otherwise <code>false</code>.
+     * @since 2.6
+     */
+    boolean allColumnAvailable(final ColumnSettingsTable settings) {
+        int foundAttributes = 0;
+        for (int i = 0; i < getRowCount(); i++) {
+            for (int j = 0; j < settings.getRowCount(); j++) {
+                if (getRowName(i).equals(settings.getRowName(j))
+                        && (isDouble(i) == settings.isDouble(j))) {
+                    if (settings.isSelected(j)) {
+                        foundAttributes++;
+                    }
+                }
+            }
+        }
+        if (foundAttributes < settings.getNrSelected()) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * @param i index to return background value for.
+     * @return background value at given index.
+     * @since 2.6
+     */
+    String getBackgroundAt(final int i) {
+        return m_backgroundColor[i];
+    }
+
+    /**
+     * @param i index to return interval color value for.
+     * @return interval color value at given index.
+     * @since 2.6
+     */
+    String getIntervalColorAt(final int i) {
+        return m_intervalColor[i];
+    }
+
+    /**
+     * @param i index to return bend color value for.
+     * @return bend color value at given index.
+     * @since 2.6
+     */
+    String getBendColorAt(final int i) {
+        return m_bendColor[i];
+    }
+
+    /**
+     * @param i index to outlying bend color value for.
+     * @return outlying bend color value at given index.
+     * @since 2.6
+     */
+    String getOutlyingBendColorAt(final int i) {
+        return m_outlyingBendColor[i];
+    }
+
+    /**
+     * @return the failOnMissingCols
+     * @since 2.6
+     */
+    public boolean getFailOnMissingCols() {
+        return m_failOnMissingCols;
+    }
+
+    /**
+     * @param failOnMissingCols the failOnMissingCols to set
+     * @since 2.6
+     */
+    public void setFailOnMissingCols(final boolean failOnMissingCols) {
+        m_failOnMissingCols = failOnMissingCols;
+    }
 }
