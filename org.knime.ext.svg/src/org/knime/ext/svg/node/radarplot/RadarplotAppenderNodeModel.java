@@ -287,8 +287,8 @@ public class RadarplotAppenderNodeModel extends NodeModel {
             
             // check for valid and existing domains
             int isProper = 0;
-            isProper = testSettings.isProper();
-            if ((isProper > 0)) {                
+            isProper = testSettings.isProper(true);
+            if ((isProper > 0)) {
                 // check for missing columns and fail if specified
                 if (!testSettings.allColumnAvailable(m_rangeModels)
                         && m_rangeModels.getFailOnMissingCols()) {

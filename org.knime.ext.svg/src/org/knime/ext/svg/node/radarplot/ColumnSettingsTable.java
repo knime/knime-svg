@@ -583,26 +583,46 @@ public class ColumnSettingsTable extends AbstractTableModel {
      *         ALL are invalid.
      */
 	public int isProper() {
-		int numCols = 0;
-		int numValidCols = 0;
-		for(int i = 0; i < this.getRowCount(); i++){
-			if (this.isDouble(i)){
-				numCols++;
-				if (this.getValidMax(i) != this.getValidMin(i)) {
-					numValidCols++;
-				}
-			}
-		}
-		if (numCols != numValidCols){
-			if (numValidCols == 0) {
-				return -1;
-			} else {
-				return 0;
-			}
-		}
-		return 1;
+	    return isProper(false);
 	}
-
+	
+    /**
+     * Checks if this table is proper (at least one column has valid values).
+     * If selectedOnly is set <code>true</code> only selected columns are
+     * considered for check.
+     *
+     * @param selectedOnly If set <code>true</code> only selected columns are
+     * considered for check, otherwise all double columns are considered.
+     * @return 1 if all Double columns are valid, 0 if some are invalid, -1 if
+     *         ALL are invalid.
+     * @since 2.6
+     */
+    public int isProper(final boolean selectedOnly) {
+        int numCols = 0;
+        int numValidCols = 0;
+        for (int i = 0; i < this.getRowCount(); i++) {
+            if (this.isDouble(i)) {
+                // check if selectedOnly = false 
+                // OR (if selectedOnly = true AND column is selected)
+                if (!selectedOnly 
+                        || (selectedOnly && this.isSelected(i))) {
+                    numCols++;
+                    if (this.getValidMax(i) != this.getValidMin(i)) {
+                        numValidCols++;
+                    }
+                }
+            }
+        }
+        if (numCols != numValidCols) {
+            if (numValidCols == 0) {
+                return -1;
+            } else {
+                return 0;
+            }
+        }
+        return 1;
+    }
+	
 	/**
 	 * Returns the index of the specified attribute or -1 is attribute does not
 	 * exist.
