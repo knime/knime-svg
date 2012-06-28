@@ -203,7 +203,10 @@ public class SvgImageContent implements ImageContent {
         return m_doc;
     }
 
-    static String serialize(final Document doc) throws TranscoderException {
+    /**
+     * @since 2.6
+     */
+    public static String serialize(final Document doc) throws TranscoderException {
         StringWriter buffer = new StringWriter(1024);
         serialize(doc, buffer);
         return buffer.toString();

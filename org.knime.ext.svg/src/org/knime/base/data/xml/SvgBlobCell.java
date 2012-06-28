@@ -197,14 +197,16 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue {
 
         try {
             String s1, s2;
-            if (this.m_isNormalized && (this.m_xmlString.get() != null)) {
-                s1 = this.m_xmlString.get();
+            final String thisString = this.m_xmlString.get();
+            if (this.m_isNormalized && (thisString != null)) {
+                s1 = thisString;
             } else {
                 s1 = SvgImageContent.serialize(getDocument());
             }
 
-            if (cell.m_isNormalized && (cell.m_xmlString.get() != null)) {
-                s2 = cell.m_xmlString.get();
+            final String cellString = cell.m_xmlString.get();
+            if (cell.m_isNormalized && (cellString != null)) {
+                s2 = cellString;
             } else {
                 s2 = SvgImageContent.serialize(cell.getDocument());
             }
