@@ -117,18 +117,20 @@ public class SvgImageContent implements ImageContent {
         }
         m_doc = doc;
 
-        // check if the SVG document is valid
-        GVTBuilder gvtBuilder = new GVTBuilder();
-        BridgeContext bridgeContext = new BridgeContext(UA);
-        GraphicsNode gvtRoot = gvtBuilder.build(bridgeContext, m_doc);
-        if (gvtRoot == null || gvtRoot.getBounds() == null) {
-            throw new IllegalArgumentException(
-                    "SVG document seems to be corrupt or does not "
-                            + " contain a proper SVG image");
-        } else {
-            m_preferredSize =
-                    new Dimension((int)gvtRoot.getBounds().getWidth(),
-                            (int)gvtRoot.getBounds().getHeight());
+        if (check) {
+            // check if the SVG document is valid
+            GVTBuilder gvtBuilder = new GVTBuilder();
+            BridgeContext bridgeContext = new BridgeContext(UA);
+            GraphicsNode gvtRoot = gvtBuilder.build(bridgeContext, m_doc);
+            if (gvtRoot == null || gvtRoot.getBounds() == null) {
+                throw new IllegalArgumentException(
+                        "SVG document seems to be corrupt or does not "
+                                + " contain a proper SVG image");
+            } else {
+                m_preferredSize =
+                        new Dimension((int)gvtRoot.getBounds().getWidth(),
+                                (int)gvtRoot.getBounds().getHeight());
+            }
         }
     }
 
@@ -204,6 +206,12 @@ public class SvgImageContent implements ImageContent {
     }
 
     /**
+     * Serializes the given document into a XML string.
+     *
+     * @param doc and SVG document
+     * @return a string containing the XML representation
+     * @throws TranscoderException
+     *
      * @since 2.6
      */
     public static String serialize(final Document doc) throws TranscoderException {
