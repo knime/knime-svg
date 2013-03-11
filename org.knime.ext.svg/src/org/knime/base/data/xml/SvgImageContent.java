@@ -59,6 +59,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.charset.Charset;
 
 import org.apache.batik.bridge.BridgeContext;
 import org.apache.batik.bridge.GVTBuilder;
@@ -192,7 +193,7 @@ public class SvgImageContent implements ImageContent {
      */
     @Override
     public void save(final OutputStream out) throws IOException {
-        OutputStreamWriter osw = new OutputStreamWriter(out);
+        OutputStreamWriter osw = new OutputStreamWriter(out, Charset.forName("UTF-8"));
         try {
             serialize(m_doc, osw);
         } catch (TranscoderException e) {
