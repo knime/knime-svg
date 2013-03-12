@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Testcases for the SVG plug-in
+Bundle-SymbolicName: org.knime.ext.svg.testing;singleton:=true
+Bundle-Version: 2.7.3.qualifier
+Fragment-Host: org.knime.ext.svg;bundle-version="[2.7.0,3)"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-Vendor: KNIME GmbH, Konstanz, Germany
+Require-Bundle: org.knime.testing;bundle-version="[2.7.0,3.0.0)",
+ org.junit;bundle-version="[4.8.0,5.0.0)"
