@@ -57,6 +57,7 @@ import java.io.IOException;
 
 import org.knime.base.data.xml.SvgCell;
 import org.knime.core.data.DataCell;
+import org.knime.core.data.DataColumnDomain;
 import org.knime.core.data.DataColumnDomainCreator;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
@@ -122,7 +123,7 @@ public class RadarplotAppenderNodeModel extends NodeModel {
      */
     @Override
     protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {        
+            throws InvalidSettingsException {
         // validate settings, check for at least 3 attributes
         ColumnSettingsTable cst = new ColumnSettingsTable(COLUMNRANGEPREFIX);
         cst.loadSettingsModel(settings);
@@ -154,20 +155,11 @@ public class RadarplotAppenderNodeModel extends NodeModel {
         boolean needDomainComputing = false;
         DataTableSpec spec = inData[0].getDataTableSpec();
         for (int colIndex = 0; colIndex < spec.getNumColumns(); colIndex++) {
-            if (spec.getColumnSpec(colIndex).getType()
-                    .isCompatible(DoubleValue.class)) {
-                if (!spec.getColumnSpec(colIndex).getDomain().hasLowerBound()
-                        || !spec.getColumnSpec(colIndex).getDomain()
-                                .hasUpperBound()) {
+            final DataColumnSpec columnSpec = spec.getColumnSpec(colIndex);
+            if (columnSpec.getType().isCompatible(DoubleValue.class)) {
+                final DataColumnDomain domain = columnSpec.getDomain();
+                if (!domain.hasLowerBound() || !domain.hasUpperBound()) {
                     needDomainComputing = true;
-                }
-                if (!spec.getColumnSpec(colIndex).getDomain().getLowerBound()
-                        .getType().isCompatible(DoubleValue.class)) {
-                    throw new Exception("Domain Minimum is not a double!");
-                }
-                if (!spec.getColumnSpec(colIndex).getDomain().getUpperBound()
-                        .getType().isCompatible(DoubleValue.class)) {
-                    throw new Exception("Domain Maximum is not a double!");
                 }
             }
         }
@@ -176,8 +168,7 @@ public class RadarplotAppenderNodeModel extends NodeModel {
             final int colCount = spec.getNumColumns();
             DataCell[] mins = new DataCell[colCount];
             DataCell[] maxs = new DataCell[colCount];
-            DataValueComparator[] comparators =
-                    new DataValueComparator[colCount];
+            DataValueComparator[] comparators = new DataValueComparator[colCount];
             for (int i = 0; i < colCount; i++) {
                 DataColumnSpec col = spec.getColumnSpec(i);
                 if (col.getType().isCompatible(DoubleValue.class)) {
@@ -258,33 +249,33 @@ public class RadarplotAppenderNodeModel extends NodeModel {
      */
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
-            throws InvalidSettingsException {        
-        // if settings no settings object exist, meaning node has not been 
+            throws InvalidSettingsException {
+        // if settings no settings object exist, meaning node has not been
         // configured yet
         if (m_rangeModels == null) {
             m_rangeModels = new ColumnSettingsTable(COLUMNRANGEPREFIX);
             m_rangeModels.setNewSpec(inSpecs[0]);
-            
+
             this.setWarningMessage("Guessing that you want to use all Doubles");
-            
+
             // check for valid domains and fail if domains are not provided
             if (m_rangeModels.isProper() <= 0) {
                 throw new InvalidSettingsException("Some columns have no "
                         + "valid domain, maybe the previous node is not "
                         + "executed.");
             }
-            
-        // else, the settings object exists, meaning the node has been 
+
+        // else, the settings object exists, meaning the node has been
         // configured some time. The configuration need to be matched against
         // the input data table spec.
         } else {
-            ColumnSettingsTable testSettings = 
+            ColumnSettingsTable testSettings =
                 new ColumnSettingsTable(COLUMNRANGEPREFIX);
             // take over as many settings specified by the user via
             // dialog as possible, ignore additional columns
-            testSettings.setNewSpecAndTakeoverSettings(inSpecs[0], 
+            testSettings.setNewSpecAndTakeoverSettings(inSpecs[0],
                     m_rangeModels);
-            
+
             // check for valid and existing domains
             int isProper = 0;
             isProper = testSettings.isProper(true);
@@ -295,14 +286,14 @@ public class RadarplotAppenderNodeModel extends NodeModel {
                     throw new InvalidSettingsException(
                             "Specified column is missing");
                 }
-                
+
                 // need to check if still at least three columns
                 // (attributes) are selected and available since input
                 // data may have changed
                 if (testSettings.getNrSelected() < 3) {
                     throw new InvalidSettingsException("At least 3 double "
                             + "columns need to be selected!");
-                }  
+                }
             } else {
                 throw new InvalidSettingsException("Some columns have no "
                         + "valid domain, maybe the previous node is not "
@@ -316,7 +307,7 @@ public class RadarplotAppenderNodeModel extends NodeModel {
     private boolean m_adjustedValidRanges = false;
 
     /**
-     * Creates and returns the column rearranger used to create spec and output 
+     * Creates and returns the column rearranger used to create spec and output
      * data table.
      * @param spec The original input spec.
      * @return The column rearranger used to create spec and output data table.
@@ -329,7 +320,7 @@ public class RadarplotAppenderNodeModel extends NodeModel {
                 new DataColumnSpecCreator(DataTableSpec.getUniqueColumnName(
                         spec, "Radar Plot"), SvgCell.TYPE).createSpec();
 
-        CellFactory cc = new RadarPlotCellFactory(newColSpec, spec, 
+        CellFactory cc = new RadarPlotCellFactory(newColSpec, spec,
                 m_rangeModels);
         result.append(cc);
         return result;
