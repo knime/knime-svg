@@ -52,9 +52,11 @@ package org.knime.ext.svg.node.writer;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.Charset;
 
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
@@ -176,7 +178,8 @@ public class SVGWriterNodeModel extends NodeModel {
 
             Document doc = ((SvgValue)row.getCell(colIndex)).getDocument();
 
-            Writer fileOut = new BufferedWriter(new FileWriter(svgFile));
+            Writer fileOut =
+                new BufferedWriter(new OutputStreamWriter(new FileOutputStream(svgFile), Charset.forName("UTF-8")));
             TranscoderOutput out = new TranscoderOutput(fileOut);
             TranscoderInput in = new TranscoderInput(doc);
             transcoder.transcode(in, out);

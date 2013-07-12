@@ -550,31 +550,6 @@ public class ColumnSettingsTable extends AbstractTableModel {
 		}
 	}
 
-    /**
-     * Checks for equality. This table and another table are equal if their
-     * column names, maximum and minimum Values are the same. This requires them
-     * to share the same number of rows.
-     *
-     * @param table Table against which to test this table
-     * @return True if the two tables are equal, false otherwise
-     */
-	public boolean equals(final ColumnSettingsTable table) {
-		if (this.getRowCount() != table.getRowCount()) {
-			return false;
-		}
-		for (int i = 0; i < this.getRowCount(); i++){
-			if (!(this.m_attrName[i].equals(table.m_attrName[i]))) {
-				return false;
-			}
-			if (this.getValidMax(i) != table.getValidMax(i)) {
-				return false;
-			}
-			if (this.getValidMin(i) != table.getValidMin(i)) {
-				return false;
-			}
-		}
-		return true;
-	}
 
     /**
      * Checks if this table is proper (at least one column has valid values).
@@ -585,7 +560,65 @@ public class ColumnSettingsTable extends AbstractTableModel {
 	public int isProper() {
 	    return isProper(false);
 	}
-	
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + m_nrAttr;
+        for (int i = 0; i < m_nrAttr; i++) {
+            result = prime * result + m_attrName[i].hashCode();
+        }
+        return result;
+    }
+
+
+    /**
+     * Checks for equality. This table and another table are equal if their column names, maximum and minimum Values are
+     * the same. This requires them to share the same number of rows.
+     *
+     * @param other Table against which to test this table
+     * @return <code>true</code> if the two tables are equal, <code>false</code> otherwise
+     */
+    public boolean equals(final ColumnSettingsTable other) {
+        if (this.getRowCount() != other.getRowCount()) {
+            return false;
+        }
+        for (int i = 0; i < this.getRowCount(); i++) {
+            if (!(this.m_attrName[i].equals(other.m_attrName[i]))) {
+                return false;
+            }
+            if (this.getValidMax(i) != other.getValidMax(i)) {
+                return false;
+            }
+            if (this.getValidMin(i) != other.getValidMin(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        ColumnSettingsTable other = (ColumnSettingsTable)obj;
+        return equals(other);
+    }
+
     /**
      * Checks if this table is proper (at least one column has valid values).
      * If selectedOnly is set <code>true</code> only selected columns are
@@ -602,9 +635,9 @@ public class ColumnSettingsTable extends AbstractTableModel {
         int numValidCols = 0;
         for (int i = 0; i < this.getRowCount(); i++) {
             if (this.isDouble(i)) {
-                // check if selectedOnly = false 
+                // check if selectedOnly = false
                 // OR (if selectedOnly = true AND column is selected)
-                if (!selectedOnly 
+                if (!selectedOnly
                         || (selectedOnly && this.isSelected(i))) {
                     numCols++;
                     if (this.getValidMax(i) != this.getValidMin(i)) {
@@ -622,7 +655,7 @@ public class ColumnSettingsTable extends AbstractTableModel {
         }
         return 1;
     }
-	
+
 	/**
 	 * Returns the index of the specified attribute or -1 is attribute does not
 	 * exist.

@@ -222,8 +222,9 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue {
      */
     @Override
     public int hashCode() {
-        if (m_isNormalized && (m_xmlString.get() != null)) {
-            return m_xmlString.get().hashCode();
+        String s;
+        if (m_isNormalized && ((s = m_xmlString.get()) != null)) {
+            return s.hashCode();
         }
         try {
             return SvgImageContent.serialize(getDocument()).hashCode();
@@ -267,7 +268,7 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue {
      */
     @Override
     public String getImageExtension() {
-    
+
         return "svg";
     }
 }

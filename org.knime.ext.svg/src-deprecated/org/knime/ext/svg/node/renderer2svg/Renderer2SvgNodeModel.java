@@ -248,7 +248,7 @@ public class Renderer2SvgNodeModel extends NodeModel {
         }
 
         Dimension size = comp.getPreferredSize();
-        if ((size.width <= 0) || (size.width <= 0)) {
+        if ((size.width <= 0) || (size.height <= 0)) {
             size = new Dimension(100, 100);
         }
         comp.setSize(size);

@@ -64,6 +64,8 @@ import javax.imageio.ImageIO;
 
 import org.apache.batik.dom.svg.SVGDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
+import org.knime.base.data.xml.SvgBlobCell;
+import org.knime.base.data.xml.SvgCell;
 import org.knime.base.data.xml.SvgCellFactory;
 import org.knime.base.data.xml.SvgProvider;
 import org.knime.base.data.xml.SvgValueRenderer;
@@ -77,6 +79,8 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.data.container.ColumnRearranger;
 import org.knime.core.data.container.SingleCellFactory;
+import org.knime.core.data.image.png.PNGImageBlobCell;
+import org.knime.core.data.image.png.PNGImageCell;
 import org.knime.core.data.image.png.PNGImageContent;
 import org.knime.core.data.renderer.DataValueRenderer;
 import org.knime.core.data.renderer.DataValueRendererFamily;
@@ -249,6 +253,13 @@ public class Renderer2ImageNodeModel extends NodeModel {
         return crea;
     }
 
+    /**
+     * Creates a new SVG cell using the given renderer and the given data cell.
+     *
+     * @param cell a data cell
+     * @param renderer a renderer
+     * @return a new {@link SvgCell} or {@link SvgBlobCell}
+     */
     DataCell createSvgCell(final DataCell cell, final DataValueRenderer renderer) {
         Component comp = renderer.getRendererComponent(cell);
         if (comp instanceof SvgProvider) {
@@ -257,7 +268,7 @@ public class Renderer2ImageNodeModel extends NodeModel {
         }
 
         Dimension size = comp.getPreferredSize();
-        if ((size.width <= 0) || (size.width <= 0)) {
+        if ((size.width <= 0) || (size.height <= 0)) {
             size = new Dimension(100, 100);
         }
         comp.setSize(size);
@@ -275,6 +286,14 @@ public class Renderer2ImageNodeModel extends NodeModel {
         return SvgCellFactory.create((SVGDocument)myFactory);
     }
 
+    /**
+     * Creates a new PNG cell using the given renderer and the given data cell.
+     *
+     * @param cell a data cell
+     * @param renderer a renderer
+     * @return a new {@link PNGImageCell} or {@link PNGImageBlobCell}
+     * @throws IOException if an I/O error occurs while creating the image
+     */
     DataCell createPngCell(final DataCell cell, final DataValueRenderer renderer) throws IOException {
         Component comp = renderer.getRendererComponent(cell);
         if (comp instanceof SvgProvider) {
@@ -283,7 +302,7 @@ public class Renderer2ImageNodeModel extends NodeModel {
         }
 
         Dimension size = comp.getPreferredSize();
-        if ((size.width <= 0) || (size.width <= 0)) {
+        if ((size.width <= 0) || (size.height <= 0)) {
             size = new Dimension(100, 100);
         }
         comp.setSize(size);

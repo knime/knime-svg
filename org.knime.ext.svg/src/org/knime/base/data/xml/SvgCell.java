@@ -108,7 +108,7 @@ public class SvgCell extends DataCell implements SvgValue, StringValue {
         }
     }
 
-    private final static SvgSerializer SERIALIZER = new SvgSerializer();
+    private static final SvgSerializer SERIALIZER = new SvgSerializer();
 
     private SoftReference<String> m_xmlString;
 
@@ -199,15 +199,11 @@ public class SvgCell extends DataCell implements SvgValue, StringValue {
 
         try {
             String s1, s2;
-            if (this.m_isNormalized && (this.m_xmlString.get() != null)) {
-                s1 = this.m_xmlString.get();
-            } else {
+            if (!this.m_isNormalized || ((s1 = this.m_xmlString.get()) == null)) {
                 s1 = SvgImageContent.serialize(getDocument());
             }
 
-            if (cell.m_isNormalized && (cell.m_xmlString.get() != null)) {
-                s2 = cell.m_xmlString.get();
-            } else {
+            if (!cell.m_isNormalized || ((s2 = cell.m_xmlString.get()) != null)) {
                 s2 = SvgImageContent.serialize(cell.getDocument());
             }
             return s1.equals(s2);
@@ -222,8 +218,9 @@ public class SvgCell extends DataCell implements SvgValue, StringValue {
      */
     @Override
     public int hashCode() {
-        if (m_isNormalized && (m_xmlString.get() != null)) {
-            return m_xmlString.get().hashCode();
+        String s;
+        if (m_isNormalized && ((s = m_xmlString.get()) != null)) {
+            return s.hashCode();
         }
         try {
             return SvgImageContent.serialize(getDocument()).hashCode();

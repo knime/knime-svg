@@ -116,7 +116,8 @@ class RadarPlotPanel extends JPanel {
         setBackground(Color.WHITE);
 	}
 
-    /** Returns a tiny String describing this Panel
+    /** Returns a tiny String describing this Panel.
+     *
      * @return Descriptive String
      */
     public String getDescription() {
@@ -142,7 +143,8 @@ class RadarPlotPanel extends JPanel {
         return new Dimension(200, 175);
     }
 
-    /** Paints the radarplot into a given Graphics-object
+    /** Paints the radarplot into a given Graphics-object.
+     *
      * @param g The graphics object in which to paint
      */
     protected void paintComponentSVG(final Graphics g) {
@@ -155,9 +157,6 @@ class RadarPlotPanel extends JPanel {
         }
         Insets insets = getInsets();
         Dimension size = new Dimension(175, 150);
-        int originOffset = size.width / 30;
-        originOffset = Math.min(size.height / 30, originOffset);
-        originOffset = Math.min(5, originOffset);
         double[] min = m_mins;
         double[] max = m_maxs;
         double[] values = m_values;
@@ -401,7 +400,7 @@ class RadarPlotPanel extends JPanel {
         Polygon valuePolygon = new Polygon(xVals, yVals, length);
         g.setColor(m_colors[2]);
         for(int i = 0; i < values.length; i++) {
-            if ((values[i] < min[i])|(values[i] > max[i])) {
+            if ((values[i] < min[i]) || (values[i] > max[i])) {
                 g.setColor(m_colors[3]);
             }
         }
