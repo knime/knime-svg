@@ -14,6 +14,7 @@
         <option name="Renderer">Select the renderer that should be used to create the images from the selected column
         </option>
         <option name="Image type">Type of the generated images</option>
+        <option name="Image size">Size of the creates PNG images (SVG does not need a size)</option>
     </fullDescription>
 
 

@@ -301,7 +301,7 @@ public class Renderer2ImageNodeModel extends NodeModel {
             return SvgCellFactory.create(doc);
         }
 
-        Dimension size = comp.getPreferredSize();
+        Dimension size = m_settings.pngSize();
         if ((size.width <= 0) || (size.height <= 0)) {
             size = new Dimension(100, 100);
         }

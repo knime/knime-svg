@@ -50,6 +50,8 @@
  */
 package org.knime.base.node.renderer2image;
 
+import java.awt.Dimension;
+
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -76,6 +78,7 @@ public class Renderer2ImageSettings {
 
     private ImageType m_imageType = ImageType.Png;
 
+    private Dimension m_pngSize;
 
 
     /**
@@ -134,6 +137,26 @@ public class Renderer2ImageSettings {
     }
 
     /**
+     * Returns the desired size of PNG images.
+     *
+     * @return the size
+     */
+    public Dimension pngSize() {
+        return m_pngSize;
+    }
+
+
+    /**
+     * Returns the desired size of PNG images.
+     *
+     * @param size the size
+     */
+    public void pngSize(final Dimension size) {
+        m_pngSize = size;
+    }
+
+
+    /**
      * Saves the settings into the given settings object.
      *
      * @param settings a settings object
@@ -142,6 +165,8 @@ public class Renderer2ImageSettings {
         settings.addString("columnName", m_columnName);
         settings.addString("rendererDescription", m_rendererDescription);
         settings.addString("imageType", m_imageType.name());
+        settings.addInt("pngWidth", m_pngSize.width);
+        settings.addInt("pngHeight", m_pngSize.height);
     }
 
     /**
@@ -155,6 +180,7 @@ public class Renderer2ImageSettings {
         m_columnName = settings.getString("columnName");
         m_rendererDescription = settings.getString("rendererDescription");
         m_imageType = ImageType.valueOf(settings.getString("imageType"));
+        m_pngSize = new Dimension(settings.getInt("pngWidth"), settings.getInt("pngHeight"));
     }
 
     /**
@@ -167,5 +193,6 @@ public class Renderer2ImageSettings {
         m_columnName = settings.getString("columnName", null);
         m_rendererDescription = settings.getString("rendererDescription", null);
         m_imageType = ImageType.valueOf(settings.getString("imageType", ImageType.Svg.name()));
+        m_pngSize = new Dimension(settings.getInt("pngWidth", 100), settings.getInt("pngHeight", 100));
     }
 }

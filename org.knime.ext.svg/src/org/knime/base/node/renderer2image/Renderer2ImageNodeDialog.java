@@ -50,6 +50,7 @@
  */
 package org.knime.base.node.renderer2image;
 
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -60,6 +61,8 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.border.Border;
 
 import org.knime.base.node.renderer2image.Renderer2ImageSettings.ImageType;
@@ -93,10 +96,16 @@ public class Renderer2ImageNodeDialog extends NodeDialogPane {
 
     private final JComboBox m_imageTypes = new JComboBox();
 
-    /**
-     *
-     */
-    public Renderer2ImageNodeDialog() {
+    private final JLabel m_pngSize = new JLabel("Image size   ");
+
+    private final JSpinner m_pngWidth = new JSpinner(new SpinnerNumberModel(100, 1, 100000, 1));
+
+    private final JLabel m_x = new JLabel (" x ");
+
+    private final JSpinner m_pngHeight = new JSpinner(new SpinnerNumberModel(100, 1, 100000, 1));
+
+
+    Renderer2ImageNodeDialog() {
         JPanel p = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
 
@@ -107,27 +116,46 @@ public class Renderer2ImageNodeDialog extends NodeDialogPane {
         c.fill = GridBagConstraints.HORIZONTAL;
         p.add(new JLabel("Column   "), c);
         c.gridx = 1;
+        c.gridwidth = 3;
         c.weightx = 1;
         p.add(m_column, c);
 
         c.gridx = 0;
+        c.gridwidth = 1;
         c.gridy++;
         c.weightx = 0;
         p.add(new JLabel("Renderer   "), c);
         c.gridx = 1;
+        c.gridwidth = 3;
         c.weightx = 1;
         p.add(m_rendererDescriptions, c);
 
         c.gridx = 0;
+        c.gridwidth = 1;
         c.gridy++;
         c.weightx = 0;
         p.add(new JLabel("Image type   "), c);
         c.gridx = 1;
+        c.gridwidth = 3;
         c.weightx = 1;
         p.add(m_imageTypes, c);
         for (ImageType t : ImageType.values()) {
             m_imageTypes.addItem(t);
         }
+
+        c.gridx = 0;
+        c.gridwidth = 1;
+        c.gridy++;
+        c.weightx = 0;
+        p.add(new JLabel("Image size   "), c);
+        c.gridx = 1;
+        c.weightx = 0;
+        c.fill = GridBagConstraints.NONE;
+        p.add(m_pngWidth, c);
+        c.gridx = 2;
+        p.add(m_x, c);
+        c.gridx = 3;
+        p.add(m_pngHeight, c);
 
         m_column.addActionListener(new ActionListener() {
             @Override
@@ -146,7 +174,23 @@ public class Renderer2ImageNodeDialog extends NodeDialogPane {
             }
         });
 
+        m_imageTypes.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                imageTypeChanged();
+            }
+        });
+
         addTab("Default Settings", p);
+    }
+
+
+    void imageTypeChanged() {
+        boolean isPng = ImageType.Png.equals(m_imageTypes.getSelectedItem());
+        m_pngSize.setEnabled(isPng);
+        m_pngWidth.setEnabled(isPng);
+        m_x.setEnabled(isPng);
+        m_pngHeight.setEnabled(isPng);
     }
 
     /**
@@ -160,6 +204,10 @@ public class Renderer2ImageNodeDialog extends NodeDialogPane {
         m_column.update(specs[0], m_settings.columnName());
         m_rendererDescriptions.setSelectedItem(m_settings.rendererDescription());
         m_imageTypes.setSelectedItem(m_settings.imageType());
+        imageTypeChanged();
+
+        m_pngWidth.setValue(m_settings.pngSize().width);
+        m_pngHeight.setValue(m_settings.pngSize().height);
     }
 
     /**
@@ -168,8 +216,12 @@ public class Renderer2ImageNodeDialog extends NodeDialogPane {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         m_settings.columnName(m_column.getSelectedColumn());
+        if (m_rendererDescriptions.getSelectedItem() == null) {
+            throw new InvalidSettingsException("No renderer selected");
+        }
         m_settings.rendererDescription(m_rendererDescriptions.getSelectedItem().toString());
         m_settings.imageType((ImageType)m_imageTypes.getSelectedItem());
+        m_settings.pngSize(new Dimension((Integer) m_pngWidth.getValue(), (Integer) m_pngHeight.getValue()));
         m_settings.saveSettings(settings);
     }
 }
