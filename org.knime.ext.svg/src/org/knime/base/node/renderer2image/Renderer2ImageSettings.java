@@ -165,8 +165,10 @@ public class Renderer2ImageSettings {
         settings.addString("columnName", m_columnName);
         settings.addString("rendererDescription", m_rendererDescription);
         settings.addString("imageType", m_imageType.name());
-        settings.addInt("pngWidth", m_pngSize.width);
-        settings.addInt("pngHeight", m_pngSize.height);
+        if (m_pngSize != null) {
+            settings.addInt("pngWidth", m_pngSize.width);
+            settings.addInt("pngHeight", m_pngSize.height);
+        }
     }
 
     /**
