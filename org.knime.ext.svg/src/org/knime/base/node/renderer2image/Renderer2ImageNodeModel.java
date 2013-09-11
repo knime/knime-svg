@@ -296,10 +296,6 @@ public class Renderer2ImageNodeModel extends NodeModel {
      */
     DataCell createPngCell(final DataCell cell, final DataValueRenderer renderer) throws IOException {
         Component comp = renderer.getRendererComponent(cell);
-        if (comp instanceof SvgProvider) {
-            SVGDocument doc = ((SvgProvider)comp).getSvg();
-            return SvgCellFactory.create(doc);
-        }
 
         Dimension size = m_settings.pngSize();
         if ((size.width <= 0) || (size.height <= 0)) {
@@ -307,7 +303,7 @@ public class Renderer2ImageNodeModel extends NodeModel {
         }
         comp.setSize(size);
 
-        BufferedImage image = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB);
+        BufferedImage image = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_ARGB);
         // create graphics object to paint in
         Graphics2D graphics = image.createGraphics();
         comp.paint(graphics);
