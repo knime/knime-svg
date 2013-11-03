@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME SVG Support
 Bundle-SymbolicName: org.knime.ext.svg;singleton:=true
-Bundle-Version: 2.8.2.qualifier
+Bundle-Version: 2.9.0.qualifier
 Bundle-ClassPath: .
 Bundle-Activator: org.knime.ext.svg.SvgPluginActivator
 Bundle-Vendor: KNIME GmbH, Konstanz, Germany
