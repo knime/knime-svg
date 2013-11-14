@@ -57,13 +57,18 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JSpinner;
+import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.Border;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.knime.base.node.renderer2image.Renderer2ImageSettings.ImageType;
 import org.knime.core.data.DataColumnSpec;
@@ -103,6 +108,12 @@ public class Renderer2ImageNodeDialog extends NodeDialogPane {
     private final JLabel m_x = new JLabel (" x ");
 
     private final JSpinner m_pngHeight = new JSpinner(new SpinnerNumberModel(100, 1, 100000, 1));
+
+    private final JTextField m_newColumnName = new JTextField(10);
+
+    private final JRadioButton m_replaceColumn = new JRadioButton("Replace input column");
+
+    private final JRadioButton m_appendColumn = new JRadioButton("Append column");
 
 
     Renderer2ImageNodeDialog() {
@@ -181,6 +192,32 @@ public class Renderer2ImageNodeDialog extends NodeDialogPane {
             }
         });
 
+        c.gridx = 0;
+        c.gridy++;
+        p.add(m_appendColumn, c);
+        c.gridx = 1;
+        c.gridwidth = 3;
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 1;
+        p.add(m_newColumnName,c );
+
+        c.gridx = 0;
+        c.gridy++;
+        c.fill = GridBagConstraints.NONE;
+        c.gridwidth = 1;
+        c.weightx = 0;
+        p.add(m_replaceColumn, c);
+
+        ButtonGroup bg = new ButtonGroup();
+        bg.add(m_appendColumn);
+        bg.add(m_replaceColumn);
+        m_appendColumn.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(final ChangeEvent e) {
+                m_newColumnName.setEnabled(m_appendColumn.isSelected());
+            }
+        });
+
         addTab("Default Settings", p);
     }
 
@@ -208,6 +245,17 @@ public class Renderer2ImageNodeDialog extends NodeDialogPane {
 
         m_pngWidth.setValue(m_settings.pngSize().width);
         m_pngHeight.setValue(m_settings.pngSize().height);
+
+        m_replaceColumn.setSelected(m_settings.replaceColumn());
+        m_appendColumn.setSelected(!m_settings.replaceColumn());
+        m_newColumnName.setEnabled(!m_settings.replaceColumn());
+        if (m_settings.newColumnName() != null) {
+            m_newColumnName.setText(m_settings.newColumnName());
+        } else {
+            String colName =
+                m_column.getSelectedColumn() + " rendered with " + m_rendererDescriptions.getSelectedItem().toString();
+            m_newColumnName.setText(colName);
+        }
     }
 
     /**
@@ -222,6 +270,13 @@ public class Renderer2ImageNodeDialog extends NodeDialogPane {
         m_settings.rendererDescription(m_rendererDescriptions.getSelectedItem().toString());
         m_settings.imageType((ImageType)m_imageTypes.getSelectedItem());
         m_settings.pngSize(new Dimension((Integer) m_pngWidth.getValue(), (Integer) m_pngHeight.getValue()));
+        m_settings.replaceColumn(m_replaceColumn.isSelected());
+        if (m_settings.replaceColumn()) {
+            m_settings.newColumnName(null);
+        } else {
+            m_settings.newColumnName(m_newColumnName.getText());
+        }
+
         m_settings.saveSettings(settings);
     }
 }

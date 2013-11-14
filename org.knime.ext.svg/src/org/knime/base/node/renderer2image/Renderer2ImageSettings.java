@@ -80,6 +80,9 @@ public class Renderer2ImageSettings {
 
     private Dimension m_pngSize;
 
+    private boolean m_replaceColumn;
+
+    private String m_newColumnName;
 
     /**
      * Sets the selected column's name.
@@ -126,7 +129,6 @@ public class Renderer2ImageSettings {
         m_imageType = type;
     }
 
-
     /**
      * Returns the type of images that should be created.
      *
@@ -145,7 +147,6 @@ public class Renderer2ImageSettings {
         return m_pngSize;
     }
 
-
     /**
      * Returns the desired size of PNG images.
      *
@@ -155,6 +156,45 @@ public class Renderer2ImageSettings {
         m_pngSize = size;
     }
 
+    /**
+     * Sets whether the input column should be replaced by the new column or if the new column should be appended.
+     *
+     * @param replace <code>true</code> if the input column should be replaced, <code>false</code> if a new column
+     *            should be appended
+     */
+    public void replaceColumn(final boolean replace) {
+        m_replaceColumn = replace;
+    }
+
+    /**
+     * Returns whether the input column should be replaced by the new column or if the new column should be appended.
+     *
+     * @return <code>true</code> if the input column should be replaced, <code>false</code> if a new column should be
+     *         appended
+     */
+    public boolean replaceColumn() {
+        return m_replaceColumn;
+    }
+
+    /**
+     * Sets the name of the new column with the rendered image. Only applicable if {@link #replaceColumn()} is
+     * <code>false</code>.
+     *
+     * @param columnName the column name
+     */
+    public void newColumnName(final String columnName) {
+        m_newColumnName = columnName;
+    }
+
+    /**
+     * Returns the name of the new column with the rendered image. Only applicable if {@link #replaceColumn()} is
+     * <code>false</code>.
+     *
+     * @return the column name
+     */
+    public String newColumnName() {
+        return m_newColumnName;
+    }
 
     /**
      * Saves the settings into the given settings object.
@@ -169,6 +209,10 @@ public class Renderer2ImageSettings {
             settings.addInt("pngWidth", m_pngSize.width);
             settings.addInt("pngHeight", m_pngSize.height);
         }
+
+        // since 2.9
+        settings.addBoolean("replaceColumn", m_replaceColumn);
+        settings.addString("newColumnName", m_newColumnName);
     }
 
     /**
@@ -177,17 +221,19 @@ public class Renderer2ImageSettings {
      * @param settings a settings object
      * @throws InvalidSettingsException if a setting is missing
      */
-    public void loadSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
+    public void loadSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_columnName = settings.getString("columnName");
         m_rendererDescription = settings.getString("rendererDescription");
         m_imageType = ImageType.valueOf(settings.getString("imageType"));
         m_pngSize = new Dimension(settings.getInt("pngWidth"), settings.getInt("pngHeight"));
+
+        // since 2.9
+        m_replaceColumn = settings.getBoolean("replaceColumn", false);
+        m_newColumnName = settings.getString("newColumnName", null);
     }
 
     /**
-     * Loads the settings from the given settings object using default values
-     * for missing settings.
+     * Loads the settings from the given settings object using default values for missing settings.
      *
      * @param settings a settings object
      */
@@ -196,5 +242,7 @@ public class Renderer2ImageSettings {
         m_rendererDescription = settings.getString("rendererDescription", null);
         m_imageType = ImageType.valueOf(settings.getString("imageType", ImageType.Svg.name()));
         m_pngSize = new Dimension(settings.getInt("pngWidth", 100), settings.getInt("pngHeight", 100));
+        m_replaceColumn = settings.getBoolean("replaceColumn", false);
+        m_newColumnName = settings.getString("newColumnName", null);
     }
 }

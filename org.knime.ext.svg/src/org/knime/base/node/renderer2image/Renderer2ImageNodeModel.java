@@ -191,6 +191,18 @@ public class Renderer2ImageNodeModel extends NodeModel {
             throw new InvalidSettingsException("No renderer selected");
         }
 
+        if (!m_settings.replaceColumn()) {
+            if (inSpecs[0].getColumnSpec(m_settings.newColumnName()) != null) {
+                throw new InvalidSettingsException("Output column '" + m_settings.newColumnName()
+                    + "' already exists in input table.");
+            } else if ((m_settings.newColumnName() == null) || m_settings.newColumnName().isEmpty()) {
+                // this is mainly for backwards compatibility because the configurable output column name was
+                // added in 2.9
+                String colName = m_settings.columnName() + " rendered with " + m_settings.rendererDescription();
+                m_settings.newColumnName(colName);
+            }
+        }
+
         return new DataTableSpec[]{createRearranger(inSpecs[0], cs).createSpec()};
     }
 
@@ -211,8 +223,7 @@ public class Renderer2ImageNodeModel extends NodeModel {
         }
         renderer.setActiveRenderer(m_settings.rendererDescription());
 
-        String colName = m_settings.columnName() + " rendered with " + m_settings.rendererDescription();
-        colName = DataTableSpec.getUniqueColumnName(inSpec, colName);
+        String colName = m_settings.replaceColumn() ? m_settings.columnName() : m_settings.newColumnName();
 
         final int colIndex = inSpec.findColumnIndex(m_settings.columnName());
         SingleCellFactory cf;
@@ -249,7 +260,12 @@ public class Renderer2ImageNodeModel extends NodeModel {
             throw new InvalidSettingsException("Unsupported image type: " + m_settings.imageType());
         }
         ColumnRearranger crea = new ColumnRearranger(inSpec);
-        crea.append(cf);
+        if (m_settings.replaceColumn()) {
+            crea.replace(cf, m_settings.columnName());
+        } else {
+            crea.append(cf);
+        }
+
         return crea;
     }
 
