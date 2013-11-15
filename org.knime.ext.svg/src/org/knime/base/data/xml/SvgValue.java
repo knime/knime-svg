@@ -50,10 +50,7 @@
  */
 package org.knime.base.data.xml;
 
-import java.io.IOException;
-
 import javax.swing.Icon;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataValue;
@@ -61,35 +58,32 @@ import org.knime.core.data.image.ImageValue;
 import org.knime.core.data.renderer.DataValueRendererFamily;
 import org.knime.core.data.renderer.DefaultDataValueRendererFamily;
 import org.knime.core.data.renderer.MultiLineStringValueRenderer;
+import org.knime.core.data.xml.XMLValue;
 import org.w3c.dom.svg.SVGDocument;
-import org.xml.sax.SAXException;
 
 /**
  * This value encapsulates SVG documents.
  *
  * @author Thorsten Meinl, University of Konstanz
  */
-public interface SvgValue extends ImageValue {
+public interface SvgValue extends ImageValue, XMLValue {
     /**
-     * Returns the root node of the parsed XML document.
+     * {@inheritDoc}
      *
-     * @return the parsed XML document
-     * @throws ParserConfigurationException
-     * @throws IOException
-     * @throws SAXException
+     * In contrast to {@link XMLValue#getDocument()} this methods always returns an {@link SVGDocument}.
      */
-    SVGDocument getDocument() throws SAXException, IOException,
-            ParserConfigurationException;
+    @Override
+    SVGDocument getDocument();
 
     /**
      * Meta information to this value type.
      *
      * @see DataValue#UTILITY
      */
-    public static final UtilityFactory UTILITY = new SvgUtilityFactory();
+    UtilityFactory UTILITY = new SvgUtilityFactory();
 
     /** Implementations of the meta information of this value class. */
-    public static class SvgUtilityFactory extends UtilityFactory {
+    class SvgUtilityFactory extends UtilityFactory {
         /** Singleton icon to be used to display this cell type. */
         private static final Icon ICON = loadIcon(SvgValue.class, "/svg.png");
 

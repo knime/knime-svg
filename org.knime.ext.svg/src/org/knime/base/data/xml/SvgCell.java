@@ -54,8 +54,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.lang.ref.SoftReference;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.batik.css.engine.value.svg.SVGValue;
 import org.apache.batik.dom.svg.SAXSVGDocumentFactory;
 import org.apache.batik.transcoder.TranscoderException;
@@ -69,7 +67,6 @@ import org.knime.core.data.DataValue;
 import org.knime.core.data.StringValue;
 import org.knime.core.data.image.ImageContent;
 import org.w3c.dom.svg.SVGDocument;
-import org.xml.sax.SAXException;
 
 /**
  * {@link DataCell} implementation that encapsulated SVG documents.
@@ -171,14 +168,9 @@ public class SvgCell extends DataCell implements SvgValue, StringValue {
 
     /**
      * {@inheritDoc}
-     *
-     * @throws ParserConfigurationException
-     * @throws IOException
-     * @throws SAXException
      */
     @Override
-    public SVGDocument getDocument() throws SAXException, IOException,
-            ParserConfigurationException {
+    public SVGDocument getDocument() {
         return m_content.getSvgDocument();
     }
 
