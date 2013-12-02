@@ -359,46 +359,49 @@ public class ColumnSettingsTable extends AbstractTableModel {
 				} else {
 				    m_attrName[i] = name;
 				}
-
-                String background = thisSettings.getString("BACKGROUND");
-                if (background == null) {
-                    throw new InvalidSettingsException(
-                            "Background must not be null!");
-                } else {
-                    m_backgroundColor[i] = background;
-                }
-
-                String intervalColor = thisSettings.getString("INTERVAL");
-                if (intervalColor == null) {
-                    throw new InvalidSettingsException(
-                            "Interval color must not be null!");
-                } else {
-                    m_intervalColor[i] = intervalColor;
-                }
-
-                String bendColor = thisSettings.getString("BEND");
-                if (bendColor == null) {
-                    throw new InvalidSettingsException(
-                            "Bend color must not be null!");
-                } else {
-                    m_bendColor[i] = bendColor;
-                }
-
-                String outlyingBendColor =
-                    thisSettings.getString("OUTLYINGBEND");
-                if (outlyingBendColor == null) {
-                    throw new InvalidSettingsException(
-                            "Outlying bend color must not be null!");
-                } else {
-                    m_outlyingBendColor[i] = outlyingBendColor;
-                }
-
-				m_validMin[i] = thisSettings.getDouble("VALIDMIN");
-				m_validMax[i] = thisSettings.getDouble("VALIDMAX");
-				m_min[i] = thisSettings.getDouble("MIN");
-				m_max[i] = thisSettings.getDouble("MAX");
 				m_isSelected[i] = thisSettings.getBoolean("SELECTED");
 				m_isDouble[i] = thisSettings.getBoolean("ISDOUBLE");
+
+				if (m_isDouble[i]) {
+				    // non-double columns don't have usable settings
+                    String background = thisSettings.getString("BACKGROUND");
+                    if (background == null) {
+                        throw new InvalidSettingsException(
+                                "Background must not be null!");
+                    } else {
+                        m_backgroundColor[i] = background;
+                    }
+
+                    String intervalColor = thisSettings.getString("INTERVAL");
+                    if (intervalColor == null) {
+                        throw new InvalidSettingsException(
+                                "Interval color must not be null!");
+                    } else {
+                        m_intervalColor[i] = intervalColor;
+                    }
+
+                    String bendColor = thisSettings.getString("BEND");
+                    if (bendColor == null) {
+                        throw new InvalidSettingsException(
+                                "Bend color must not be null!");
+                    } else {
+                        m_bendColor[i] = bendColor;
+                    }
+
+                    String outlyingBendColor =
+                        thisSettings.getString("OUTLYINGBEND");
+                    if (outlyingBendColor == null) {
+                        throw new InvalidSettingsException(
+                                "Outlying bend color must not be null!");
+                    } else {
+                        m_outlyingBendColor[i] = outlyingBendColor;
+                    }
+
+    				m_validMin[i] = thisSettings.getDouble("VALIDMIN");
+    				m_validMax[i] = thisSettings.getDouble("VALIDMAX");
+    				m_min[i] = thisSettings.getDouble("MIN");
+    				m_max[i] = thisSettings.getDouble("MAX");
+				}
 			}
 		fireTableDataChanged();
 	}
