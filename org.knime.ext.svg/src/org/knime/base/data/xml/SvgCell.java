@@ -66,6 +66,11 @@ import org.knime.core.data.DataType;
 import org.knime.core.data.DataValue;
 import org.knime.core.data.StringValue;
 import org.knime.core.data.image.ImageContent;
+import org.knime.core.data.xml.util.XmlDomComparer;
+import org.knime.core.data.xml.util.XmlDomComparerCustomizer;
+import org.knime.core.data.xml.util.XmlDomComparerCustomizer.ChildrenCompareStrategy;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.svg.SVGDocument;
 
 /**
@@ -83,8 +88,7 @@ public class SvgCell extends DataCell implements SvgValue, StringValue {
          * {@inheritDoc}
          */
         @Override
-        public void serialize(final SvgCell cell,
-                final DataCellDataOutput output) throws IOException {
+        public void serialize(final SvgCell cell, final DataCellDataOutput output) throws IOException {
             try {
                 output.writeUTF(cell.getStringValue());
             } catch (IOException ex) {
@@ -98,20 +102,30 @@ public class SvgCell extends DataCell implements SvgValue, StringValue {
          * {@inheritDoc}
          */
         @Override
-        public SvgCell deserialize(final DataCellDataInput input)
-                throws IOException {
+        public SvgCell deserialize(final DataCellDataInput input) throws IOException {
             String s = input.readUTF();
             return new SvgCell(s);
         }
     }
+
+    private static final XmlDomComparerCustomizer SVG_XML_CUSTOMIZER = new XmlDomComparerCustomizer(
+        ChildrenCompareStrategy.ORDERED) {
+
+        @Override
+        public boolean include(final Node name) {
+            if (XmlDomComparer.isElement(name)) {
+                Element element = (Element)name;
+                return !"metadata".equals(element.getLocalName());
+            }
+            return !XmlDomComparer.isCommment(name);
+        }
+    };
 
     private static final SvgSerializer SERIALIZER = new SvgSerializer();
 
     private SoftReference<String> m_xmlString;
 
     private final SvgImageContent m_content;
-
-    private boolean m_isNormalized;
 
     /**
      * Returns the serializer for SVG cells.
@@ -123,8 +137,7 @@ public class SvgCell extends DataCell implements SvgValue, StringValue {
     }
 
     /**
-     * Returns the preferred value class for SVG cells which is {@link SVGValue}
-     * .
+     * Returns the preferred value class for SVG cells which is {@link SVGValue} .
      *
      * @return the preferred value class
      */
@@ -133,12 +146,11 @@ public class SvgCell extends DataCell implements SvgValue, StringValue {
     }
 
     /**
-     * Creates a new SVGCell by parsing the passed string. It must contain a
-     * valid SVG document, including all XML headers.
+     * Creates a new SVGCell by parsing the passed string. It must contain a valid SVG document, including all XML
+     * headers.
      *
-     * Please consider using {@link SvgCellFactory#create(String)} instead of
-     * this constructor as the latter dynamically decides if a in-table cell or
-     * a blob cell is created (depending on the size).
+     * Please consider using {@link SvgCellFactory#create(String)} instead of this constructor as the latter dynamically
+     * decides if a in-table cell or a blob cell is created (depending on the size).
      *
      * @param xmlString an SVG document
      * @throws IOException if an error occurs while reading the XML string.
@@ -148,17 +160,14 @@ public class SvgCell extends DataCell implements SvgValue, StringValue {
         String parserClass = XMLResourceDescriptor.getXMLParserClassName();
         SAXSVGDocumentFactory f = new SAXSVGDocumentFactory(parserClass);
 
-        m_content =
-                new SvgImageContent(f.createSVGDocument(null, new StringReader(
-                        xmlString)), false);
+        m_content = new SvgImageContent(f.createSVGDocument(null, new StringReader(xmlString)), false);
     }
 
     /**
      * Creates a new SVGCell by using the passed SVG document.
      *
-     * Please consider using {@link SvgCellFactory#create(SVGDocument)} instead
-     * of this constructor as the latter dynamically decides if a in-table cell
-     * or a blob cell is created (depending on the size).
+     * Please consider using {@link SvgCellFactory#create(SVGDocument)} instead of this constructor as the latter
+     * dynamically decides if a in-table cell or a blob cell is created (depending on the size).
      *
      * @param doc an SVG document
      */
@@ -190,18 +199,9 @@ public class SvgCell extends DataCell implements SvgValue, StringValue {
         SvgCell cell = (SvgCell)dc;
 
         try {
-            String s1, s2;
-            if (!this.m_isNormalized || ((s1 = this.m_xmlString.get()) == null)) {
-                s1 = SvgImageContent.serialize(getDocument());
-            }
-
-            if (!cell.m_isNormalized || ((s2 = cell.m_xmlString.get()) != null)) {
-                s2 = SvgImageContent.serialize(cell.getDocument());
-            }
-            return s1.equals(s2);
+            return XmlDomComparer.equals(getDocument(), cell.getDocument(), SVG_XML_CUSTOMIZER);
         } catch (Exception ex) {
-            throw new RuntimeException(
-                    "Cannot create string representation of XML document", ex);
+            throw new RuntimeException("Cannot create string representation of XML document", ex);
         }
     }
 
@@ -210,16 +210,7 @@ public class SvgCell extends DataCell implements SvgValue, StringValue {
      */
     @Override
     public int hashCode() {
-        String s;
-        if (m_isNormalized && ((s = m_xmlString.get()) != null)) {
-            return s.hashCode();
-        }
-        try {
-            return SvgImageContent.serialize(getDocument()).hashCode();
-        } catch (Exception ex) {
-            throw new RuntimeException(
-                    "Cannot create string representation of XML document", ex);
-        }
+        return XmlDomComparer.hashCode(getDocument(), SVG_XML_CUSTOMIZER);
     }
 
     /**
@@ -227,20 +218,16 @@ public class SvgCell extends DataCell implements SvgValue, StringValue {
      */
     @Override
     public String getStringValue() {
-        if ((m_xmlString == null) || (m_xmlString.get() == null)) {
+        String string = m_xmlString == null ? null : m_xmlString.get();
+        if (string == null) {
             try {
-                m_xmlString =
-                        new SoftReference<String>(
-                                SvgImageContent.serialize(m_content
-                                        .getSvgDocument()));
-                m_isNormalized = true;
+                string = SvgImageContent.serialize(m_content.getSvgDocument());
+                m_xmlString = new SoftReference<String>(string);
             } catch (TranscoderException ex) {
-                throw new RuntimeException(
-                        "Cannot create string representation of XML document",
-                        ex);
+                throw new RuntimeException("Cannot create string representation of XML document", ex);
             }
         }
-        return m_xmlString.get();
+        return string;
     }
 
     /**
