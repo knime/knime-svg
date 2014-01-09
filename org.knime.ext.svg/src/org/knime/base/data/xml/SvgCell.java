@@ -53,6 +53,8 @@ package org.knime.base.data.xml;
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.ref.SoftReference;
+import java.util.Arrays;
+import java.util.Collection;
 
 import org.apache.batik.css.engine.value.svg.SVGValue;
 import org.apache.batik.dom.svg.SAXSVGDocumentFactory;
@@ -108,16 +110,28 @@ public class SvgCell extends DataCell implements SvgValue, StringValue {
         }
     }
 
+    private static final Collection<String> SVG_TEXT_CONTENT_NOT_IGNORED_TAGS =
+            Arrays.asList("text", "tspan", "textPath");
+
     private static final XmlDomComparerCustomizer SVG_XML_CUSTOMIZER = new XmlDomComparerCustomizer(
         ChildrenCompareStrategy.ORDERED) {
 
         @Override
-        public boolean include(final Node name) {
-            if (XmlDomComparer.isElement(name)) {
-                Element element = (Element)name;
-                return !"metadata".equals(element.getLocalName());
+        public boolean include(final Node node) {
+            switch (node.getNodeType()) {
+                case Node.TEXT_NODE:
+                    //ignore all text nodes, except the ones in the defined set
+                    return SVG_TEXT_CONTENT_NOT_IGNORED_TAGS.contains(node.getParentNode().getLocalName());
+                case Node.ELEMENT_NODE:
+                    //ignore metadata elements
+                    Element element = (Element)node;
+                    return !"metadata".equals(element.getLocalName());
+                case Node.COMMENT_NODE:
+                    //ignore comments
+                    return false;
+                default:
+                    return true;
             }
-            return !XmlDomComparer.isCommment(name);
         }
     };
 
