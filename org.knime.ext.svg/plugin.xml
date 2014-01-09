@@ -18,6 +18,11 @@
             factory-class="org.knime.base.node.renderer2image.Renderer2ImageNodeFactory"
             id="org.knime.base.node.renderer2image.Renderer2ImageNodeFactory">
       </node>      
+      <node
+            category-path="/io/io-other"
+            factory-class="org.knime.base.node.image.readimage.ReadImageFromUrlNodeFactory"
+            id="org.knime.base.node.image.readimage.ReadImageFromUrlNodeFactory">
+      </node>
    </extension>
 
 </plugin>
