@@ -35,12 +35,14 @@
 			the given
 			name.
 		</option>
-        <option name="Type Selection (SVG, PNG)">
-            Select which types are valid in the input. If a non-valid
-            type is encountered it will handle the error according to the
-            "Fail on invalid input" option.
-        </option>
-        <option name="Fail on invalid input">
+		<option name="Type Selection (SVG, PNG)">
+			Select which types are valid in the input. If a
+			non-valid
+			type is encountered it will handle the error according to
+			the
+			"Fail on invalid input" option.
+		</option>
+		<option name="Fail on invalid input">
 			If selected, the node will fail during execution
 			if any URL
 			is invalid or points to an invalid image file. If
@@ -51,13 +53,19 @@
 			the node will
 			fail in either case.
 		</option>
+		<option name="Customize image read timeout (ms)">
+			Changes the connection and read timeout for the
+			used URL connections. The default is 1000 ms which can also be
+			overwritten using the 'knime.url.timeout' system property.
+		</option>
 	</fullDescription>
 	<ports>
 		<inPort index="0" name="URL data">
 			Table containing the URL column.
 		</inPort>
 		<outPort index="0" name="Input data with additional image column">
-			The input data amended by the image column. The type of the column
+			The input data amended by the image
+			column. The type of the column
 			is determined based on the input data.
 		</outPort>
 	</ports>
