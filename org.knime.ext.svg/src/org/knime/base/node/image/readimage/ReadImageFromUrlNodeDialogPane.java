@@ -50,6 +50,8 @@ package org.knime.base.node.image.readimage;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
@@ -79,27 +81,33 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.util.CheckUtils;
-import org.knime.core.node.util.ColumnSelectionComboxBox;
+import org.knime.core.node.util.ColumnSelectionPanel;
+import org.knime.core.util.Pair;
 
 /**
  * Dialog to Read Image node. It has a column selector and few other controls.
- *
+ * 
  * @author Marcel Hanser
  */
 final class ReadImageFromUrlNodeDialogPane extends NodeDialogPane {
 
-    private final ColumnSelectionComboxBox m_columnPanel;
+    private final ColumnSelectionPanel m_columnPanel;
 
     private final JCheckBox m_failOnInvalidChecker;
 
     private final JTextField m_appendColumnField;
 
+    private final Pair<JCheckBox, JTextField> m_readTimeoutInput;
+
     private final Map<ImageType, JCheckBox> m_typeToCheckBox;
+
+    private DataTableSpec m_dataTableSpec;
 
     /** Create new dialog. */
     @SuppressWarnings("unchecked")
     ReadImageFromUrlNodeDialogPane() {
-        m_columnPanel = new ColumnSelectionComboxBox((Border)null, StringValue.class);
+        m_columnPanel = new ColumnSelectionPanel((Border)null, StringValue.class);
+        m_columnPanel.setLayout(new GridLayout(1, 0));
 
         ButtonGroup bg = new ButtonGroup();
         final JRadioButton replaceColumnRadio = new JRadioButton("Replace input column");
@@ -158,8 +166,23 @@ final class ReadImageFromUrlNodeDialogPane extends NodeDialogPane {
         tabPanel.add(columnConfig, BorderLayout.NORTH);
         tabPanel.add(southPanel, BorderLayout.CENTER);
 
-        m_failOnInvalidChecker = addCheckBox(tabPanel, "Fail on invalid input", BorderLayout.SOUTH);
+        JPanel southernPanel = new JPanel(new GridLayout(2, 2));
+        m_failOnInvalidChecker = addCheckBox(southernPanel, "Fail on invalid input", null);
+        // dummy label
+        southernPanel.add(new JLabel(""));
+        final JTextField field = new JTextField(10);
 
+        final JCheckBox timeoutCheckBox = addCheckBox(southernPanel, "Customize image read timeout (ms)", null);
+
+        timeoutCheckBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                field.setEnabled(timeoutCheckBox.isSelected());
+            }
+        });
+        southernPanel.add(field);
+        m_readTimeoutInput = Pair.create(timeoutCheckBox, field);
+        tabPanel.add(southernPanel, BorderLayout.SOUTH);
         addTab("Settings", tabPanel);
     }
 
@@ -168,8 +191,9 @@ final class ReadImageFromUrlNodeDialogPane extends NodeDialogPane {
     protected void loadSettingsFrom(final NodeSettingsRO settings, final DataTableSpec[] specs)
         throws NotConfigurableException {
         ReadImageFromUrlConfig config = new ReadImageFromUrlConfig();
+        m_dataTableSpec = specs[0];
         config.loadInDialog(settings, specs[0]);
-        m_columnPanel.update(specs[0], config.getUrlColName());
+        m_columnPanel.update(specs[0], config.getUrlColName(), false, true);
         m_failOnInvalidChecker.setSelected(config.isFailOnInvalid());
 
         setText(m_appendColumnField, config.getNewColumnName());
@@ -178,13 +202,21 @@ final class ReadImageFromUrlNodeDialogPane extends NodeDialogPane {
         for (Map.Entry<ImageType, JCheckBox> entry : m_typeToCheckBox.entrySet()) {
             entry.getValue().setSelected(types.contains(entry.getKey()));
         }
+        int readTimeout = config.getReadTimeout();
+        if (readTimeout > 0) {
+            m_readTimeoutInput.getFirst().setSelected(true);
+            m_readTimeoutInput.getSecond().setText(String.valueOf(readTimeout));
+        } else {
+            m_readTimeoutInput.getFirst().setSelected(false);
+            m_readTimeoutInput.getSecond().setEnabled(false);
+        }
     }
 
     /** {@inheritDoc} */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         ReadImageFromUrlConfig config = new ReadImageFromUrlConfig();
-        config.setUrlColName(m_columnPanel.getSelectedColumn());
+
         config.setFailOnInvalid(m_failOnInvalidChecker.isSelected());
 
         config.setNewColumnName(m_appendColumnField.isEnabled() ? getText(m_appendColumnField,
@@ -198,6 +230,21 @@ final class ReadImageFromUrlNodeDialogPane extends NodeDialogPane {
         }
         CheckUtils.checkSetting(!types.isEmpty(), "one of %s must be selected.", Arrays.toString(ImageType.values()));
         config.setTypes(types);
+
+        String selectedColumn = m_columnPanel.getSelectedColumn();
+        CheckUtils.checkSetting(m_dataTableSpec.containsName(selectedColumn),
+            "column: '%s' is not contained in the given input table.", selectedColumn);
+        CheckUtils.checkSetting(
+            m_dataTableSpec.getColumnSpec(selectedColumn).getType().isCompatible(StringValue.class),
+            "column: '%s' is not a string compatible column.", selectedColumn);
+        config.setUrlColName(m_columnPanel.getSelectedColumn());
+
+        if (m_readTimeoutInput.getFirst().isSelected()) {
+            int readTimeout =
+                getInt(m_readTimeoutInput.getSecond(), "Connection timeout must be an integer number and not empty.");
+            CheckUtils.checkSetting(readTimeout > 0, "Connection timeout must be positive.");
+            config.setReadTimeout(readTimeout);
+        }
         config.save(settings);
     }
 
@@ -206,6 +253,16 @@ final class ReadImageFromUrlNodeDialogPane extends NodeDialogPane {
         if (newColumnName != null) {
             appendColumnField.setText(newColumnName);
             appendColumnField.setEnabled(true);
+        }
+    }
+
+    private int getInt(final JTextField intField, final String exceptionText) throws InvalidSettingsException {
+        String text = intField.getText();
+        try {
+            return Integer.valueOf(text);
+
+        } catch (Exception e) {
+            throw new InvalidSettingsException(exceptionText);
         }
     }
 
@@ -225,5 +282,4 @@ final class ReadImageFromUrlNodeDialogPane extends NodeDialogPane {
         }
         return jCheckBox;
     }
-
 }

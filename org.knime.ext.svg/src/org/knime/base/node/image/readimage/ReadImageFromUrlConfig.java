@@ -78,11 +78,15 @@ final class ReadImageFromUrlConfig {
 
     private static final String CONGIGURED_TYPE = "types";
 
+    private static final String READ_TIMEOUT = "read-timeout";
+
     private String m_urlColName;
+
+    private String m_newColumnName;
 
     private boolean m_failOnInvalid = true;
 
-    private String m_newColumnName;
+    private int m_readTimeout = -1;
 
     private List<? extends ImageType> m_types;
 
@@ -131,6 +135,20 @@ final class ReadImageFromUrlConfig {
     }
 
     /**
+     * @return the readTimeout
+     */
+    public int getReadTimeout() {
+        return m_readTimeout;
+    }
+
+    /**
+     * @param readTimeout the readTimeout to set
+     */
+    public void setReadTimeout(final int readTimeout) {
+        m_readTimeout = readTimeout;
+    }
+
+    /**
      * Save current configuration.
      *
      * @param settings To save to.
@@ -140,6 +158,7 @@ final class ReadImageFromUrlConfig {
         settings.addBoolean(FAIL_IF_INVALID, m_failOnInvalid);
         settings.addString(NEW_COLUMN_NAME, m_newColumnName);
         settings.addStringArray(CONGIGURED_TYPE, toStringArray(m_types.toArray(new ImageType[0])));
+        settings.addInt(READ_TIMEOUT, m_readTimeout);
     }
 
     /**
@@ -153,6 +172,7 @@ final class ReadImageFromUrlConfig {
         m_failOnInvalid = settings.getBoolean(FAIL_IF_INVALID);
         m_newColumnName = settings.getString(NEW_COLUMN_NAME);
         m_types = toEnum(ImageType.class, settings.getStringArray(CONGIGURED_TYPE));
+        m_readTimeout = settings.getInt(READ_TIMEOUT, -1);
     }
 
     /**
@@ -164,15 +184,14 @@ final class ReadImageFromUrlConfig {
      */
     void loadInDialog(final NodeSettingsRO settings, final DataTableSpec in) throws NotConfigurableException {
         m_urlColName = settings.getString(URL_COLUMN, null);
-        DataColumnSpec col = in.getColumnSpec(m_urlColName);
-        if (col == null || !col.getType().isCompatible(StringValue.class)) {
+        if (m_urlColName == null) {
             try {
                 guessDefaults(in);
             } catch (InvalidSettingsException e) {
                 throw new NotConfigurableException("No valid input column available");
             }
         }
-
+        m_readTimeout = settings.getInt(READ_TIMEOUT, -1);
         m_failOnInvalid = settings.getBoolean(FAIL_IF_INVALID, m_failOnInvalid);
         m_newColumnName = settings.getString(NEW_COLUMN_NAME, m_newColumnName);
         m_types = toEnum(ImageType.class, settings.getStringArray(CONGIGURED_TYPE, toStringArray(ImageType.values())));

@@ -244,7 +244,10 @@ final class ReadImageFromUrlNodeModel extends NodeModel {
         final URL url = new URL(urlValue);
 
         final byte[] buffer = new byte[FIRST_BYTES_NUM];
-        final InputStream in = FileUtil.openStreamWithTimeout(url);
+
+        int readTimeout = m_config.getReadTimeout();
+        final InputStream in =
+            readTimeout > 0 ? FileUtil.openStreamWithTimeout(url, readTimeout) : FileUtil.openStreamWithTimeout(url);
 
         try {
             int readData = IOUtils.read(in, buffer);
