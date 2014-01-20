@@ -53,10 +53,10 @@
 			the node will
 			fail in either case.
 		</option>
-		<option name="Customize image read timeout (ms)">
-			Changes the connection and read timeout for the
-			used URL connections. The default is 1000 ms which can also be
-			overwritten using the 'knime.url.timeout' system property.
+		<option name="Customize image read timeout in seconds">
+			Defines the connection and read timeout for the
+			used URL connections in seconds. The default is 1 second if it is not
+			overwritten by the 'knime.url.timeout' system property.
 		</option>
 	</fullDescription>
 	<ports>

@@ -76,7 +76,9 @@ import org.knime.base.node.image.readimage.ReadImageFromUrlNodeModel.ImageType;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.StringValue;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.KNIMEConstants;
 import org.knime.core.node.NodeDialogPane;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
@@ -86,10 +88,11 @@ import org.knime.core.util.Pair;
 
 /**
  * Dialog to Read Image node. It has a column selector and few other controls.
- * 
+ *
  * @author Marcel Hanser
  */
 final class ReadImageFromUrlNodeDialogPane extends NodeDialogPane {
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(ReadImageFromUrlNodeDialogPane.class);
 
     private final ColumnSelectionPanel m_columnPanel;
 
@@ -172,7 +175,7 @@ final class ReadImageFromUrlNodeDialogPane extends NodeDialogPane {
         southernPanel.add(new JLabel(""));
         final JTextField field = new JTextField(10);
 
-        final JCheckBox timeoutCheckBox = addCheckBox(southernPanel, "Customize image read timeout (ms)", null);
+        final JCheckBox timeoutCheckBox = addCheckBox(southernPanel, "Customize image read timeout in seconds", null);
 
         timeoutCheckBox.addActionListener(new ActionListener() {
             @Override
@@ -204,12 +207,30 @@ final class ReadImageFromUrlNodeDialogPane extends NodeDialogPane {
         }
         int readTimeout = config.getReadTimeout();
         if (readTimeout > 0) {
-            m_readTimeoutInput.getFirst().setSelected(true);
-            m_readTimeoutInput.getSecond().setText(String.valueOf(readTimeout));
+            m_readTimeoutInput.getFirst().doClick();
+            m_readTimeoutInput.getSecond().setText(String.valueOf(readTimeout/1000d));
         } else {
             m_readTimeoutInput.getFirst().setSelected(false);
             m_readTimeoutInput.getSecond().setEnabled(false);
+            m_readTimeoutInput.getSecond().setText(
+                String.valueOf(getSystemPropertyAsDouble(KNIMEConstants.PROPERTY_URL_TIMEOUT, 1)));
         }
+    }
+
+    /**
+     * @return trys to format and return the given system property, if it is not set or its not a valid integer
+     */
+    private double getSystemPropertyAsDouble(final String property, final double defaultDouble) {
+        String to = System.getProperty(KNIMEConstants.PROPERTY_URL_TIMEOUT);
+        double toReturn = defaultDouble;
+        if (to != null) {
+            try {
+                toReturn = Double.parseDouble(to) / 1000;
+            } catch (NumberFormatException ex) {
+                LOGGER.error("Illegal value for property " + KNIMEConstants.PROPERTY_URL_TIMEOUT + ": " + to);
+            }
+        }
+        return toReturn;
     }
 
     /** {@inheritDoc} */
@@ -240,10 +261,11 @@ final class ReadImageFromUrlNodeDialogPane extends NodeDialogPane {
         config.setUrlColName(m_columnPanel.getSelectedColumn());
 
         if (m_readTimeoutInput.getFirst().isSelected()) {
-            int readTimeout =
-                getInt(m_readTimeoutInput.getSecond(), "Connection timeout must be an integer number and not empty.");
+            double readTimeout =
+                getDouble(m_readTimeoutInput.getSecond(), "Connection timeout must be a valid double number.");
             CheckUtils.checkSetting(readTimeout > 0, "Connection timeout must be positive.");
-            config.setReadTimeout(readTimeout);
+            // convert to milli seconds and set in the configuration
+            config.setReadTimeout((int)(readTimeout * 1000));
         }
         config.save(settings);
     }
@@ -256,10 +278,10 @@ final class ReadImageFromUrlNodeDialogPane extends NodeDialogPane {
         }
     }
 
-    private int getInt(final JTextField intField, final String exceptionText) throws InvalidSettingsException {
+    private double getDouble(final JTextField intField, final String exceptionText) throws InvalidSettingsException {
         String text = intField.getText();
         try {
-            return Integer.valueOf(text);
+            return Double.valueOf(text);
 
         } catch (Exception e) {
             throw new InvalidSettingsException(exceptionText);
