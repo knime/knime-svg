@@ -260,7 +260,7 @@ final class ReadImageFromUrlNodeModel extends NodeModel {
                 case GZIP:
                     // overwrite the stream variable with the gzip stream
                     imageStream = new GZIPInputStream(aggregate(buffer, readData, in));
-                    readData = IOUtils.read(in, buffer);
+                    readData = IOUtils.read(imageStream, buffer);
                 default:
                     final ImageType foundType = determineImageType(buffer, readData);
                     if (foundType != null) {
