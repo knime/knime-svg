@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
+<knimeNode icon="./string_svg.png" type="Manipulator">
+	<name>String To SVG</name>
+	<shortDescription>
+		Converts a String or XML column to SVG images.
+	</shortDescription>
+
+	<fullDescription>
+		<intro>
+			Converts a String or XML column to SVG images. 
+			If you want to read multiple SVG files, e.g. from a	directory, you probably want to use
+			the "List Files" node in combination with the "Read Images" node.
+		</intro>
+		<option name="Input Column">The String or XML column contain valid SVG text (or xml).</option>
+		<option name="Replace/Append Column">Choose whether you want to replace the selected input or 
+		append a new column containing the SVG objects.</option>
+		<option name="Fail on invalid input cell">
+			If selected, the node will fail during execution
+			if any cell contains invalid SVG image data. If unselected, the node
+			will skip these invalid entries and insert a missing value instead.
+			Note that if the parsing fails for all cells, the node will
+			fail in either case.
+		</option>
+	</fullDescription>
+
+	<ports>
+		<inPort index="0" name="Input">Input data.</inPort>
+		<outPort index="0" name="Transformed input">Input data with the new image data.
+		</outPort>
+	</ports>
+</knimeNode>
