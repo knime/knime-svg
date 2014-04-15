@@ -1,7 +1,7 @@
 /*
  * ------------------------------------------------------------------------
  *
- *  Copyright by 
+ *  Copyright by
  *  University of Konstanz, Germany and
  *  KNIME GmbH, Konstanz, Germany
  *  Website: http://www.knime.org; Email: contact@knime.org
@@ -79,7 +79,9 @@ import org.knime.core.node.util.ColumnSelectionComboxBox;
  * column and subsequently one of the registered renderers for this column.
  *
  * @author Thorsten Meinl, University of Konstanz
+ * @deprecated replaced by the Renderer2Image node
  */
+@Deprecated
 public class Renderer2SvgNodeDialog extends NodeDialogPane {
     private final Renderer2SvgSettings m_settings = new Renderer2SvgSettings();
 

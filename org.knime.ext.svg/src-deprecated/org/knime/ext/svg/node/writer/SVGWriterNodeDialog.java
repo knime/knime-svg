@@ -1,7 +1,7 @@
 /*
  * ------------------------------------------------------------------------
  *
- *  Copyright by 
+ *  Copyright by
  *  University of Konstanz, Germany and
  *  KNIME GmbH, Konstanz, Germany
  *  Website: http://www.knime.org; Email: contact@knime.org
@@ -64,7 +64,9 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  * This is the dialog for the SVG writer.
  *
  * @author Thorsten Meinl, University of Konstanz
+ * @deprecated replaced by the ImageColWriter node
  */
+@Deprecated
 public class SVGWriterNodeDialog extends DefaultNodeSettingsPane {
     @SuppressWarnings("unchecked")
     private final DialogComponentColumnNameSelection m_svgColumn =

@@ -1,7 +1,7 @@
 /*
  * ------------------------------------------------------------------------
  *
- *  Copyright by 
+ *  Copyright by
  *  University of Konstanz, Germany and
  *  KNIME GmbH, Konstanz, Germany
  *  Website: http://www.knime.org; Email: contact@knime.org
@@ -83,7 +83,9 @@ import org.w3c.dom.Document;
  * directory.
  *
  * @author Thorsten Meinl, University of Konstanz
+ * @deprecated replaced by the ImageColWriter node
  */
+@Deprecated
 public class SVGWriterNodeModel extends NodeModel {
     private final SettingsModelString m_svgColumn = new SettingsModelString(
             "svgColumn", null);

@@ -1,7 +1,7 @@
 /*
  * ------------------------------------------------------------------------
  *
- *  Copyright by 
+ *  Copyright by
  *  University of Konstanz, Germany and
  *  KNIME GmbH, Konstanz, Germany
  *  Website: http://www.knime.org; Email: contact@knime.org
@@ -88,7 +88,9 @@ import org.w3c.dom.svg.SVGDocument;
  * This is the model for the renderer-to-svg node.
  *
  * @author Thorsten Meinl, University of Konstanz
+ * @deprecated replaced by the Renderer2Image node
  */
+@Deprecated
 public class Renderer2SvgNodeModel extends NodeModel {
     private final Renderer2SvgSettings m_settings = new Renderer2SvgSettings();
 

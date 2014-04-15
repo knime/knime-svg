@@ -1,7 +1,7 @@
 /*
  * ------------------------------------------------------------------------
  *
- *  Copyright by 
+ *  Copyright by
  *  University of Konstanz, Germany and
  *  KNIME GmbH, Konstanz, Germany
  *  Website: http://www.knime.org; Email: contact@knime.org
@@ -58,7 +58,9 @@ import org.knime.core.node.NodeView;
  * This is the factory for the SVG writer node.
  *
  * @author Thorsten Meinl, University of Konstanz
+ * @deprecated replaced by the ImageColWriter node
  */
+@Deprecated
 public class SVGWriterNodeFactory extends NodeFactory<SVGWriterNodeModel> {
     /**
      * {@inheritDoc}

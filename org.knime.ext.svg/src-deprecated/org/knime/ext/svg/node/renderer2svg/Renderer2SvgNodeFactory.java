@@ -1,7 +1,7 @@
 /*
  * ------------------------------------------------------------------------
  *
- *  Copyright by 
+ *  Copyright by
  *  University of Konstanz, Germany and
  *  KNIME GmbH, Konstanz, Germany
  *  Website: http://www.knime.org; Email: contact@knime.org
@@ -58,7 +58,9 @@ import org.knime.core.node.NodeView;
  * This is the factory for the renderer-to-svg node.
  *
  * @author Thorsten Meinl, University of Konstanz
+ * @deprecated replaced by the Renderer2Image node
  */
+@Deprecated
 public class Renderer2SvgNodeFactory extends NodeFactory<Renderer2SvgNodeModel> {
     /**
      * {@inheritDoc}
