@@ -259,8 +259,8 @@ final class ReadImageFromUrlNodeDialogPane extends NodeDialogPane {
 
         if (m_readTimeoutInput.getFirst().isSelected()) {
             double readTimeout =
-                getDouble(m_readTimeoutInput.getSecond(), "Connection timeout must be a valid double number.");
-            CheckUtils.checkSetting(readTimeout > 0, "Connection timeout must be positive.");
+                getDouble(m_readTimeoutInput.getSecond(), "Read timeout must be a valid double number.");
+            CheckUtils.checkSetting(readTimeout > 0, "Read timeout must be positive.");
             // convert to milli seconds and set in the configuration
             config.setReadTimeout((int)(readTimeout * 1000));
         }
