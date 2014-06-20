@@ -204,7 +204,8 @@ final class ReadImageFromUrlNodeDialogPane extends NodeDialogPane {
         }
         int readTimeout = config.getReadTimeout();
         if (readTimeout > 0) {
-            m_readTimeoutInput.getFirst().doClick();
+            m_readTimeoutInput.getFirst().setSelected(true);
+            m_readTimeoutInput.getSecond().setEnabled(true);
             m_readTimeoutInput.getSecond().setText(String.valueOf(readTimeout/1000d));
         } else {
             m_readTimeoutInput.getFirst().setSelected(false);
