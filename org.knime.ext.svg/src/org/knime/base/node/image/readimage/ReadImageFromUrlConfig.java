@@ -225,7 +225,7 @@ final class ReadImageFromUrlConfig {
         }
         m_urlColName = winColumn;
         m_failOnInvalid = true;
-        m_newColumnName = DataTableSpec.getUniqueColumnName(in, "Image to " + m_urlColName);
+        m_newColumnName = DataTableSpec.getUniqueColumnName(in, "Image from " + m_urlColName);
         m_types = Arrays.asList(ImageType.values());
     }
 
