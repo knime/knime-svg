@@ -67,6 +67,7 @@ import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
+import org.knime.core.data.MissingCell;
 import org.knime.core.data.StringValue;
 import org.knime.core.data.container.CellFactory;
 import org.knime.core.data.container.ColumnRearranger;
@@ -198,7 +199,7 @@ final class ReadImageFromUrlNodeModel extends NodeModel {
                                 "Failed to read image content from " + "\"" + url + "\": " + e.getMessage();
                             LOGGER.warn(message, e);
                             failCounter.incrementAndGet();
-                            return DataType.getMissingCell();
+                            return new MissingCell(e.getMessage());
                         }
                     }
                 }
@@ -378,7 +379,8 @@ final class ReadImageFromUrlNodeModel extends NodeModel {
         SVG(SvgCell.TYPE) {
             @Override
             public boolean isMimeType(final byte[] firstBytes, final int bytes) {
-                return new String(firstBytes, 0, bytes, Charsets.UTF_8).contains("<svg");
+                String s = new String(firstBytes, 0, bytes, Charsets.UTF_8);
+                return s.contains("<?xml ") || s.contains("<svg");
             }
 
             @Override
