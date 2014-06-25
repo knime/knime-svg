@@ -65,7 +65,9 @@ import org.apache.batik.gvt.GraphicsNode;
 import org.apache.batik.gvt.renderer.StaticRenderer;
 import org.knime.core.data.DataColumnProperties;
 import org.knime.core.data.DataColumnSpec;
+import org.knime.core.data.renderer.AbstractDataValueRendererFactory;
 import org.knime.core.data.renderer.AbstractPainterDataValueRenderer;
+import org.knime.core.data.renderer.DataValueRenderer;
 import org.w3c.dom.svg.SVGDocument;
 
 /**
@@ -76,6 +78,29 @@ import org.w3c.dom.svg.SVGDocument;
 @SuppressWarnings("serial")
 public class SvgValueRenderer extends AbstractPainterDataValueRenderer
         implements SvgProvider {
+    /**
+     * Factory for SVG Value renderers.
+     *
+     * @since 2.10
+     */
+    public static final class Factory extends AbstractDataValueRendererFactory {
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String getDescription() {
+            return DESCRIPTION;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public DataValueRenderer createRenderer(final DataColumnSpec colSpec) {
+            return new SvgValueRenderer(colSpec);
+        }
+    }
+
     /**
      * Property key that can be used in {@link DataColumnProperties} to specify
      * whether the aspect ration of the SVG should be kept (<code>true</code>)
@@ -100,6 +125,8 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer
      */
     public static final String OPTION_PREFERRED_WIDTH = SvgValueRenderer.class
             + ".preferredWidth";
+
+    static final String DESCRIPTION = "SVG renderer";
 
     private SVGDocument m_doc;
 
@@ -178,7 +205,7 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer
      */
     @Override
     public String getDescription() {
-        return "SVG Renderer";
+        return DESCRIPTION;
     }
 
     /**

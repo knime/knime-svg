@@ -29,5 +29,19 @@
             id="org.knime.base.node.preproc.colconvert.stringtosvg.StringToSvgNodeFactory">
       </node>
    </extension>
+   <extension
+         point="org.knime.core.DataValueRenderer">
+      <dataValue
+            valueClass="org.knime.base.data.xml.SvgValue">
+         <renderer
+               rendererFactoryClass="org.knime.base.data.xml.SvgValueRenderer$Factory"
+               suggestAsDefault="true">
+         </renderer>
+         <renderer
+               rendererFactoryClass="org.knime.core.data.renderer.MultiLineStringValueRenderer$Factory"
+               suggestAsDefault="false">
+         </renderer>
+      </dataValue>
+   </extension>
 
 </plugin>

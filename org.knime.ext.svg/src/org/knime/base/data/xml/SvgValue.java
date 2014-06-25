@@ -49,12 +49,9 @@ package org.knime.base.data.xml;
 
 import javax.swing.Icon;
 
-import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataValue;
+import org.knime.core.data.ExtensibleUtilityFactory;
 import org.knime.core.data.image.ImageValue;
-import org.knime.core.data.renderer.DataValueRendererFamily;
-import org.knime.core.data.renderer.DefaultDataValueRendererFamily;
-import org.knime.core.data.renderer.MultiLineStringValueRenderer;
 import org.knime.core.data.xml.XMLValue;
 import org.w3c.dom.svg.SVGDocument;
 
@@ -80,12 +77,13 @@ public interface SvgValue extends ImageValue, XMLValue {
     UtilityFactory UTILITY = new SvgUtilityFactory();
 
     /** Implementations of the meta information of this value class. */
-    class SvgUtilityFactory extends UtilityFactory {
+    class SvgUtilityFactory extends ExtensibleUtilityFactory {
         /** Singleton icon to be used to display this cell type. */
         private static final Icon ICON = loadIcon(SvgValue.class, "/svg.png");
 
         /** Only subclasses are allowed to instantiate this class. */
         protected SvgUtilityFactory() {
+            super(SvgValue.class);
         }
 
         /**
@@ -100,11 +98,8 @@ public interface SvgValue extends ImageValue, XMLValue {
          * {@inheritDoc}
          */
         @Override
-        protected DataValueRendererFamily getRendererFamily(
-                final DataColumnSpec spec) {
-            return new DefaultDataValueRendererFamily(
-                    new SvgValueRenderer(spec),
-                    new MultiLineStringValueRenderer("String"));
+        public String getName() {
+            return "SVG images";
         }
     }
 }
