@@ -49,9 +49,7 @@
 			unselected, the
 			node will skip these invalid entries and insert a
 			missing value
-			instead. Note that if the parsing fails for all rows,
-			the node will
-			fail in either case.
+			instead. 
 		</option>
 		<option name="Customize image read timeout in seconds">
 			Defines the connection and read timeout for the

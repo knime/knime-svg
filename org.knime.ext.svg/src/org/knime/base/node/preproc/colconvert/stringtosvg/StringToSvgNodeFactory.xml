@@ -19,8 +19,6 @@
 			If selected, the node will fail during execution
 			if any cell contains invalid SVG image data. If unselected, the node
 			will skip these invalid entries and insert a missing value instead.
-			Note that if the parsing fails for all cells, the node will
-			fail in either case.
 		</option>
 	</fullDescription>
 

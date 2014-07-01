@@ -111,10 +111,8 @@ final class StringToSvgNodeModel extends NodeModel {
         int rowCount = resultTable.getRowCount();
         int fail = failCount.get();
 
-        if (fail > 0 && rowCount == fail) {
-            throw new Exception("None of the strings could be read as SVG image (see log for details)");
-        } else if (fail > 0) {
-            setWarningMessage("Failed to read " + fail + "/" + rowCount + " files");
+        if (fail > 0) {
+            setWarningMessage("Failed to read " + fail + " of " + rowCount + " files");
         }
 
         return new BufferedDataTable[]{resultTable};
