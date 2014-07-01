@@ -137,10 +137,8 @@ final class ReadImageFromUrlNodeModel extends NodeModel {
         BufferedDataTable out = exec.createColumnRearrangeTable(inData[0], rearranger, exec);
         int rowCount = out.getRowCount();
         int fail = failCount.get();
-        if (rowCount > 0 && rowCount == fail) {
-            throw new Exception("None of the URLs could be read  as images (see log for details)");
-        } else if (fail > 0) {
-            setWarningMessage("Failed to read " + fail + "/" + rowCount + " files");
+        if (fail > 0) {
+            setWarningMessage("Failed to read " + fail + " of " + rowCount + " files");
         }
         return new BufferedDataTable[]{out};
     }
