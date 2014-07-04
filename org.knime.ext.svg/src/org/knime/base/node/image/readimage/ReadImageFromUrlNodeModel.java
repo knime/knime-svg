@@ -51,6 +51,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -58,6 +59,7 @@ import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.apache.commons.lang.Validate;
 import org.knime.base.data.xml.SvgCell;
 import org.knime.base.data.xml.SvgImageContent;
@@ -91,6 +93,12 @@ import org.knime.core.util.FileUtil;
  * @author Marcel Hanser
  */
 final class ReadImageFromUrlNodeModel extends NodeModel {
+
+    /**
+     *
+     */
+    private static final String EXCEPTION_MESSAGE_TEMPLATE =
+        "Failed to read image content from row '%s', url='%s': %s";
 
     private static final NodeLogger LOGGER = NodeLogger.getLogger(ReadImageFromUrlNodeModel.class);
 
@@ -182,20 +190,38 @@ final class ReadImageFromUrlNodeModel extends NodeModel {
                 if (cell.isMissing()) {
                     return DataType.getMissingCell();
                 } else {
-                    String url = ((StringValue)cell).getStringValue();
+                    String urlValue = ((StringValue)cell).getStringValue();
+                    URL url = null;
                     try {
+                        url = new URL(urlValue);
                         return toImageCell(url);
-                    } catch (Exception e) {
+                    } catch (UnknownHostException e) {
+                        String message = String.format(EXCEPTION_MESSAGE_TEMPLATE, row.getKey(), urlValue,
+                                "unknown host: " + e.getMessage());
+                        LOGGER.warn(message, e);
                         if (m_config.isFailOnInvalid()) {
-                            if (e instanceof RuntimeException) {
-                                throw (RuntimeException)e;
-                            } else {
-                                throw new RuntimeException(e.getMessage(), e);
+                            if ("file".equals(url.getProtocol())) {
+                                StringBuilder b = new StringBuilder(message);
+                                b.append("\nNote that file URLs should look like ");
+                                if (SystemUtils.IS_OS_WINDOWS) {
+                                    b.append("'file:/C:\\file.png' on windows.\n");
+                                } else {
+                                    b.append("'file:/some/path/file.png' on linux and mac.\n");
+                                }
+                                message = b.toString();
                             }
+                            throw new RuntimeException(message, e);
                         } else {
-                            String message =
-                                "Failed to read image content from " + "\"" + url + "\": " + e.getMessage();
-                            LOGGER.warn(message, e);
+                            failCounter.incrementAndGet();
+                            return new MissingCell(e.getMessage());
+                        }
+                    } catch (Exception e) {
+                        String message =
+                            String.format(EXCEPTION_MESSAGE_TEMPLATE, row.getKey(), urlValue, e.getMessage());
+                        LOGGER.warn(message, e);
+                        if (m_config.isFailOnInvalid()) {
+                            throw new RuntimeException(message, e);
+                        } else {
                             failCounter.incrementAndGet();
                             return new MissingCell(e.getMessage());
                         }
@@ -236,8 +262,7 @@ final class ReadImageFromUrlNodeModel extends NodeModel {
      * @throws IllegalArgumentException If the image is invalid
      * @see ImageType#createImageCell(InputStream)
      */
-    private DataCell toImageCell(final String urlValue) throws IOException {
-        final URL url = new URL(urlValue);
+    private DataCell toImageCell(final URL url) throws IOException {
 
         final byte[] buffer = new byte[FIRST_BYTES_NUM];
 
@@ -271,7 +296,7 @@ final class ReadImageFromUrlNodeModel extends NodeModel {
         EnumSet<ImageType> enumsd = EnumSet.allOf(ImageType.class);
         enumsd.removeAll(m_config.getTypes());
 
-        throw new IllegalArgumentException("no image type found for given URL: " + urlValue + "."
+        throw new IllegalArgumentException("no image type found for given URL: " + url.toString() + "."
             + (enumsd.isEmpty() ? "" : //
                 "You might configure the node to except also this types: " + enumsd.toString()));
     }
