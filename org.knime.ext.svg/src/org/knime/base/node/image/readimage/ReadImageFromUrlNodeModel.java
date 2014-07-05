@@ -84,6 +84,7 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.util.StringFormat;
 import org.knime.core.util.FileUtil;
 
 /**
@@ -196,8 +197,8 @@ final class ReadImageFromUrlNodeModel extends NodeModel {
                         url = new URL(urlValue);
                         return toImageCell(url);
                     } catch (UnknownHostException e) {
-                        String message = String.format(EXCEPTION_MESSAGE_TEMPLATE, row.getKey(), urlValue,
-                                "unknown host: " + e.getMessage());
+                        String message = String.format(EXCEPTION_MESSAGE_TEMPLATE, row.getKey(),
+                            StringFormat.formatPath(urlValue, 50), "unknown host: " + e.getMessage());
                         LOGGER.warn(message, e);
                         if (m_config.isFailOnInvalid()) {
                             if ("file".equals(url.getProtocol())) {
@@ -217,7 +218,8 @@ final class ReadImageFromUrlNodeModel extends NodeModel {
                         }
                     } catch (Exception e) {
                         String message =
-                            String.format(EXCEPTION_MESSAGE_TEMPLATE, row.getKey(), urlValue, e.getMessage());
+                            String.format(EXCEPTION_MESSAGE_TEMPLATE, row.getKey(),
+                                StringFormat.formatPath(urlValue, 50), e.getMessage());
                         LOGGER.warn(message, e);
                         if (m_config.isFailOnInvalid()) {
                             throw new RuntimeException(message, e);
@@ -296,9 +298,8 @@ final class ReadImageFromUrlNodeModel extends NodeModel {
         EnumSet<ImageType> enumsd = EnumSet.allOf(ImageType.class);
         enumsd.removeAll(m_config.getTypes());
 
-        throw new IllegalArgumentException("no image type found for given URL: " + url.toString() + "."
-            + (enumsd.isEmpty() ? "" : //
-                "You might configure the node to except also this types: " + enumsd.toString()));
+        throw new IllegalArgumentException("no applicable image type" + (enumsd.isEmpty()
+                ? "" : "; you may want to reconfigure the node to also accept type(s): " + enumsd.toString()));
     }
 
     /**
