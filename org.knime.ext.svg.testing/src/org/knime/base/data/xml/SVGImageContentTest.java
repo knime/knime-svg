@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 import org.junit.Test;
+import org.knime.core.node.NodeLogger;
 
 /**
  * Testcases for {@link SvgImageContent}
@@ -76,6 +77,7 @@ public class SVGImageContentTest {
      */
     @Test
     public void testSerialization() throws IOException {
+        NodeLogger.getLogger(getClass()).debug("Context classloader: " + Thread.currentThread().getContextClassLoader());
         byte[] input = SVG.getBytes(Charset.forName("UTF-8"));
 
         ByteArrayInputStream is = new ByteArrayInputStream(input);
