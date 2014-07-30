@@ -144,18 +144,17 @@ public class SvgImageContent implements ImageContent {
 
         // workaround for MacOS that does not have a proper context classloader in the main thread
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        SAXSVGDocumentFactory f;
+        SAXSVGDocumentFactory  f = new SAXSVGDocumentFactory(parserClass);
         if (cl == null) {
             Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             try {
-                 f = new SAXSVGDocumentFactory(parserClass);
+                m_doc = f.createSVGDocument(null, in);
             } finally {
                 Thread.currentThread().setContextClassLoader(null);
             }
         } else {
-            f = new SAXSVGDocumentFactory(parserClass);
+            m_doc = f.createSVGDocument(null, in);
         }
-        m_doc = f.createSVGDocument(null, in);
     }
 
     /**
