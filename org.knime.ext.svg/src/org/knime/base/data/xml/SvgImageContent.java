@@ -141,8 +141,20 @@ public class SvgImageContent implements ImageContent {
      */
     public SvgImageContent(final InputStream in) throws IOException {
         String parserClass = XMLResourceDescriptor.getXMLParserClassName();
-        SAXSVGDocumentFactory f = new SAXSVGDocumentFactory(parserClass);
-        m_doc = f.createSVGDocument(null, in);
+
+        // workaround for MacOS that does not have a proper context classloader in the main thread
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        SAXSVGDocumentFactory  f = new SAXSVGDocumentFactory(parserClass);
+        if (cl == null) {
+            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+            try {
+                m_doc = f.createSVGDocument(null, in);
+            } finally {
+                Thread.currentThread().setContextClassLoader(null);
+            }
+        } else {
+            m_doc = f.createSVGDocument(null, in);
+        }
     }
 
     /**
