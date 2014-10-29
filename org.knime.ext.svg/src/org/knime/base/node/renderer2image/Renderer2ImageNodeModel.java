@@ -274,6 +274,9 @@ public class Renderer2ImageNodeModel extends NodeModel {
      * @return a new {@link SvgCell} or {@link SvgBlobCell}
      */
     DataCell createSvgCell(final DataCell cell, final DataValueRenderer renderer) {
+        if (cell.isMissing()) {
+            return cell;
+        }
         Component comp = renderer.getRendererComponent(cell);
         if (comp instanceof SvgProvider) {
             SVGDocument doc = ((SvgProvider)comp).getSvg();
@@ -308,6 +311,9 @@ public class Renderer2ImageNodeModel extends NodeModel {
      * @throws IOException if an I/O error occurs while creating the image
      */
     DataCell createPngCell(final DataCell cell, final DataValueRenderer renderer) throws IOException {
+        if (cell.isMissing()) {
+            return cell;
+        }
         Component comp = renderer.getRendererComponent(cell);
 
         Dimension size = m_settings.pngSize();
