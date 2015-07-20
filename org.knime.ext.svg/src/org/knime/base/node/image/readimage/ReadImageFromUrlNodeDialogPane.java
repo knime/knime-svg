@@ -68,7 +68,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.knime.base.node.image.readimage.ReadImageFromUrlNodeModel.ImageType;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.StringValue;

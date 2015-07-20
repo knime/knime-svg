@@ -55,12 +55,15 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 
 import org.apache.batik.dom.svg.SVGDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
+import org.apache.commons.lang3.concurrent.ConcurrentException;
+import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.knime.base.data.xml.SvgBlobCell;
 import org.knime.base.data.xml.SvgCell;
 import org.knime.base.data.xml.SvgCellFactory;
@@ -73,6 +76,7 @@ import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.DataTableSpecCreator;
 import org.knime.core.data.DataType;
 import org.knime.core.data.container.ColumnRearranger;
 import org.knime.core.data.container.SingleCellFactory;
@@ -80,7 +84,7 @@ import org.knime.core.data.image.png.PNGImageBlobCell;
 import org.knime.core.data.image.png.PNGImageCell;
 import org.knime.core.data.image.png.PNGImageContent;
 import org.knime.core.data.renderer.DataValueRenderer;
-import org.knime.core.data.renderer.DataValueRendererFamily;
+import org.knime.core.data.renderer.DataValueRendererFactory;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -89,6 +93,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.util.Pointer;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.svg.SVGDocument;
@@ -165,8 +170,9 @@ public class Renderer2ImageNodeModel extends NodeModel {
         DataTableSpec inSpec = inData[0].getDataTableSpec();
         DataColumnSpec cs = inSpec.getColumnSpec(m_settings.columnName());
 
-        ColumnRearranger crea = createRearranger(inSpec, cs);
+        MyColumnRearranger crea = createRearranger(inSpec, cs);
         BufferedDataTable outTable = exec.createColumnRearrangeTable(inData[0], crea, exec);
+        outTable = exec.createSpecReplacerTable(outTable, fixPropertiesInSpec(outTable.getSpec(), crea));
         return new BufferedDataTable[]{outTable};
     }
 
@@ -203,41 +209,45 @@ public class Renderer2ImageNodeModel extends NodeModel {
         return new DataTableSpec[]{createRearranger(inSpecs[0], cs).createSpec()};
     }
 
-    private ColumnRearranger createRearranger(final DataTableSpec inSpec, final DataColumnSpec colSpec)
+    private MyColumnRearranger createRearranger(final DataTableSpec inSpec, final DataColumnSpec colSpec)
         throws InvalidSettingsException {
 
-        final DataValueRendererFamily renderer = colSpec.getType().getRenderer(colSpec);
-        boolean found = false;
-        for (String desc : renderer.getRendererDescriptions()) {
-            if (desc.equals(m_settings.rendererDescription())) {
-                found = true;
+        Collection<DataValueRendererFactory> rendererFactories = colSpec.getType().getRendererFactories();
+
+        final Pointer<DataValueRendererFactory> activeRendererPointer = new Pointer<>();
+        for (DataValueRendererFactory f: rendererFactories) {
+            if (f.getDescription().equals(m_settings.rendererDescription())) {
+                activeRendererPointer.set(f);
                 break;
             }
         }
-        if (!found) {
+        if (activeRendererPointer.get() == null) {
             throw new InvalidSettingsException("Renderer '" + m_settings.rendererDescription()
                 + "' does not exist for column '" + m_settings.columnName() + "'");
         }
-        renderer.setActiveRenderer(m_settings.rendererDescription());
 
-        String colName = m_settings.replaceColumn() ? m_settings.columnName() : m_settings.newColumnName();
 
+        String colName = m_settings.replaceColumn() ? m_settings.columnName()
+            : DataTableSpec.getUniqueColumnName(inSpec, m_settings.newColumnName());
+
+        final LazyInitializer<DataValueRenderer> rendererInitializer = new LazyInitializer<DataValueRenderer>() {
+            @Override
+            protected DataValueRenderer initialize() {
+                return activeRendererPointer.get().createRenderer(colSpec);
+            }
+        };
         final int colIndex = inSpec.findColumnIndex(m_settings.columnName());
         SingleCellFactory cf;
         if (ImageType.Svg.equals(m_settings.imageType())) {
             DataColumnSpecCreator append = new DataColumnSpecCreator(colName, SvgCellFactory.TYPE);
-            Dimension prefSize = renderer.getPreferredSize();
-
-            HashMap<String, String> newProps = new HashMap<String, String>();
-            newProps.put(SvgValueRenderer.OPTION_KEEP_ASPECT_RATIO, "true");
-            newProps.put(SvgValueRenderer.OPTION_PREFERRED_HEIGHT, Integer.toString(prefSize.height));
-            newProps.put(SvgValueRenderer.OPTION_PREFERRED_WIDTH, Integer.toString(prefSize.width));
-            DataColumnProperties props = new DataColumnProperties(newProps);
-            append.setProperties(props);
             cf = new SingleCellFactory(append.createSpec()) {
                 @Override
                 public DataCell getCell(final DataRow row) {
-                    return createSvgCell(row.getCell(colIndex), renderer);
+                    try {
+                        return createSvgCell(row.getCell(colIndex), rendererInitializer.get());
+                    } catch (ConcurrentException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             };
         } else if (ImageType.Png.equals(m_settings.imageType())) {
@@ -246,7 +256,9 @@ public class Renderer2ImageNodeModel extends NodeModel {
                 @Override
                 public DataCell getCell(final DataRow row) {
                     try {
-                        return createPngCell(row.getCell(colIndex), renderer);
+                        return createPngCell(row.getCell(colIndex), rendererInitializer.get());
+                    } catch (ConcurrentException e) {
+                        throw new RuntimeException(e);
                     } catch (IOException ex) {
                         getLogger().error("Could not create PNG image: " + ex.getMessage(), ex);
                         return DataType.getMissingCell();
@@ -256,7 +268,7 @@ public class Renderer2ImageNodeModel extends NodeModel {
         } else {
             throw new InvalidSettingsException("Unsupported image type: " + m_settings.imageType());
         }
-        ColumnRearranger crea = new ColumnRearranger(inSpec);
+        MyColumnRearranger crea = new MyColumnRearranger(inSpec, colName, rendererInitializer);
         if (m_settings.replaceColumn()) {
             crea.replace(cf, m_settings.columnName());
         } else {
@@ -264,6 +276,30 @@ public class Renderer2ImageNodeModel extends NodeModel {
         }
 
         return crea;
+    }
+
+    private DataTableSpec fixPropertiesInSpec(final DataTableSpec spec, final MyColumnRearranger rearranger)
+            throws ConcurrentException {
+        if (!ImageType.Svg.equals(m_settings.imageType())) {
+            return spec;
+        }
+        DataTableSpecCreator tableSpecCreator = new DataTableSpecCreator(spec);
+
+        int columnIndex = spec.findColumnIndex(rearranger.getColName());
+        assert columnIndex >= 0;
+        DataColumnSpec oldColSpec = spec.getColumnSpec(columnIndex);
+
+        DataColumnSpecCreator newColSpecCreator = new DataColumnSpecCreator(oldColSpec);
+        Dimension prefSize = rearranger.getRenderer().getPreferredSize();
+
+        HashMap<String, String> newProps = new HashMap<String, String>();
+        newProps.put(SvgValueRenderer.OPTION_KEEP_ASPECT_RATIO, "true");
+        newProps.put(SvgValueRenderer.OPTION_PREFERRED_HEIGHT, Integer.toString(prefSize.height));
+        newProps.put(SvgValueRenderer.OPTION_PREFERRED_WIDTH, Integer.toString(prefSize.width));
+        DataColumnProperties props = new DataColumnProperties(newProps);
+        newColSpecCreator.setProperties(props);
+        tableSpecCreator.replaceColumn(columnIndex, newColSpecCreator.createSpec());
+        return tableSpecCreator.createSpec();
     }
 
     /**
@@ -331,6 +367,34 @@ public class Renderer2ImageNodeModel extends NodeModel {
         bos.close();
 
         return new PNGImageContent(bos.toByteArray()).toImageCell();
+    }
+
+    private static final class MyColumnRearranger extends ColumnRearranger {
+
+        private String m_colName;
+        private LazyInitializer<DataValueRenderer> m_rendererInitializer;
+
+        /** @param original forwarded to super.
+         * @param rendererInitializer
+         * @param colName */
+        MyColumnRearranger(final DataTableSpec original, final String colName,
+            final LazyInitializer<DataValueRenderer> rendererInitializer) {
+            super(original);
+            m_colName = colName;
+            m_rendererInitializer = rendererInitializer;
+        }
+
+        /** @return the colName of the modified/new column. */
+        String getColName() {
+            return m_colName;
+        }
+
+        /** @return the renderer used (lazy initialized - don't call on configure()).
+         * @throws ConcurrentException as per commons.lang API - not actually thrown. */
+        DataValueRenderer getRenderer() throws ConcurrentException {
+            return m_rendererInitializer.get();
+        }
+
     }
 
 }

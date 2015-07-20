@@ -59,8 +59,8 @@ import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.SystemUtils;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.SystemUtils;
+import org.apache.commons.lang3.Validate;
 import org.knime.base.data.xml.SvgCell;
 import org.knime.base.data.xml.SvgImageContent;
 import org.knime.core.data.DataCell;
