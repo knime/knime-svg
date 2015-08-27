@@ -48,10 +48,11 @@
 package org.knime.base.data.xml;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.io.StringReader;
 import java.lang.ref.SoftReference;
 
-import org.apache.batik.css.engine.value.svg.SVGValue;
 import org.apache.batik.dom.svg.SAXSVGDocumentFactory;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.util.XMLResourceDescriptor;
@@ -59,7 +60,7 @@ import org.knime.core.data.DataCell;
 import org.knime.core.data.DataCellDataInput;
 import org.knime.core.data.DataCellDataOutput;
 import org.knime.core.data.DataCellSerializer;
-import org.knime.core.data.DataValue;
+import org.knime.core.data.DataTypeRegistry;
 import org.knime.core.data.StringValue;
 import org.knime.core.data.container.BlobDataCell;
 import org.knime.core.data.image.ImageContent;
@@ -72,8 +73,12 @@ import org.w3c.dom.svg.SVGDocument;
  */
 @SuppressWarnings("serial")
 public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue {
-    private static class SvgSerializer implements
-            DataCellSerializer<SvgBlobCell> {
+    /**
+     * Serializer for {@link SvgBlobCell}s.
+     *
+     * @noreference This class is not intended to be referenced by clients.
+     */
+    public static final class SvgSerializer implements DataCellSerializer<SvgBlobCell> {
         /**
          * {@inheritDoc}
          */
@@ -100,8 +105,6 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue {
         }
     }
 
-    private final static SvgSerializer SERIALIZER = new SvgSerializer();
-
     private SoftReference<String> m_xmlString;
 
     private final SvgImageContent m_content;
@@ -112,19 +115,11 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue {
      * Returns the serializer for SVG cells.
      *
      * @return a serializer
+     * @deprecated use {@link DataTypeRegistry#getSerializer(Class)} instead
      */
+    @Deprecated
     public static DataCellSerializer<SvgBlobCell> getCellSerializer() {
-        return SERIALIZER;
-    }
-
-    /**
-     * Returns the preferred value class for SVG cells which is {@link SVGValue}
-     * .
-     *
-     * @return the preferred value class
-     */
-    public static Class<? extends DataValue> getPreferredValueClass() {
-        return SvgValue.class;
+        return new SvgSerializer();
     }
 
     /**
@@ -137,7 +132,9 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue {
      *
      * @param xmlString an SVG document
      * @throws IOException if an error occurs while reading the XML string.
+     * @deprecated use {@link SvgCellFactory#create(String)} instead
      */
+    @Deprecated
     public SvgBlobCell(final String xmlString) throws IOException {
         m_xmlString = new SoftReference<String>(xmlString);
         String parserClass = XMLResourceDescriptor.getXMLParserClassName();
@@ -156,9 +153,27 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue {
      * or a blob cell is created (depending on the size).
      *
      * @param doc an SVG document
+     * @deprecated use {@link SvgCellFactory#create(SVGDocument)} instead
      */
+    @Deprecated
     public SvgBlobCell(final SVGDocument doc) {
         m_content = new SvgImageContent(doc, true);
+    }
+
+
+    SvgBlobCell(final InputStream is) throws IOException {
+        String parserClass = XMLResourceDescriptor.getXMLParserClassName();
+        SAXSVGDocumentFactory f = new SAXSVGDocumentFactory(parserClass);
+
+        m_content = new SvgImageContent(f.createSVGDocument(null, is), false);
+    }
+
+
+    SvgBlobCell(final Reader reader) throws IOException {
+        String parserClass = XMLResourceDescriptor.getXMLParserClassName();
+        SAXSVGDocumentFactory f = new SAXSVGDocumentFactory(parserClass);
+
+        m_content = new SvgImageContent(f.createSVGDocument(null, reader), false);
     }
 
     /**

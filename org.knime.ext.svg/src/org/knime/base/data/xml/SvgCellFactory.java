@@ -48,8 +48,14 @@
 package org.knime.base.data.xml;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.text.ParseException;
 
 import org.knime.core.data.DataCell;
+import org.knime.core.data.DataCellFactory.FromComplexString;
+import org.knime.core.data.DataCellFactory.FromInputStream;
+import org.knime.core.data.DataCellFactory.FromReader;
 import org.knime.core.data.DataType;
 import org.knime.core.data.container.BlobDataCell;
 import org.knime.core.node.NodeLogger;
@@ -61,7 +67,7 @@ import org.w3c.dom.svg.SVGDocument;
  *
  * @author Thorsten Meinl, University of Konstanz
  */
-public class SvgCellFactory {
+public final class SvgCellFactory implements FromComplexString, FromReader, FromInputStream {
     /**
      * Minimum size for blobs in bytes. That is, if a given string is at least
      * as large as this value, it will be represented by a blob cell
@@ -105,11 +111,6 @@ public class SvgCellFactory {
     /** Type for CML cells. */
     public static final DataType TYPE = DataType.getType(SvgCell.class);
 
-    /** Don't instantiate this class. */
-    private SvgCellFactory() {
-
-    }
-
     /**
      * Factory method to create {@link DataCell} representing SVG documents.
      * The returned cell is either of type {@link SvgCell} (for small strings)
@@ -121,6 +122,7 @@ public class SvgCellFactory {
      * @throws IOException if an error occurs while reading the XML string
      * @throws NullPointerException if argument is null
      */
+    @SuppressWarnings("deprecation")
     public static DataCell create(final String string) throws IOException {
         if (string == null) {
             throw new NullPointerException("SVG must not be null");
@@ -142,11 +144,52 @@ public class SvgCellFactory {
      * @return DataCell representing the SVG document
      * @throws NullPointerException if argument is null
      */
+    @SuppressWarnings("deprecation")
     public static DataCell create(final SVGDocument doc) {
         if (doc == null) {
             throw new NullPointerException("SVG must not be null");
         }
         // TODO add a reasonable size check
         return new SvgBlobCell(doc);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @since 3.0
+     */
+    @Override
+    public DataCell createCell(final String input) {
+        try {
+            return create(input);
+        } catch (IOException ex) {
+            throw new IllegalArgumentException(ex);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     * @since 3.0
+     */
+    @Override
+    public DataType getDataType() {
+        return TYPE;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @since 3.0
+     */
+    @Override
+    public DataCell createCell(final InputStream input) throws IOException {
+        return new SvgBlobCell(input);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @since 3.0
+     */
+    @Override
+    public DataCell createCell(final Reader input) throws ParseException, IOException {
+        return new SvgBlobCell(input);
     }
 }

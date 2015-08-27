@@ -43,5 +43,20 @@
          </renderer>
       </dataValue>
    </extension>
+   <extension
+         point="org.knime.core.DataType">
+      <DataType
+            cellClass="org.knime.base.data.xml.SvgCell"
+            factoryClass="org.knime.base.data.xml.SvgCellFactory">
+         <serializer
+               cellClass="org.knime.base.data.xml.SvgCell"
+               serializerClass="org.knime.base.data.xml.SvgCell$SvgSerializer">
+         </serializer>
+         <serializer
+               cellClass="org.knime.base.data.xml.SvgBlobCell"
+               serializerClass="org.knime.base.data.xml.SvgBlobCell$SvgSerializer">
+         </serializer>
+      </DataType>
+   </extension>
 
 </plugin>
