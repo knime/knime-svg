@@ -61,9 +61,11 @@ import org.knime.core.data.DataCellDataInput;
 import org.knime.core.data.DataCellDataOutput;
 import org.knime.core.data.DataCellSerializer;
 import org.knime.core.data.DataTypeRegistry;
+import org.knime.core.data.DataValue;
 import org.knime.core.data.StringValue;
 import org.knime.core.data.container.BlobDataCell;
 import org.knime.core.data.image.ImageContent;
+import org.knime.core.data.xml.util.XmlDomComparer;
 import org.w3c.dom.svg.SVGDocument;
 
 /**
@@ -225,17 +227,16 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue {
      * {@inheritDoc}
      */
     @Override
+    protected boolean equalContent(final DataValue otherValue) {
+        return SvgValue.equalContent(this, (SvgValue)otherValue);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public int hashCode() {
-        String s;
-        if (m_isNormalized && ((s = m_xmlString.get()) != null)) {
-            return s.hashCode();
-        }
-        try {
-            return SvgImageContent.serialize(getDocument()).hashCode();
-        } catch (Exception ex) {
-            throw new RuntimeException(
-                    "Cannot create string representation of XML document", ex);
-        }
+        return XmlDomComparer.hashCode(getDocument(), SvgCell.SVG_XML_CUSTOMIZER);
     }
 
     /**

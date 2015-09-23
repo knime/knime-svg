@@ -53,6 +53,7 @@ import org.knime.core.data.DataValue;
 import org.knime.core.data.ExtensibleUtilityFactory;
 import org.knime.core.data.image.ImageValue;
 import org.knime.core.data.xml.XMLValue;
+import org.knime.core.data.xml.util.XmlDomComparer;
 import org.w3c.dom.svg.SVGDocument;
 
 /**
@@ -75,6 +76,18 @@ public interface SvgValue extends ImageValue, XMLValue {
      * @see DataValue#UTILITY
      */
     UtilityFactory UTILITY = new SvgUtilityFactory();
+
+    /**
+     * Returns whether the two data values have the same content.
+     *
+     * @param v1 the first data value
+     * @param v2 the second data value
+     * @return <code>true</code> if both values are equal, <code>false</code> otherwise
+     * @since 3.0
+     */
+    static boolean equalContent(final SvgValue v1, final SvgValue v2) {
+        return XmlDomComparer.equals(v1.getDocument(), v2.getDocument(), SvgCell.SVG_XML_CUSTOMIZER);
+    }
 
     /** Implementations of the meta information of this value class. */
     class SvgUtilityFactory extends ExtensibleUtilityFactory {

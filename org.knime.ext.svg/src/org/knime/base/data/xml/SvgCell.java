@@ -64,6 +64,7 @@ import org.knime.core.data.DataCellDataOutput;
 import org.knime.core.data.DataCellSerializer;
 import org.knime.core.data.DataType;
 import org.knime.core.data.DataTypeRegistry;
+import org.knime.core.data.DataValue;
 import org.knime.core.data.StringValue;
 import org.knime.core.data.image.ImageContent;
 import org.knime.core.data.xml.util.XmlDomComparer;
@@ -116,7 +117,7 @@ public class SvgCell extends DataCell implements SvgValue, StringValue {
     private static final Collection<String> SVG_TEXT_CONTENT_NOT_IGNORED_TAGS =
             Arrays.asList("text", "tspan", "textPath");
 
-    private static final XmlDomComparerCustomizer SVG_XML_CUSTOMIZER = new XmlDomComparerCustomizer(
+    static final XmlDomComparerCustomizer SVG_XML_CUSTOMIZER = new XmlDomComparerCustomizer(
         ChildrenCompareStrategy.ORDERED) {
 
         @Override
@@ -231,6 +232,14 @@ public class SvgCell extends DataCell implements SvgValue, StringValue {
         } catch (Exception ex) {
             throw new RuntimeException("Cannot create string representation of XML document", ex);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected boolean equalContent(final DataValue otherValue) {
+        return SvgValue.equalContent(this, (SvgValue)otherValue);
     }
 
     /**
