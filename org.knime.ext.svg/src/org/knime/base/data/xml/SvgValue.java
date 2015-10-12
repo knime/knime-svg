@@ -112,7 +112,7 @@ public interface SvgValue extends ImageValue, XMLValue {
          */
         @Override
         public String getName() {
-            return "SVG images";
+            return "SVG image";
         }
     }
 }
