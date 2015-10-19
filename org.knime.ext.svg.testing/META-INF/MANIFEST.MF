@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Testcases for the SVG plug-in
 Bundle-SymbolicName: org.knime.ext.svg.testing;singleton:=true
-Bundle-Version: 3.0.0.qualifier
+Bundle-Version: 3.1.0.qualifier
 Bundle-Vendor: KNIME GmbH, Konstanz, Germany
 Fragment-Host: org.knime.ext.svg;bundle-version="[3,4)"
 Require-Bundle: org.knime.testing;bundle-version="[3.0.0,4.0.0)",
