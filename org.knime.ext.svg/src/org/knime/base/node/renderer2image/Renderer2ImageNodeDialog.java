@@ -72,7 +72,7 @@ import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.data.DataValue;
-import org.knime.core.data.renderer.DataValueRendererFamily;
+import org.knime.core.data.renderer.DataValueRendererFactory;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
@@ -92,11 +92,11 @@ public class Renderer2ImageNodeDialog extends NodeDialogPane {
     @SuppressWarnings("unchecked")
     private final ColumnSelectionComboxBox m_column = new ColumnSelectionComboxBox((Border)null, DataValue.class);
 
-    private final DefaultComboBoxModel m_rendererComboModel = new DefaultComboBoxModel();
+    private final DefaultComboBoxModel<String> m_rendererComboModel = new DefaultComboBoxModel<>();
 
-    private final JComboBox m_rendererDescriptions = new JComboBox(m_rendererComboModel);
+    private final JComboBox<String> m_rendererDescriptions = new JComboBox<>(m_rendererComboModel);
 
-    private final JComboBox m_imageTypes = new JComboBox();
+    private final JComboBox<ImageType> m_imageTypes = new JComboBox<>();
 
     private final JLabel m_pngSize = new JLabel("Image size   ");
 
@@ -173,10 +173,8 @@ public class Renderer2ImageNodeDialog extends NodeDialogPane {
                 if (m_column.getSelectedItem() != null) {
                     DataColumnSpec cs = (DataColumnSpec)m_column.getSelectedItem();
                     DataType type = cs.getType();
-                    DataValueRendererFamily rFamily = type.getRenderer(cs);
-
-                    for (String desc : rFamily.getRendererDescriptions()) {
-                        m_rendererComboModel.addElement(desc);
+                    for (DataValueRendererFactory rFac : type.getRendererFactories()) {
+                        m_rendererComboModel.addElement(rFac.getDescription());
                     }
                 }
             }
