@@ -58,6 +58,7 @@ import org.knime.core.data.DataCellFactory.FromInputStream;
 import org.knime.core.data.DataCellFactory.FromReader;
 import org.knime.core.data.DataType;
 import org.knime.core.data.container.BlobDataCell;
+import org.knime.core.data.convert.DataCellFactoryMethod;
 import org.knime.core.node.NodeLogger;
 import org.w3c.dom.svg.SVGDocument;
 
@@ -158,6 +159,7 @@ public final class SvgCellFactory implements FromComplexString, FromReader, From
      * @since 3.0
      */
     @Override
+    @DataCellFactoryMethod(name = "String (SVG)")
     public DataCell createCell(final String input) {
         try {
             return create(input);
@@ -180,6 +182,7 @@ public final class SvgCellFactory implements FromComplexString, FromReader, From
      * @since 3.0
      */
     @Override
+    @DataCellFactoryMethod(name = "InputStream (SVG)")
     public DataCell createCell(final InputStream input) throws IOException {
         return new SvgBlobCell(input);
     }
@@ -189,6 +192,7 @@ public final class SvgCellFactory implements FromComplexString, FromReader, From
      * @since 3.0
      */
     @Override
+    @DataCellFactoryMethod(name = "Reader (SVG)")
     public DataCell createCell(final Reader input) throws ParseException, IOException {
         return new SvgBlobCell(input);
     }

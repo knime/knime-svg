@@ -51,6 +51,7 @@ import javax.swing.Icon;
 
 import org.knime.core.data.DataValue;
 import org.knime.core.data.ExtensibleUtilityFactory;
+import org.knime.core.data.convert.DataValueAccessMethod;
 import org.knime.core.data.image.ImageValue;
 import org.knime.core.data.xml.XMLValue;
 import org.knime.core.data.xml.util.XmlDomComparer;
@@ -68,6 +69,7 @@ public interface SvgValue extends ImageValue, XMLValue {
      * In contrast to {@link XMLValue#getDocument()} this methods always returns an {@link SVGDocument}.
      */
     @Override
+    @DataValueAccessMethod(name = "SVGDocument")
     SVGDocument getDocument();
 
     /**
