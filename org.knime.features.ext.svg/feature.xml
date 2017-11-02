@@ -3,14 +3,14 @@
       id="org.knime.features.ext.svg"
       label="KNIME SVG Support"
       version="3.5.0.qualifier"
-      provider-name="KNIME GmbH, Konstanz, Germany">
+      provider-name="KNIME AG, Zurich, Switzerland">
 
    <description>
       This features contains SVG (Scalable Vector Graphics) support for KNIME. It enables export of all views and whole workflows as SVG, and contains a cell implementation holding SVG images and some processing nodes.
    </description>
 
    <copyright>
-      Copyright by KNIME GmbH, Konstanz, Germany
+      Copyright by KNIME AG, Zurich, Switzerland
    </copyright>
 
    <license>
