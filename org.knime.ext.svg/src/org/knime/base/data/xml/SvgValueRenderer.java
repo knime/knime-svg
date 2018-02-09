@@ -56,6 +56,7 @@ import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.batik.bridge.BridgeContext;
 import org.apache.batik.bridge.GVTBuilder;
@@ -68,6 +69,7 @@ import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.renderer.AbstractDataValueRendererFactory;
 import org.knime.core.data.renderer.AbstractPainterDataValueRenderer;
 import org.knime.core.data.renderer.DataValueRenderer;
+import org.knime.core.data.util.AutocloseableSupplier;
 import org.w3c.dom.svg.SVGDocument;
 
 /**
@@ -142,6 +144,8 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer
 
     private final Dimension m_preferredSize;
 
+    private final ReentrantLock m_lock;
+
     /**
      * Creates a new renderer for SVG values. The passed spec may contain
      * properties that can be used to fine-tune rendering.
@@ -161,6 +165,8 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer
                 Integer.parseInt(props.getProperty(OPTION_PREFERRED_HEIGHT,
                         "90"));
         m_preferredSize = new Dimension(width, height);
+
+        m_lock = new ReentrantLock();
     }
 
     /**
@@ -178,8 +184,8 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer
             return;
         }
 
-        try {
-            m_doc = ((SvgValue)value).getDocument();
+        try (AutocloseableSupplier<SVGDocument> supplier = ((SvgValue)value).getDocumentSupplier()){
+            m_doc = supplier.get();
         } catch (Exception ex) {
             throw new RuntimeException("Unable to render SVG", ex);
         }
@@ -277,9 +283,20 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer
 
     /**
      * {@inheritDoc}
+     * @deprecated
      */
+    @Deprecated
     @Override
     public SVGDocument getSvg() {
         return m_doc;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @since 3.6
+     */
+    @Override
+    public AutocloseableSupplier<SVGDocument> getSvgSupplier() {
+        return new AutocloseableSupplier<SVGDocument>(m_doc, m_lock);
     }
 }

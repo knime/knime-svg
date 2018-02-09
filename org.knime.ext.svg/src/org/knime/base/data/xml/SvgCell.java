@@ -54,6 +54,7 @@ import java.io.StringReader;
 import java.lang.ref.SoftReference;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.batik.dom.svg.SAXSVGDocumentFactory;
 import org.apache.batik.transcoder.TranscoderException;
@@ -67,6 +68,7 @@ import org.knime.core.data.DataTypeRegistry;
 import org.knime.core.data.DataValue;
 import org.knime.core.data.StringValue;
 import org.knime.core.data.image.ImageContent;
+import org.knime.core.data.util.AutocloseableSupplier;
 import org.knime.core.data.xml.util.XmlDomComparer;
 import org.knime.core.data.xml.util.XmlDomComparerCustomizer;
 import org.knime.core.data.xml.util.XmlDomComparerCustomizer.ChildrenCompareStrategy;
@@ -141,6 +143,8 @@ public class SvgCell extends DataCell implements SvgValue, StringValue {
 
     private SoftReference<String> m_xmlString;
 
+    private final ReentrantLock m_lock = new ReentrantLock();
+
     private final SvgImageContent m_content;
 
     /**
@@ -206,7 +210,9 @@ public class SvgCell extends DataCell implements SvgValue, StringValue {
 
     /**
      * {@inheritDoc}
+     * @deprecated use {@link #getDocumentSupplier()} instead.
      */
+    @Deprecated
     @Override
     public SVGDocument getDocument() {
         return m_content.getSvgDocument();
@@ -227,8 +233,9 @@ public class SvgCell extends DataCell implements SvgValue, StringValue {
     protected boolean equalsDataCell(final DataCell dc) {
         SvgCell cell = (SvgCell)dc;
 
-        try {
-            return XmlDomComparer.equals(getDocument(), cell.getDocument(), SVG_XML_CUSTOMIZER);
+        try (AutocloseableSupplier<SVGDocument> thisSupplier = getDocumentSupplier();
+                AutocloseableSupplier<SVGDocument> cellSupplier = cell.getDocumentSupplier()) {
+            return XmlDomComparer.equals(thisSupplier.get(), cellSupplier.get(), SVG_XML_CUSTOMIZER);
         } catch (Exception ex) {
             throw new RuntimeException("Cannot create string representation of XML document", ex);
         }
@@ -247,7 +254,9 @@ public class SvgCell extends DataCell implements SvgValue, StringValue {
      */
     @Override
     public int hashCode() {
-        return XmlDomComparer.hashCode(getDocument(), SVG_XML_CUSTOMIZER);
+        try (AutocloseableSupplier<SVGDocument> supplier = getDocumentSupplier()) {
+            return XmlDomComparer.hashCode(supplier.get(), SVG_XML_CUSTOMIZER);
+        }
     }
 
     /**
@@ -281,5 +290,14 @@ public class SvgCell extends DataCell implements SvgValue, StringValue {
     @Override
     public String getImageExtension() {
         return "svg";
+    }
+
+    /**
+     * {@inheritDoc}
+     * @since 3.6
+     */
+    @Override
+    public AutocloseableSupplier<SVGDocument> getDocumentSupplier() {
+        return new AutocloseableSupplier<SVGDocument>(m_content.getSvgDocument(), m_lock);
     }
 }

@@ -85,6 +85,7 @@ import org.knime.core.data.image.png.PNGImageCell;
 import org.knime.core.data.image.png.PNGImageContent;
 import org.knime.core.data.renderer.DataValueRenderer;
 import org.knime.core.data.renderer.DataValueRendererFactory;
+import org.knime.core.data.util.AutocloseableSupplier;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -315,8 +316,11 @@ public class Renderer2ImageNodeModel extends NodeModel {
         }
         Component comp = renderer.getRendererComponent(cell);
         if (comp instanceof SvgProvider) {
-            SVGDocument doc = ((SvgProvider)comp).getSvg();
-            return SvgCellFactory.create(doc);
+
+            try (AutocloseableSupplier<SVGDocument> supplier = ((SvgProvider)comp).getSvgSupplier()) {
+                SVGDocument doc = supplier.get();
+                return SvgCellFactory.create(doc);
+            }
         }
 
         Dimension size = comp.getPreferredSize();

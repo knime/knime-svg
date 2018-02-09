@@ -52,6 +52,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.lang.ref.SoftReference;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.batik.dom.svg.SAXSVGDocumentFactory;
 import org.apache.batik.transcoder.TranscoderException;
@@ -65,6 +66,7 @@ import org.knime.core.data.DataValue;
 import org.knime.core.data.StringValue;
 import org.knime.core.data.container.BlobDataCell;
 import org.knime.core.data.image.ImageContent;
+import org.knime.core.data.util.AutocloseableSupplier;
 import org.knime.core.data.xml.util.XmlDomComparer;
 import org.w3c.dom.svg.SVGDocument;
 
@@ -108,6 +110,8 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue {
     }
 
     private SoftReference<String> m_xmlString;
+
+    private final ReentrantLock m_lock = new ReentrantLock();
 
     private final SvgImageContent m_content;
 
@@ -207,19 +211,22 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue {
             if (this.m_isNormalized && (thisString != null)) {
                 s1 = thisString;
             } else {
-                s1 = SvgImageContent.serialize(getDocument());
+                s1 = SvgImageContent.serialize(getDocumentSupplier().get());
             }
 
             final String cellString = cell.m_xmlString.get();
             if (cell.m_isNormalized && (cellString != null)) {
                 s2 = cellString;
             } else {
-                s2 = SvgImageContent.serialize(cell.getDocument());
+                s2 = SvgImageContent.serialize(cell.getDocumentSupplier().get());
             }
             return s1.equals(s2);
         } catch (Exception ex) {
             throw new RuntimeException(
                     "Cannot create string representation of XML document", ex);
+        } finally {
+            getDocumentSupplier().close();
+            cell.getDocumentSupplier().close();
         }
     }
 
@@ -236,7 +243,9 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue {
      */
     @Override
     public int hashCode() {
-        return XmlDomComparer.hashCode(getDocument(), SvgCell.SVG_XML_CUSTOMIZER);
+        try (AutocloseableSupplier<SVGDocument> supplier = getDocumentSupplier()) {
+            return XmlDomComparer.hashCode(supplier.get(), SvgCell.SVG_XML_CUSTOMIZER);
+        }
     }
 
     /**
@@ -275,5 +284,15 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue {
     public String getImageExtension() {
 
         return "svg";
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @since 3.6
+     */
+    @Override
+    public AutocloseableSupplier<SVGDocument> getDocumentSupplier() {
+        return new AutocloseableSupplier<SVGDocument>(m_content.getSvgDocument(), m_lock);
     }
 }

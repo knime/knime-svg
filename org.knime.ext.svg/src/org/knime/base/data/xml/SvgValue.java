@@ -53,6 +53,7 @@ import org.knime.core.data.DataValue;
 import org.knime.core.data.ExtensibleUtilityFactory;
 import org.knime.core.data.convert.DataValueAccessMethod;
 import org.knime.core.data.image.ImageValue;
+import org.knime.core.data.util.AutocloseableSupplier;
 import org.knime.core.data.xml.XMLValue;
 import org.knime.core.data.xml.util.XmlDomComparer;
 import org.w3c.dom.svg.SVGDocument;
@@ -62,12 +63,16 @@ import org.w3c.dom.svg.SVGDocument;
  *
  * @author Thorsten Meinl, University of Konstanz
  */
-public interface SvgValue extends ImageValue, XMLValue {
+public interface SvgValue extends ImageValue, XMLValue<SVGDocument> {
     /**
      * {@inheritDoc}
      *
      * In contrast to {@link XMLValue#getDocument()} this methods always returns an {@link SVGDocument}.
+     *
+     * @deprecated Deprecated as the access to dom documents is not thread safe (even for reading). Use
+     *             {@link #getDocumentSupplier()} instead.
      */
+    @Deprecated
     @Override
     @DataValueAccessMethod(name = "SVGDocument")
     SVGDocument getDocument();
@@ -88,7 +93,10 @@ public interface SvgValue extends ImageValue, XMLValue {
      * @since 3.0
      */
     static boolean equalContent(final SvgValue v1, final SvgValue v2) {
-        return XmlDomComparer.equals(v1.getDocument(), v2.getDocument(), SvgCell.SVG_XML_CUSTOMIZER);
+        try (AutocloseableSupplier<SVGDocument> s1 = v1.getDocumentSupplier();
+                AutocloseableSupplier<SVGDocument> s2 = v2.getDocumentSupplier()) {
+            return XmlDomComparer.equals(s1.get(), s2.get(), SvgCell.SVG_XML_CUSTOMIZER);
+        }
     }
 
     /** Implementations of the meta information of this value class. */

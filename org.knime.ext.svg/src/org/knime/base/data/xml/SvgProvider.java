@@ -47,6 +47,7 @@
  */
 package org.knime.base.data.xml;
 
+import org.knime.core.data.util.AutocloseableSupplier;
 import org.w3c.dom.svg.SVGDocument;
 
 /**
@@ -60,6 +61,19 @@ public interface SvgProvider {
      * Returns the graphic as an SVG document.
      *
      * @return an SVG document
+     *
+     * @deprecated Deprecated as the access to dom documents is not thread safe (even for reading). Use
+     *             {@link #getSvgSupplier()} instead.
      */
+    @Deprecated
     public SVGDocument getSvg();
+
+    /**
+     * Returns the supplier holding the graphic as an SVG document.
+     *
+     * @return an {@link AutocloseableSupplier} holding the SVG document
+     *
+     * @since 3.6
+     */
+    public AutocloseableSupplier<SVGDocument> getSvgSupplier();
 }
