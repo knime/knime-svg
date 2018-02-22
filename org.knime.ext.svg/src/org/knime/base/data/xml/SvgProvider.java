@@ -47,7 +47,7 @@
  */
 package org.knime.base.data.xml;
 
-import org.knime.core.data.util.AutocloseableSupplier;
+import org.knime.core.data.util.LockedSupplier;
 import org.w3c.dom.svg.SVGDocument;
 
 /**
@@ -71,9 +71,9 @@ public interface SvgProvider {
     /**
      * Returns the supplier holding the graphic as an SVG document.
      *
-     * @return an {@link AutocloseableSupplier} holding the SVG document
+     * @return an {@link LockedSupplier} holding the SVG document
      *
      * @since 3.6
      */
-    public AutocloseableSupplier<SVGDocument> getSvgSupplier();
+    public LockedSupplier<SVGDocument> getSvgSupplier();
 }

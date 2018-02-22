@@ -53,7 +53,7 @@ import org.knime.core.data.DataValue;
 import org.knime.core.data.ExtensibleUtilityFactory;
 import org.knime.core.data.convert.DataValueAccessMethod;
 import org.knime.core.data.image.ImageValue;
-import org.knime.core.data.util.AutocloseableSupplier;
+import org.knime.core.data.util.LockedSupplier;
 import org.knime.core.data.xml.XMLValue;
 import org.knime.core.data.xml.util.XmlDomComparer;
 import org.w3c.dom.svg.SVGDocument;
@@ -93,8 +93,8 @@ public interface SvgValue extends ImageValue, XMLValue<SVGDocument> {
      * @since 3.0
      */
     static boolean equalContent(final SvgValue v1, final SvgValue v2) {
-        try (AutocloseableSupplier<SVGDocument> s1 = v1.getDocumentSupplier();
-                AutocloseableSupplier<SVGDocument> s2 = v2.getDocumentSupplier()) {
+        try (LockedSupplier<SVGDocument> s1 = v1.getDocumentSupplier();
+                LockedSupplier<SVGDocument> s2 = v2.getDocumentSupplier()) {
             return XmlDomComparer.equals(s1.get(), s2.get(), SvgCell.SVG_XML_CUSTOMIZER);
         }
     }

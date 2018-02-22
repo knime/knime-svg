@@ -66,7 +66,7 @@ import org.knime.core.data.DataValue;
 import org.knime.core.data.StringValue;
 import org.knime.core.data.container.BlobDataCell;
 import org.knime.core.data.image.ImageContent;
-import org.knime.core.data.util.AutocloseableSupplier;
+import org.knime.core.data.util.LockedSupplier;
 import org.knime.core.data.xml.util.XmlDomComparer;
 import org.w3c.dom.svg.SVGDocument;
 
@@ -206,8 +206,8 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue {
     protected boolean equalsDataCell(final DataCell dc) {
         SvgBlobCell cell = (SvgBlobCell)dc;
 
-        try (AutocloseableSupplier<SVGDocument> thisSupplier = getDocumentSupplier();
-             AutocloseableSupplier<SVGDocument> cellSupplier = cell.getDocumentSupplier()) {
+        try (LockedSupplier<SVGDocument> thisSupplier = getDocumentSupplier();
+             LockedSupplier<SVGDocument> cellSupplier = cell.getDocumentSupplier()) {
             return XmlDomComparer.equals(thisSupplier.get(), cellSupplier.get(), SvgCell.SVG_XML_CUSTOMIZER);
        }
     }
@@ -225,7 +225,7 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue {
      */
     @Override
     public int hashCode() {
-        try (AutocloseableSupplier<SVGDocument> supplier = getDocumentSupplier()) {
+        try (LockedSupplier<SVGDocument> supplier = getDocumentSupplier()) {
             return XmlDomComparer.hashCode(supplier.get(), SvgCell.SVG_XML_CUSTOMIZER);
         }
     }
@@ -274,7 +274,7 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue {
      * @since 3.6
      */
     @Override
-    public AutocloseableSupplier<SVGDocument> getDocumentSupplier() {
-        return new AutocloseableSupplier<SVGDocument>(m_content.getSvgDocument(), m_lock);
+    public LockedSupplier<SVGDocument> getDocumentSupplier() {
+        return new LockedSupplier<SVGDocument>(m_content.getSvgDocument(), m_lock);
     }
 }

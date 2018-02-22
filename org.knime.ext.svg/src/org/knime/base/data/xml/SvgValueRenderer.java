@@ -69,7 +69,7 @@ import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.renderer.AbstractDataValueRendererFactory;
 import org.knime.core.data.renderer.AbstractPainterDataValueRenderer;
 import org.knime.core.data.renderer.DataValueRenderer;
-import org.knime.core.data.util.AutocloseableSupplier;
+import org.knime.core.data.util.LockedSupplier;
 import org.w3c.dom.svg.SVGDocument;
 
 /**
@@ -184,7 +184,7 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer
             return;
         }
 
-        try (AutocloseableSupplier<SVGDocument> supplier = ((SvgValue)value).getDocumentSupplier()){
+        try (LockedSupplier<SVGDocument> supplier = ((SvgValue)value).getDocumentSupplier()){
             m_doc = supplier.get();
         } catch (Exception ex) {
             throw new RuntimeException("Unable to render SVG", ex);
@@ -296,7 +296,7 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer
      * @since 3.6
      */
     @Override
-    public AutocloseableSupplier<SVGDocument> getSvgSupplier() {
-        return new AutocloseableSupplier<SVGDocument>(m_doc, m_lock);
+    public LockedSupplier<SVGDocument> getSvgSupplier() {
+        return new LockedSupplier<SVGDocument>(m_doc, m_lock);
     }
 }
