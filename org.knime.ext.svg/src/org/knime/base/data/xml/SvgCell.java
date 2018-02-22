@@ -234,10 +234,8 @@ public class SvgCell extends DataCell implements SvgValue, StringValue {
         SvgCell cell = (SvgCell)dc;
 
         try (AutocloseableSupplier<SVGDocument> thisSupplier = getDocumentSupplier();
-                AutocloseableSupplier<SVGDocument> cellSupplier = cell.getDocumentSupplier()) {
+             AutocloseableSupplier<SVGDocument> cellSupplier = cell.getDocumentSupplier()) {
             return XmlDomComparer.equals(thisSupplier.get(), cellSupplier.get(), SVG_XML_CUSTOMIZER);
-        } catch (Exception ex) {
-            throw new RuntimeException("Cannot create string representation of XML document", ex);
         }
     }
 

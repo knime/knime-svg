@@ -186,6 +186,7 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue {
      * {@inheritDoc}
      */
     @Override
+    @Deprecated
     public SVGDocument getDocument() {
         return m_content.getSvgDocument();
     }
@@ -205,29 +206,10 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue {
     protected boolean equalsDataCell(final DataCell dc) {
         SvgBlobCell cell = (SvgBlobCell)dc;
 
-        try {
-            String s1, s2;
-            final String thisString = this.m_xmlString.get();
-            if (this.m_isNormalized && (thisString != null)) {
-                s1 = thisString;
-            } else {
-                s1 = SvgImageContent.serialize(getDocumentSupplier().get());
-            }
-
-            final String cellString = cell.m_xmlString.get();
-            if (cell.m_isNormalized && (cellString != null)) {
-                s2 = cellString;
-            } else {
-                s2 = SvgImageContent.serialize(cell.getDocumentSupplier().get());
-            }
-            return s1.equals(s2);
-        } catch (Exception ex) {
-            throw new RuntimeException(
-                    "Cannot create string representation of XML document", ex);
-        } finally {
-            getDocumentSupplier().close();
-            cell.getDocumentSupplier().close();
-        }
+        try (AutocloseableSupplier<SVGDocument> thisSupplier = getDocumentSupplier();
+             AutocloseableSupplier<SVGDocument> cellSupplier = cell.getDocumentSupplier()) {
+            return XmlDomComparer.equals(thisSupplier.get(), cellSupplier.get(), SvgCell.SVG_XML_CUSTOMIZER);
+       }
     }
 
     /**
