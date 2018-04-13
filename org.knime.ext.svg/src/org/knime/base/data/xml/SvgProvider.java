@@ -47,7 +47,10 @@
  */
 package org.knime.base.data.xml;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 import org.knime.core.data.util.LockedSupplier;
+import org.knime.core.node.NodeLogger;
 import org.w3c.dom.svg.SVGDocument;
 
 /**
@@ -62,18 +65,24 @@ public interface SvgProvider {
      *
      * @return an SVG document
      *
-     * @deprecated Deprecated as the access to dom documents is not thread safe (even for reading). Use
+     * @deprecated Deprecated as the access to dom documents is not thread safe (even for reading). Use/implement
      *             {@link #getSvgSupplier()} instead.
      */
     @Deprecated
     public SVGDocument getSvg();
 
     /**
-     * Returns the supplier holding the graphic as an SVG document.
+     * Returns the supplier holding the graphic as an SVG document. For backward compatibility reasons this method has
+     * a default implementation, which, however is <b>not</b> thread safe. Therefore all implementors of this interface
+     * are strongly encouraged to implement this method.
      *
-     * @return an {@link LockedSupplier} holding the SVG document
+     * @return a {@link LockedSupplier} holding the SVG document
      *
      * @since 3.6
      */
-    public LockedSupplier<SVGDocument> getSvgSupplier();
+    default public LockedSupplier<SVGDocument> getSvgSupplier() {
+        NodeLogger.getLogger(getClass()).coding("Please implement SvgProvider.getSvgSupplier because the default "
+            + "implementation is not thread-safe!");
+        return new LockedSupplier<SVGDocument>(getSvg(), new ReentrantLock());
+    }
 }
