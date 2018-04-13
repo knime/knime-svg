@@ -8,4 +8,12 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="src/org/knime/base/data/xml/SvgProvider.java" type="org.knime.base.data.xml.SvgProvider">
+    	<filter id="403804204">
+    		<message_arguments>
+                <message_argument value="org.knime.base.data.xml.SvgProvider"/>
+                <message_argument value="getSvgSupplier()"/>
+            </message_arguments>
+        </filter>
+    </resource>
 </component>
