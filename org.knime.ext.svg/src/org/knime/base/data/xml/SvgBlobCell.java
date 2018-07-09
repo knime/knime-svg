@@ -56,7 +56,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.batik.dom.svg.SAXSVGDocumentFactory;
 import org.apache.batik.transcoder.TranscoderException;
-import org.apache.batik.util.XMLResourceDescriptor;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataCellDataInput;
 import org.knime.core.data.DataCellDataOutput;
@@ -143,8 +142,7 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue {
     @Deprecated
     public SvgBlobCell(final String xmlString) throws IOException {
         m_xmlString = new SoftReference<String>(xmlString);
-        String parserClass = XMLResourceDescriptor.getXMLParserClassName();
-        SAXSVGDocumentFactory f = new SAXSVGDocumentFactory(parserClass);
+        SAXSVGDocumentFactory f = SvgImageContent.newSAXSVGDocumentFactory();
 
         m_content =
                 new SvgImageContent(f.createSVGDocument(null, new StringReader(
@@ -168,16 +166,13 @@ public class SvgBlobCell extends BlobDataCell implements SvgValue, StringValue {
 
 
     SvgBlobCell(final InputStream is) throws IOException {
-        String parserClass = XMLResourceDescriptor.getXMLParserClassName();
-        SAXSVGDocumentFactory f = new SAXSVGDocumentFactory(parserClass);
-
+        SAXSVGDocumentFactory f = SvgImageContent.newSAXSVGDocumentFactory();
         m_content = new SvgImageContent(f.createSVGDocument(null, is), false);
     }
 
 
     SvgBlobCell(final Reader reader) throws IOException {
-        String parserClass = XMLResourceDescriptor.getXMLParserClassName();
-        SAXSVGDocumentFactory f = new SAXSVGDocumentFactory(parserClass);
+        SAXSVGDocumentFactory f = SvgImageContent.newSAXSVGDocumentFactory();
 
         m_content = new SvgImageContent(f.createSVGDocument(null, reader), false);
     }

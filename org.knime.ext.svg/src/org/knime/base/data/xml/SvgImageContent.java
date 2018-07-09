@@ -63,16 +63,19 @@ import org.apache.batik.bridge.GVTBuilder;
 import org.apache.batik.bridge.UserAgent;
 import org.apache.batik.bridge.UserAgentAdapter;
 import org.apache.batik.dom.svg.SAXSVGDocumentFactory;
+import org.apache.batik.dom.svg.SVGDOMImplementation;
 import org.apache.batik.gvt.GraphicsNode;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.svg2svg.SVGTranscoder;
+import org.apache.batik.util.XMLConstants;
 import org.apache.batik.util.XMLResourceDescriptor;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.image.ImageContent;
 import org.w3c.dom.Document;
 import org.w3c.dom.svg.SVGDocument;
+import org.xml.sax.SAXException;
 
 /**
  * {@link ImageContent} implementation for SVG images.
@@ -140,11 +143,10 @@ public class SvgImageContent implements ImageContent {
      * @throws IOException if an I/O error occurs
      */
     public SvgImageContent(final InputStream in) throws IOException {
-        String parserClass = XMLResourceDescriptor.getXMLParserClassName();
+        SAXSVGDocumentFactory f = newSAXSVGDocumentFactory();
 
-        // workaround for MacOS that does not have a proper context classloader in the main thread
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        SAXSVGDocumentFactory  f = new SAXSVGDocumentFactory(parserClass);
+        // workaround for MacOS that does not have a proper context classloader in the main thread
         if (cl == null) {
             Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             try {
@@ -155,6 +157,31 @@ public class SvgImageContent implements ImageContent {
         } else {
             m_doc = f.createSVGDocument(null, in);
         }
+    }
+
+    /** Create new instance of of the factory (includes names space 'fixes').
+     * Batik 1.7.x requires proper namespace declaration is required.
+     * As this presents a backward compatibility issue we force the name space on the document,
+     * see also https://issues.apache.org/jira/browse/BATIK-764 and https://knime-com.atlassian.net/browse/AP-3136
+     *
+     * @return new instance of a document factory.
+     */
+    static final SAXSVGDocumentFactory newSAXSVGDocumentFactory() {
+        String parserClass = XMLResourceDescriptor.getXMLParserClassName();
+
+        SAXSVGDocumentFactory  f = new SAXSVGDocumentFactory(parserClass) {
+            @Override
+            public void startDocument() throws SAXException {
+                super.startDocument();
+                if (namespaces.get("") == null) {
+                    namespaces.put("", SVGDOMImplementation.SVG_NAMESPACE_URI);
+                }
+                if (namespaces.get("xlink") == null) {
+                    namespaces.put("xlink", XMLConstants.XLINK_NAMESPACE_URI);
+                }
+            }
+        };
+        return f;
     }
 
     /**
@@ -245,4 +272,5 @@ public class SvgImageContent implements ImageContent {
         Dimension dim = getPreferredSize();
         return "SVG " + dim.width + " x " + dim.height;
     }
+
 }
