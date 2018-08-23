@@ -241,7 +241,7 @@ public class Renderer2ImageNodeModel extends NodeModel {
         SingleCellFactory cf;
         if (ImageType.Svg.equals(m_settings.imageType())) {
             DataColumnSpecCreator append = new DataColumnSpecCreator(colName, SvgCellFactory.TYPE);
-            cf = new SingleCellFactory(true, append.createSpec()) {
+            cf = new SingleCellFactory(append.createSpec()) {
                 @Override
                 public DataCell getCell(final DataRow row) {
                     try {
@@ -253,7 +253,7 @@ public class Renderer2ImageNodeModel extends NodeModel {
             };
         } else if (ImageType.Png.equals(m_settings.imageType())) {
             DataColumnSpecCreator append = new DataColumnSpecCreator(colName, PNGImageContent.TYPE);
-            cf = new SingleCellFactory(true, append.createSpec()) {
+            cf = new SingleCellFactory(append.createSpec()) {
                 @Override
                 public DataCell getCell(final DataRow row) {
                     try {
