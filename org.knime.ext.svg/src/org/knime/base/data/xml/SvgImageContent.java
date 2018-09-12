@@ -150,12 +150,14 @@ public class SvgImageContent implements ImageContent {
         if (cl == null) {
             Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             try {
-                m_doc = f.createSVGDocument(null, in);
+                // We need to set the document uri here, because batik expects the uri to be non-null in
+                // certain error handling methods. An empty string is sufficient for the uri parser used.
+                m_doc = f.createSVGDocument("", in);
             } finally {
                 Thread.currentThread().setContextClassLoader(null);
             }
         } else {
-            m_doc = f.createSVGDocument(null, in);
+            m_doc = f.createSVGDocument("", in);
         }
     }
 
