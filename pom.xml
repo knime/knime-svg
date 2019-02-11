@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.knime.maven</groupId>
+		<artifactId>parent-pom</artifactId>
+		<version>4.1.0-SNAPSHOT</version>
+	</parent>
+
+	<groupId>org.knime</groupId>
+	<artifactId>knime-svg</artifactId>
+    <version>${revision}${changelist}</version>
+	<packaging>pom</packaging>
+
+    <properties>
+		<revision>4.1.0</revision>
+		<changelist>-SNAPSHOT</changelist>
+		<feature-branch-extension.branchListProperty>git.branch</feature-branch-extension.branchListProperty>
+		<feature-branch-extension.appendArtifactoryProperties>false</feature-branch-extension.appendArtifactoryProperties>
+	</properties>
+
+	<modules>
+        <module>org.knime.ext.svg</module>
+        <module>org.apache.batik.ext.awt.knime_fragment</module>
+        <module>org.knime.ext.svg.testing</module>
+        <module>org.knime.features.ext.svg</module>
+        <module>org.knime.features.ext.svg.testing</module>
+        <module>org.knime.update.ext.svg</module>
+	</modules>
+
+	<repositories>
+		<repository>
+			<id>p2-knime-base</id>
+			<layout>p2</layout>
+			<url>${knime.base.p2}</url>
+		</repository>
+		<repository>
+			<id>p2-knime-core</id>
+			<layout>p2</layout>
+			<url>${knime.core.p2}</url>
+		</repository>
+		<repository>
+			<id>p2-knime-shared</id>
+			<layout>p2</layout>
+			<url>${knime.shared.p2}</url>
+		</repository>
+		<repository>
+			<id>p2-knime-tp</id>
+			<layout>p2</layout>
+			<url>${knime.tp.p2}</url>
+		</repository>
+	</repositories>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho.extras</groupId>
+				<artifactId>tycho-source-feature-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>source-feature</id>
+						<phase>package</phase>
+						<goals>
+							<goal>source-feature</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<excludes>
+						<plugin id="org.apache.batik.dom.clfix" />
+						<plugin id="org.apache.batik.dom.svg.clfix" />
+					</excludes>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
