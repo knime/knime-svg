@@ -67,6 +67,7 @@ import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.knime.base.node.renderer2image.Renderer2ImageSettings.ImageType;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
@@ -234,7 +235,8 @@ public class Renderer2ImageNodeDialog extends NodeDialogPane {
         m_settings.loadSettingsForDialog(settings);
 
         m_column.update(specs[0], m_settings.columnName());
-        m_rendererDescriptions.setSelectedItem(m_settings.rendererDescription());
+        Object defRenderer = m_rendererDescriptions.getModel().getSelectedItem(); // first item
+        m_rendererDescriptions.setSelectedItem(ObjectUtils.defaultIfNull(m_settings.rendererDescription(), defRenderer));
         m_imageTypes.setSelectedItem(m_settings.imageType());
         imageTypeChanged();
 
@@ -247,8 +249,8 @@ public class Renderer2ImageNodeDialog extends NodeDialogPane {
         if (m_settings.newColumnName() != null) {
             m_newColumnName.setText(m_settings.newColumnName());
         } else {
-            String colName =
-                m_column.getSelectedColumn() + " rendered with " + m_rendererDescriptions.getSelectedItem().toString();
+            String colName = m_column.getSelectedColumn() + " rendered with "
+                    + m_rendererDescriptions.getSelectedItem().toString();
             m_newColumnName.setText(colName);
         }
     }
