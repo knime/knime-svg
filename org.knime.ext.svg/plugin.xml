@@ -4,12 +4,12 @@
    <extension
          point="org.knime.workbench.repository.nodes">
       <node
-            category-path="/view"
+            category-path="/view/appender"
             factory-class="org.knime.ext.svg.node.sparklines.SparkLineNodeFactory">
       </node>
       <node
             after="org.knime.ext.svg.node.sparklines.SparkLineNodeFactory"
-            category-path="/view"
+            category-path="/view/appender"
             factory-class="org.knime.ext.svg.node.radarplot.RadarplotAppenderFactory"/>
       <node
             category-path="/view/view-util"
