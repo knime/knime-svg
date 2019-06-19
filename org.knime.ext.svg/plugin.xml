@@ -8,7 +8,6 @@
             factory-class="org.knime.ext.svg.node.sparklines.SparkLineNodeFactory">
       </node>
       <node
-            after="org.knime.ext.svg.node.sparklines.SparkLineNodeFactory"
             category-path="/view/appender"
             factory-class="org.knime.ext.svg.node.radarplot.RadarplotAppenderFactory"/>
       <node
