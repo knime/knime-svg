@@ -33,5 +33,5 @@ Require-Bundle: org.knime.base;bundle-version="[4.0.0,5.0.0)",
   org.apache.batik.xml;bundle-version="[1.7.0,1.8.0)";visibility:=reexport,
   org.apache.batik.svggen;bundle-version="[1.7.0,1.8.0)";visibility:=reexport,
   org.apache.commons.lang3;bundle-version="[3.2.1,4.0.0)"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
