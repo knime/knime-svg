@@ -739,14 +739,16 @@ propagated with or for interoperation with KNIME.
          download-size="0"
          install-size="0"
          version="0.0.0"
-         fragment="true"/>
+         fragment="true"
+		 unpack="false"/>
 
    <plugin
          id="org.apache.batik.dom.svg.clfix"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         fragment="true"/>
+         fragment="true"
+		 unpack="false"/>
 
    <plugin
          id="org.apache.batik.ext.awt.knime_fragment"
