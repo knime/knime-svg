@@ -2,7 +2,7 @@
 <feature
       id="org.knime.features.ext.svg"
       label="KNIME SVG Support"
-      version="4.0.0.qualifier"
+      version="4.1.0.qualifier"
       provider-name="KNIME AG, Zurich, Switzerland">
 
    <description>
@@ -740,7 +740,7 @@ propagated with or for interoperation with KNIME.
          install-size="0"
          version="0.0.0"
          fragment="true"
-		 unpack="false"/>
+         unpack="false"/>
 
    <plugin
          id="org.apache.batik.dom.svg.clfix"
@@ -748,7 +748,7 @@ propagated with or for interoperation with KNIME.
          install-size="0"
          version="0.0.0"
          fragment="true"
-		 unpack="false"/>
+         unpack="false"/>
 
    <plugin
          id="org.apache.batik.ext.awt.knime_fragment"
