@@ -88,4 +88,12 @@
             </message_arguments>
         </filter>
     </resource>
+	<resource path="META-INF/MANIFEST.MF" type="org.apache.batik.ext.awt.image.spi.PNGRegistryEntry">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.ext.awt.image.spi.PNGRegistryEntry"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
 </component>
