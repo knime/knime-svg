@@ -88,10 +88,186 @@
             </message_arguments>
         </filter>
     </resource>
-	<resource path="META-INF/MANIFEST.MF" type="org.apache.batik.ext.awt.image.spi.PNGRegistryEntry">
+    <resource path="META-INF/MANIFEST.MF" type="org.apache.batik.ext.awt.image.codec.FileCacheSeekableStream">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.ext.awt.image.codec.FileCacheSeekableStream"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.apache.batik.ext.awt.image.codec.ForwardSeekableStream">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.ext.awt.image.codec.ForwardSeekableStream"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.apache.batik.ext.awt.image.codec.ImageDecodeParam">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.ext.awt.image.codec.ImageDecodeParam"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.apache.batik.ext.awt.image.codec.ImageDecoder">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.ext.awt.image.codec.ImageDecoder"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.apache.batik.ext.awt.image.codec.ImageDecoderImpl">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.ext.awt.image.codec.ImageDecoderImpl"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.apache.batik.ext.awt.image.codec.ImageEncodeParam">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.ext.awt.image.codec.ImageEncodeParam"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.apache.batik.ext.awt.image.codec.ImageEncoder">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.ext.awt.image.codec.ImageEncoder"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.apache.batik.ext.awt.image.codec.ImageEncoderImpl">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.ext.awt.image.codec.ImageEncoderImpl"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.apache.batik.ext.awt.image.codec.MemoryCacheSeekableStream">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.ext.awt.image.codec.MemoryCacheSeekableStream"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.apache.batik.ext.awt.image.codec.PNGDecodeParam">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.ext.awt.image.codec.PNGDecodeParam"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.apache.batik.ext.awt.image.codec.PNGEncodeParam">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.ext.awt.image.codec.PNGEncodeParam"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.apache.batik.ext.awt.image.codec.PNGImageDecoder">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.ext.awt.image.codec.PNGImageDecoder"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.apache.batik.ext.awt.image.codec.PNGImageEncoder">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.ext.awt.image.codec.PNGImageEncoder"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.apache.batik.ext.awt.image.codec.PNGRed">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.ext.awt.image.codec.PNGRed"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.apache.batik.ext.awt.image.codec.PNGSuggestedPaletteEntry">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.ext.awt.image.codec.PNGSuggestedPaletteEntry"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.apache.batik.ext.awt.image.codec.PropertyUtil">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.ext.awt.image.codec.PropertyUtil"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.apache.batik.ext.awt.image.codec.SeekableOutputStream">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.ext.awt.image.codec.SeekableOutputStream"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.apache.batik.ext.awt.image.codec.SeekableStream">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.ext.awt.image.codec.SeekableStream"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.apache.batik.ext.awt.image.codec.SimpleRenderedImage">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.ext.awt.image.codec.SimpleRenderedImage"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.apache.batik.ext.awt.image.codec.SingleTileRenderedImage">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.ext.awt.image.codec.SingleTileRenderedImage"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.apache.batik.ext.awt.image.spi.JPEGRegistryEntry">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.ext.awt.image.spi.JPEGRegistryEntry"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.apache.batik.ext.awt.image.spi.PNGRegistryEntry">
         <filter id="305422471">
             <message_arguments>
                 <message_argument value="org.apache.batik.ext.awt.image.spi.PNGRegistryEntry"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.apache.batik.ext.awt.image.spi.TIFFRegistryEntry">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.ext.awt.image.spi.TIFFRegistryEntry"/>
                 <message_argument value="org.knime.ext.svg_4.1.0"/>
             </message_arguments>
         </filter>
