@@ -192,4 +192,68 @@
             </message_arguments>
         </filter>
     </resource>
+	<resource path="META-INF/MANIFEST.MF" type="org.apache.batik.dom.svg.SVGAnimatedPointsSupport">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.dom.svg.SVGAnimatedPointsSupport"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+	<resource path="META-INF/MANIFEST.MF" type="org.apache.batik.dom.svg.SVGExternalResourcesRequiredSupport">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.dom.svg.SVGExternalResourcesRequiredSupport"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+	<resource path="META-INF/MANIFEST.MF" type="org.apache.batik.dom.svg.SVGOMCSSImportedElementRoot">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.dom.svg.SVGOMCSSImportedElementRoot"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+	<resource path="META-INF/MANIFEST.MF" type="org.apache.batik.dom.svg.SVGPreserveAspectRatioSupport">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.dom.svg.SVGPreserveAspectRatioSupport"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+	<resource path="META-INF/MANIFEST.MF" type="org.apache.batik.dom.svg.SVGTextPositioningElementSupport">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.dom.svg.SVGTextPositioningElementSupport"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+	<resource path="META-INF/MANIFEST.MF" type="org.apache.batik.dom.svg.SVGTransformableSupport">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.dom.svg.SVGTransformableSupport"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+	<resource path="META-INF/MANIFEST.MF" type="org.apache.batik.dom.svg.SVGURIReferenceSupport">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.dom.svg.SVGURIReferenceSupport"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+	<resource path="META-INF/MANIFEST.MF" type="org.apache.batik.dom.svg.XMLBaseSupport">
+        <filter id="305422471">
+            <message_arguments>
+                <message_argument value="org.apache.batik.dom.svg.XMLBaseSupport"/>
+                <message_argument value="org.knime.ext.svg_4.1.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
 </component>
