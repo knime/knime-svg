@@ -12,11 +12,21 @@
             factory-class="org.knime.ext.svg.node.radarplot.RadarplotAppenderFactory"/>
       <node
             category-path="/view/view-util"
+            deprecated="true"
+            factory-class="org.knime.ext.svg.node.renderer2svg.Renderer2SvgNodeFactory">
+      </node>      
+      <node
+            category-path="/view/view-util"
             factory-class="org.knime.base.node.renderer2image.Renderer2ImageNodeFactory">
       </node>      
       <node
             category-path="/io/read"
             factory-class="org.knime.base.node.image.readimage.ReadImageFromUrlNodeFactory">
+      </node>
+      <node
+            category-path="/io/write"
+            deprecated="true"
+            factory-class="org.knime.ext.svg.node.writer.SVGWriterNodeFactory">
       </node>
       <node
             category-path="/view/view-util"
