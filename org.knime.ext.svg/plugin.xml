@@ -62,5 +62,11 @@
          </serializer>
       </DataType>
    </extension>
+   <extension
+         point="org.knime.core.ImageContentFactory">
+      <ImageContentFactory
+            ImageContentFactory="org.knime.base.data.xml.SvgImageContentFactory">
+      </ImageContentFactory>
+   </extension>
 
 </plugin>
