@@ -6,9 +6,7 @@
    <feature id="org.knime.features.ext.svg.source" version="0.0.0">
       <category name="knime-svg"/>
    </feature>
-   <feature id="org.knime.features.ext.svg.testing" version="0.0.0">
-      <category name="knime-svg"/>
-   </feature>
+
    <category-def name="knime-svg" label="Build artifacts from knime-svg">
       <description>
          Build artifacts from knime-svg
