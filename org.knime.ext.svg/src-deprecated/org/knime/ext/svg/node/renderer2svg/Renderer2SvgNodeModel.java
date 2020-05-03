@@ -54,7 +54,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
-import org.apache.batik.dom.svg.SVGDOMImplementation;
+import org.apache.batik.anim.dom.SVGDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.knime.base.data.xml.SvgCellFactory;
 import org.knime.base.data.xml.SvgProvider;

@@ -54,7 +54,7 @@ import java.io.StringReader;
 import java.lang.ref.SoftReference;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.batik.dom.svg.SAXSVGDocumentFactory;
+import org.apache.batik.anim.dom.SAXSVGDocumentFactory;
 import org.apache.batik.transcoder.TranscoderException;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataCellDataInput;

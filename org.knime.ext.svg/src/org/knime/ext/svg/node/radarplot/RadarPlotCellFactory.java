@@ -41,7 +41,7 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * ------------------------------------------------------------------------
- * 
+ *
  * History
  *   18.06.2012 (kilian): created
  */
@@ -54,7 +54,7 @@ import java.awt.Font;
 
 import javax.swing.SwingUtilities;
 
-import org.apache.batik.dom.svg.SVGDOMImplementation;
+import org.apache.batik.anim.dom.SVGDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.knime.base.data.xml.SvgCell;
 import org.knime.core.data.DataCell;
@@ -75,7 +75,7 @@ import org.w3c.dom.svg.SVGDocument;
 class RadarPlotCellFactory extends SingleCellFactory {
 
     private ColumnSettingsTable m_originalSettings;
-    
+
     private int m_dim = 0;
     private int[] m_indices = new int[m_dim];
     private double[] m_min = new double[m_dim];
@@ -83,10 +83,10 @@ class RadarPlotCellFactory extends SingleCellFactory {
     private double[] m_validMin = new double[m_dim];
     private double[] m_validMax = new double[m_dim];
     private String[] m_labels = new String[m_dim];
-    
+
     /**
-     * Constructor of <code>RadarPlotCellFactory</code> with given spec of 
-     * column to store the svg plots in, the original input spec and the 
+     * Constructor of <code>RadarPlotCellFactory</code> with given spec of
+     * column to store the svg plots in, the original input spec and the
      * settings specified by the user.
      * @param colSpec The spec of the solumn to store the svg plots in.
      * @param spec The spec of the original input data table.
@@ -95,15 +95,15 @@ class RadarPlotCellFactory extends SingleCellFactory {
     RadarPlotCellFactory(final DataColumnSpec colSpec, final DataTableSpec spec,
             final ColumnSettingsTable origSettings) {
         super(colSpec);
-        
+
         m_originalSettings = origSettings;
-        
+
         // read the possibly new input spec, match the given original settings
         // against it and take over as many of the original settings as possible
         ColumnSettingsTable testSettings = new ColumnSettingsTable(
                 RadarplotAppenderNodeModel.COLUMNRANGEPREFIX);
         testSettings.setNewSpecAndTakeoverSettings(spec, origSettings);
-        
+
         m_dim = testSettings.getNrSelected();
         m_indices = new int[m_dim];
         m_min = new double[m_dim];
@@ -111,7 +111,7 @@ class RadarPlotCellFactory extends SingleCellFactory {
         m_validMin = new double[m_dim];
         m_validMax = new double[m_dim];
         m_labels = new String[m_dim];
-        
+
         int nrSelCol = 0; // keep track of selected (and double) columns
 
         for (int i = 0; i < spec.getNumColumns(); i++) {
@@ -121,7 +121,7 @@ class RadarPlotCellFactory extends SingleCellFactory {
             if (j > -1 && m_originalSettings.isSelected(j)
                     && testSettings.isSelected(k)) {
                 // retrieve min/max values. We know that they exist
-                // because only columns with valid domains are allowed to be 
+                // because only columns with valid domains are allowed to be
                 // selected.
                 m_validMin[nrSelCol] = Double.NaN;
                 m_validMax[nrSelCol] = Double.NaN;
@@ -161,12 +161,12 @@ class RadarPlotCellFactory extends SingleCellFactory {
             }
         }
     }
-    
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public DataCell getCell(DataRow row) {
+    public DataCell getCell(final DataRow row) {
         double[] values = new double[m_dim];
         for (int j = 0; j < m_dim; j++) {
             if (!row.getCell(m_indices[j]).isMissing()) {
