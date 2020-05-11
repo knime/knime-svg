@@ -25,7 +25,6 @@
 
 	<modules>
         <module>org.knime.ext.svg</module>
-        <module>org.apache.batik.ext.awt.knime_fragment</module>
         <module>org.knime.ext.svg.tests</module>
         <module>org.knime.features.ext.svg</module>
         <module>org.knime.update.ext.svg</module>
