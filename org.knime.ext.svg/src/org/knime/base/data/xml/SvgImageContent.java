@@ -69,7 +69,7 @@ import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.svg2svg.SVGTranscoder;
-import org.apache.batik.util.XMLConstants;
+import org.apache.batik.constants.XMLConstants;
 import org.apache.batik.util.XMLResourceDescriptor;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.image.ImageContent;
