@@ -15,7 +15,7 @@ try {
     knimetools.defaultTychoBuild('org.knime.update.ext.svg')
 
     workflowTests.runTests(
-        dependencies: [ repositories: ['knime-svg', 'knime-json', 'knime-xml' ], ius: ['org.knime.json.tests'] ]
+        dependencies: [ repositories: ['knime-core', 'knime-svg', 'knime-json', 'knime-xml' ], ius: ['org.knime.json.tests'] ]
     )
 
     stage('Sonarqube analysis') {
