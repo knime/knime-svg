@@ -1,0 +1,6 @@
+autoEnabled=true
+eclipse.preferences.version=1
+idePrefixKey=
+projectKey=org.knime\:knime-svg
+serverId=sonar.knime.com
+sqPrefixKey=org.knime.ext.svg
