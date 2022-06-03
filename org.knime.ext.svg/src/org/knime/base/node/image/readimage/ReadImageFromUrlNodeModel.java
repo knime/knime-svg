@@ -404,7 +404,7 @@ final class ReadImageFromUrlNodeModel extends NodeModel {
             @Override
             public boolean isMimeType(final byte[] firstBytes, final int bytes) {
                 String s = new String(firstBytes, 0, bytes, Charsets.UTF_8);
-                return s.contains("<?xml ") || s.contains("<svg");
+                return s.contains("<?xml ") || s.contains("<svg") || s.contains("<!DOCTYPE svg");
             }
 
             @Override
