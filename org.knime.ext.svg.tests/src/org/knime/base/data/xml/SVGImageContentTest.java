@@ -47,13 +47,20 @@
  */
 package org.knime.base.data.xml;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 
+import org.apache.batik.transcoder.TranscoderException;
 import org.junit.Test;
 import org.knime.core.node.NodeLogger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 /**
  * Testcases for {@link SvgImageContent}
@@ -62,13 +69,19 @@ import org.knime.core.node.NodeLogger;
  */
 public class SVGImageContentTest {
     // contains a non-ASCII character (é)
-    private static final String SVG = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
-    		"<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\"" +
-            "     width=\"210mm\" height=\"297mm\" id=\"svg2\">\n" +
-    		"    <text x=\"322.85715\" y=\"286.64789\" id=\"text2987\" xml:space=\"preserve\">\n" +
-    		"      <tspan x=\"322.85715\" y=\"286.64789\" id=\"tspan2989\">é</tspan>\n" +
-    		"    </text>\n" +
-    		"</svg>\n";
+    private static final String SVG_NON_ASCII = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
+        + "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\""
+        + "     width=\"210mm\" height=\"297mm\" id=\"svg2\">\n"
+        + "    <text x=\"322.85715\" y=\"286.64789\" id=\"text2987\" xml:space=\"preserve\">\n"
+        + "      <tspan x=\"322.85715\" y=\"286.64789\" id=\"tspan2989\">é</tspan>\n" + "    </text>\n" + "</svg>\n";
+
+    private static final String SVG_ALL_WITHIN_BMP = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
+        + "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.0\" width=\"300mm\" height=\"200mm\">"
+        + "    <text x=\"150\" y=\"115\" font-size=\"40\" text-anchor=\"middle\">SVG \u2764</text>" + "</svg>";
+
+    private static final String SVG_WITH_EMOJI = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
+        + "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.0\" width=\"300mm\" height=\"200mm\">"
+        + "    <text x=\"150\" y=\"115\" font-size=\"40\" text-anchor=\"middle\">SVG \u1f633</text>" + "</svg>";
 
     /**
      * Test if de-/serialization of non-ASCII characters in SVG works properly
@@ -77,8 +90,9 @@ public class SVGImageContentTest {
      */
     @Test
     public void testSerialization() throws IOException {
-        NodeLogger.getLogger(getClass()).debug("Context classloader: " + Thread.currentThread().getContextClassLoader());
-        byte[] input = SVG.getBytes(Charset.forName("UTF-8"));
+        NodeLogger.getLogger(getClass())
+            .debug("Context classloader: " + Thread.currentThread().getContextClassLoader());
+        byte[] input = SVG_NON_ASCII.getBytes(Charset.forName("UTF-8"));
 
         ByteArrayInputStream is = new ByteArrayInputStream(input);
         SvgImageContent imageContent = new SvgImageContent(is);
@@ -92,5 +106,48 @@ public class SVGImageContentTest {
 
         // this call should work with an exception, see bug #4108
         imageContent = new SvgImageContent(is);
+    }
+
+    /**
+     * Test whether the serialisation preserves compatible characters
+     *
+     * @throws IOException
+     * @throws TranscoderException
+     */
+    @Test
+    public void testSerializePreservesCharacters() throws IOException, TranscoderException {
+        try (InputStream is = new ByteArrayInputStream(SVG_ALL_WITHIN_BMP.getBytes())) {
+            SvgImageContent image = new SvgImageContent(is);
+
+            String serialised = SvgImageContent.serialize(image.getSvgDocument());
+
+            assertTrue("The heart character should survive the serialisation.", serialised.contains("\u2764"));
+            assertTrue("There's no surrogate pairs introduced",
+                serialised.chars().allMatch(c -> c < 0xD800 || 0xDFFF < c));
+        }
+    }
+
+    /**
+     * Test whether unsupported characters are filtered out and no exception arises
+     *
+     * @throws IOException
+     * @throws TranscoderException
+     */
+    @Test
+    public void testSerializeFiltersUnsupportedChars() throws IOException, TranscoderException {
+        try (InputStream is = new ByteArrayInputStream(SVG_WITH_EMOJI.getBytes())) {
+            SvgImageContent image = new SvgImageContent(is);
+
+            Document doc = image.getSvgDocument();
+
+            // add another emoji to the document
+            Node n = doc.getChildNodes().item(0).getChildNodes().item(0);
+            n.setNodeValue(new StringBuilder().appendCodePoint(0x1f171).toString());
+
+            String serialised = SvgImageContent.serialize(image.getSvgDocument()); // Before AP-18895, this failed.
+
+            assertFalse("There's no character > 0xFFFF left.", serialised.codePoints().anyMatch(c -> c > 0xFFFF));
+            assertTrue("The emoji is replaced by U+FFFD.", serialised.codePoints().anyMatch(c -> c == 0xFFFD));
+        }
     }
 }

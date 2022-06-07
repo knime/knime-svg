@@ -57,6 +57,7 @@ import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.util.regex.Pattern;
 
 import org.apache.batik.anim.dom.SAXSVGDocumentFactory;
 import org.apache.batik.anim.dom.SVGDOMImplementation;
@@ -64,16 +65,17 @@ import org.apache.batik.bridge.BridgeContext;
 import org.apache.batik.bridge.GVTBuilder;
 import org.apache.batik.bridge.UserAgent;
 import org.apache.batik.bridge.UserAgentAdapter;
+import org.apache.batik.constants.XMLConstants;
 import org.apache.batik.gvt.GraphicsNode;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.svg2svg.SVGTranscoder;
-import org.apache.batik.constants.XMLConstants;
 import org.apache.batik.util.XMLResourceDescriptor;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.image.ImageContent;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.svg.SVGDocument;
 import org.xml.sax.SAXException;
 
@@ -259,11 +261,73 @@ public class SvgImageContent implements ImageContent {
         return buffer.toString();
     }
 
-    private static void serialize(final Document doc, final Writer writer)
-            throws TranscoderException {
+    private static void serialize(final Document doc, final Writer writer) throws TranscoderException {
+        // see below (AP-18895)
+        replaceUnsupportedUnicode(doc);
+
         TranscoderOutput out = new TranscoderOutput(writer);
         TranscoderInput in = new TranscoderInput(doc);
         TRANSCODER.transcode(in, out);
+    }
+
+    /**
+     * Pattern that matches all Unicode characters outside the Basic Multilingual Plane
+     */
+    private static final Pattern UNSUPPORTED_UNICODE = Pattern.compile("[\\x{10000}-\\x{10FFFF}]");
+
+    /**
+     * This is a single-char string containing U+FFFD REPLACEMENT CHARACTER.
+     */
+    private static final String REPLACEMENT_STRING = String.valueOf((char)0xFFFD);
+
+    /**
+     * As to why we need this method, consult AP-18895.
+     *
+     * tl;dr: This method is obsolete, once an issue with Apache Batik has been addressed. This bug causes a
+     * {@code RuntimeException}, iff the SVG contains a Unicode character in the 0+10000 to U+10FFFF range. This will
+     * (hopefully) eventually be addressed by https://issues.apache.org/jira/browse/BATIK-1328.
+     *
+     * This method recursively replaces all of those characters with U+FFFD REPLACEMENT CHARACTER.
+     *
+     * See {@link "https://www.w3.org/TR/DOM-Level-3-Core/core.html"}, where the structure and inheritance model of a
+     * {@code DOM} is described.
+     *
+     * TODO get rid of this function once batik supports transcoding aforementioned characters
+     *
+     * @param n the root node, e.g. an SVG {@link Document}
+     */
+    private static void replaceUnsupportedUnicode(final Node n) {
+        switch (n.getNodeType()) {
+            case Node.CDATA_SECTION_NODE:
+            case Node.COMMENT_NODE:
+            case Node.TEXT_NODE:
+                // CDATA sections, comments and text nodes are the node types that contain strings.
+                // We replace the contained strings with a new string, in that all invalid characters are replaced.
+                var newText = UNSUPPORTED_UNICODE.matcher(n.getNodeValue()).replaceAll(REPLACEMENT_STRING);
+                n.setNodeValue(newText);
+                break;
+            case Node.ELEMENT_NODE:
+                // Besides children (handled later), element nodes have attributes, that also contain text.
+                var attributes = n.getAttributes();
+                for (var i = 0; i < attributes.getLength(); ++i) {
+                    // recurse into attribute (contains a text node)
+                    replaceUnsupportedUnicode(attributes.item(i));
+                }
+                // no break: elements have children, too
+            case Node.DOCUMENT_NODE:
+            case Node.DOCUMENT_FRAGMENT_NODE:
+            case Node.ENTITY_REFERENCE_NODE:
+            case Node.ATTRIBUTE_NODE:
+            case Node.ENTITY_NODE:
+                // All of the above node types can have children containing strings we want to replace
+                var children = n.getChildNodes();
+                for (var i = 0; i < children.getLength(); ++i) {
+                    // recurse into child
+                    replaceUnsupportedUnicode(children.item(i));
+                }
+                break;
+            default:
+        }
     }
 
     /**
