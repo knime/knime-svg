@@ -48,6 +48,7 @@
 package org.knime.ext.svg;
 
 import org.eclipse.core.runtime.Plugin;
+import org.eclipse.gmf.runtime.draw2d.ui.render.awt.internal.Draw2dRenderPlugin;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeViewExport;
 import org.knime.ext.batik.svgexport.SVGExportType;
@@ -57,6 +58,7 @@ import org.osgi.framework.BundleContext;
  *
  * @author Thorsten Meinl, University of Konstanz
  */
+@SuppressWarnings("restriction")
 public class SvgPluginActivator extends Plugin {
     /**
      * {@inheritDoc}
@@ -71,5 +73,9 @@ public class SvgPluginActivator extends Plugin {
         } catch (Throwable e) {
             logger.debug("Failed to add SVG export option to node view", e);
         }
+        // activate the Drwa2dRenderPlugin which contains the ImageIO based
+        // exporters for PNG and SVG, and registers them to the
+        // ImageWriterRegistry of batik
+        Draw2dRenderPlugin.getPluginId();
     }
 }
