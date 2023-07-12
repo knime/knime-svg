@@ -213,7 +213,9 @@ public class Renderer2ImageNodeModel extends NodeModel {
     private MyColumnRearranger createRearranger(final DataTableSpec inSpec, final DataColumnSpec colSpec)
         throws InvalidSettingsException {
 
-        Collection<DataValueRendererFactory> rendererFactories = colSpec.getType().getRendererFactories();
+        final var type = colSpec.getType();
+        final var columnName = m_settings.columnName();
+        Collection<DataValueRendererFactory> rendererFactories = type.getRendererFactories();
 
         final Pointer<DataValueRendererFactory> activeRendererPointer = new Pointer<>();
         for (DataValueRendererFactory f: rendererFactories) {
@@ -223,12 +225,20 @@ public class Renderer2ImageNodeModel extends NodeModel {
             }
         }
         if (activeRendererPointer.get() == null) {
-            throw new InvalidSettingsException("Renderer '" + m_settings.rendererDescription()
-                + "' does not exist for column '" + m_settings.columnName() + "'");
+            // changed as part of AP-20660 and AP-18025: the description of some default renderer were changed,
+            // e.g. "Default" -> "Image". Fallback to the default renderer.
+            if ("Default".equals(m_settings.rendererDescription())) {
+                activeRendererPointer.set(rendererFactories.stream().findFirst()
+                    .orElseThrow(() -> new InvalidSettingsException(
+                        String.format("Column %s of type %s has no renderers registered", columnName, type))));
+            } else {
+                throw new InvalidSettingsException("Renderer '" + m_settings.rendererDescription()
+                    + "' does not exist for column '" + columnName + "'");
+            }
         }
 
 
-        String colName = m_settings.replaceColumn() ? m_settings.columnName()
+        String colName = m_settings.replaceColumn() ? columnName
             : DataTableSpec.getUniqueColumnName(inSpec, m_settings.newColumnName());
 
         final LazyInitializer<DataValueRenderer> rendererInitializer = new LazyInitializer<DataValueRenderer>() {
@@ -237,7 +247,7 @@ public class Renderer2ImageNodeModel extends NodeModel {
                 return activeRendererPointer.get().createRenderer(colSpec);
             }
         };
-        final int colIndex = inSpec.findColumnIndex(m_settings.columnName());
+        final int colIndex = inSpec.findColumnIndex(columnName);
         SingleCellFactory cf;
         if (ImageType.Svg.equals(m_settings.imageType())) {
             DataColumnSpecCreator append = new DataColumnSpecCreator(colName, SvgCellFactory.TYPE);
@@ -271,7 +281,7 @@ public class Renderer2ImageNodeModel extends NodeModel {
         }
         MyColumnRearranger crea = new MyColumnRearranger(inSpec, colName, rendererInitializer);
         if (m_settings.replaceColumn()) {
-            crea.replace(cf, m_settings.columnName());
+            crea.replace(cf, columnName);
         } else {
             crea.append(cf);
         }
