@@ -56,6 +56,7 @@ import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.batik.bridge.BridgeContext;
@@ -142,9 +143,15 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer
 
     private final boolean m_keepAspectRatio;
 
+    private static final int DEFAULT__PREFERRED_WIDTH = 90;
+
+    private static final int DEFAULT_PREFERRED_HEIGHT = 90;
+
     private final Dimension m_preferredSize;
 
     private final ReentrantLock m_lock;
+
+    private SvgValue m_currentValue;
 
     /**
      * Creates a new renderer for SVG values. The passed spec may contain
@@ -157,16 +164,20 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer
         m_keepAspectRatio =
                 Boolean.parseBoolean(props.getProperty(
                         OPTION_KEEP_ASPECT_RATIO, "true"));
-
-        int width =
-                Integer.parseInt(props
-                        .getProperty(OPTION_PREFERRED_WIDTH, "90"));
-        int height =
-                Integer.parseInt(props.getProperty(OPTION_PREFERRED_HEIGHT,
-                        "90"));
-        m_preferredSize = new Dimension(width, height);
-
+        m_preferredSize = getPreferredSizeFromProps(props).orElse(null);
         m_lock = new ReentrantLock();
+    }
+
+    private static Optional<Dimension> getPreferredSizeFromProps(final DataColumnProperties props) {
+
+        String widthProp = props.getProperty(OPTION_PREFERRED_WIDTH);
+        String heightProp = props.getProperty(OPTION_PREFERRED_HEIGHT);
+        if (widthProp == null && heightProp == null) {
+            return Optional.empty();
+        }
+        int width = widthProp == null ? DEFAULT__PREFERRED_WIDTH : Integer.parseInt(widthProp);
+        int height = heightProp == null ? DEFAULT_PREFERRED_HEIGHT : Integer.parseInt(heightProp);
+        return Optional.of(new Dimension(width, height));
     }
 
     /**
@@ -184,7 +195,8 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer
             return;
         }
 
-        try (LockedSupplier<SVGDocument> supplier = ((SvgValue)value).getDocumentSupplier()){
+        m_currentValue = (SvgValue)value;
+        try (LockedSupplier<SVGDocument> supplier = m_currentValue.getDocumentSupplier()) {
             m_doc = supplier.get();
         } catch (Exception ex) {
             throw new RuntimeException("Unable to render SVG", ex);
@@ -215,12 +227,35 @@ public class SvgValueRenderer extends AbstractPainterDataValueRenderer
     }
 
     /**
-     * @return new Dimension(80, 80);
+     * @return the preferred size set via spec properties or the preferred size of the current image value or
+     *         Dimension(90, 90).
      * @see javax.swing.JComponent#getPreferredSize()
      */
     @Override
     public Dimension getPreferredSize() {
-        return m_preferredSize;
+        if (m_preferredSize != null) {
+            return m_preferredSize;
+        }
+        if (m_currentValue != null) {
+            return m_currentValue.getImageContent().getPreferredSize();
+        }
+        return new Dimension(DEFAULT__PREFERRED_WIDTH, DEFAULT_PREFERRED_HEIGHT);
+    }
+
+    @Override
+    public Dimension getPreferredSize(final Dimension viewPortDimension) {
+        if (m_keepAspectRatio == false || m_currentValue == null) {
+            return viewPortDimension;
+        }
+        var preferredSize = m_currentValue.getImageContent().getPreferredSize();
+        double aspectRatio = (double)preferredSize.width / preferredSize.height;
+        double width = viewPortDimension.height * aspectRatio;
+        if (width <= viewPortDimension.width) {
+            return new Dimension((int)width, viewPortDimension.height);
+        } else {
+            double height = viewPortDimension.width / aspectRatio;
+            return new Dimension(viewPortDimension.width, (int)height);
+        }
     }
 
     /**
