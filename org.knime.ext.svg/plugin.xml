@@ -68,5 +68,11 @@
             ImageContentFactory="org.knime.base.data.xml.SvgImageContentFactory">
       </ImageContentFactory>
    </extension>
+   <extension
+         point="org.knime.core.ui.dataValueViewProvider">
+      <DataValueViewProvider
+            dataValueViewProvider="org.knime.ext.svg.datavalueview.SvgValueViewProvider">
+      </DataValueViewProvider>
+   </extension>
 
 </plugin>
