@@ -122,7 +122,12 @@ public interface SvgValue extends ImageValue, XMLValue<SVGDocument> {
          */
         @Override
         public String getName() {
-            return "SVG image";
+            return "Image (SVG)";
+        }
+
+        @Override
+        protected String[] getLegacyNames() {
+            return new String[]{"SVG image"};
         }
     }
 }
