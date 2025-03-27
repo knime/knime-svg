@@ -50,7 +50,8 @@ package org.knime.base.node.preproc.colconvert.stringtosvg;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.knime.base.data.xml.SvgCell;
 import org.knime.base.data.xml.SvgImageContent;
@@ -97,19 +98,19 @@ final class StringToSvgNodeModel extends NodeModel {
 
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
-        ColumnRearranger createColRearranger = createColRearranger(inSpecs[0], new AtomicInteger());
+        ColumnRearranger createColRearranger = createColRearranger(inSpecs[0], new AtomicLong());
         return new DataTableSpec[]{createColRearranger.createSpec()};
     }
 
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec)
         throws Exception {
-        AtomicInteger failCount = new AtomicInteger();
+        AtomicLong failCount = new AtomicLong();
         ColumnRearranger colRe = createColRearranger(inData[0].getDataTableSpec(), failCount);
         BufferedDataTable resultTable = exec.createColumnRearrangeTable(inData[0], colRe, exec);
 
-        int rowCount = resultTable.getRowCount();
-        int fail = failCount.get();
+        long rowCount = resultTable.size();
+        long fail = failCount.get();
 
         if (fail > 0) {
             setWarningMessage("Failed to read " + fail + " of " + rowCount + " files");
@@ -118,7 +119,7 @@ final class StringToSvgNodeModel extends NodeModel {
         return new BufferedDataTable[]{resultTable};
     }
 
-    private ColumnRearranger createColRearranger(final DataTableSpec spec, final AtomicInteger failCounter)
+    private ColumnRearranger createColRearranger(final DataTableSpec spec, final AtomicLong failCounter)
         throws InvalidSettingsException {
 
         StringBuilder warnings = new StringBuilder();
@@ -161,12 +162,12 @@ final class StringToSvgNodeModel extends NodeModel {
                     String image = ((StringValue)cell).getStringValue();
                     try {
                         SvgImageContent svgImageContent =
-                            new SvgImageContent(new ByteArrayInputStream(image.getBytes("UTF-8")));
+                            new SvgImageContent(new ByteArrayInputStream(image.getBytes(StandardCharsets.UTF_8)));
                         return svgImageContent.toImageCell();
                     } catch (Exception e) {
                         if (m_colConfig.isFailOnInvalid()) {
-                            if (e instanceof RuntimeException) {
-                                throw (RuntimeException)e;
+                            if (e instanceof RuntimeException rte) {
+                                throw rte;
                             } else {
                                 throw new RuntimeException(e.getMessage(), e);
                             }

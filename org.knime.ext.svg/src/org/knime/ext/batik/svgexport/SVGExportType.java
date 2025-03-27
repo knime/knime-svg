@@ -49,10 +49,9 @@ package org.knime.ext.batik.svgexport;
 
 import java.awt.Component;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.file.Files;
 
 import javax.swing.JComponent;
 
@@ -72,13 +71,11 @@ import org.w3c.dom.Document;
  */
 public class SVGExportType implements ExportType {
 
-    /** {@inheritDoc} */
     @Override
-    public void export(final File destination, final Component cont,
-            final int width, final int height) throws IOException {
+    public void export(final File destination, final Component cont, final int width, final int height)
+            throws IOException {
         // Get a DOMImplementation.
-        DOMImplementation domImpl =
-                GenericDOMImplementation.getDOMImplementation();
+        DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
 
         // Create an instance of org.w3c.dom.Document.
         String svgNS = "http://www.w3.org/2000/svg";
@@ -87,10 +84,10 @@ public class SVGExportType implements ExportType {
         // need to switch off double buffering, otherwise the svg file only
         // contains an image
         boolean isDoubleBuffered = false;
-        if (cont instanceof JComponent) {
-            isDoubleBuffered = ((JComponent)cont).isDoubleBuffered();
+        if (cont instanceof JComponent comp) {
+            isDoubleBuffered = comp.isDoubleBuffered();
             if (isDoubleBuffered) {
-                setDoubleBufferedRecursively((JComponent)cont, false);
+                setDoubleBufferedRecursively(comp, false);
             }
         }
         SVGGeneratorContext ctx = SVGGeneratorContext.createDefault(myFactory);
@@ -99,34 +96,30 @@ public class SVGExportType implements ExportType {
         SVGGraphics2D g2d = new SVGGraphics2D(ctx, false);
         g2d.setSVGCanvasSize(cont.getSize());
         cont.update(g2d);
-        if (isDoubleBuffered) {
+        if (isDoubleBuffered) { // only `true` if `cont instanceof JComponent`
             setDoubleBufferedRecursively((JComponent)cont, true);
         }
 
         boolean useCSS = true; // we want to use CSS style attributes
-        FileOutputStream fileOut = new FileOutputStream(destination);
-        Writer out = new OutputStreamWriter(fileOut, "UTF-8");
-        g2d.stream(out, useCSS);
+        try (Writer out = Files.newBufferedWriter(destination.toPath())) {
+            g2d.stream(out, useCSS);
+        }
     }
 
-    /** {@inheritDoc} */
     @Override
     public String getDescription() {
         return "SVG - Scalable Vector Graphics";
     }
 
-    /** {@inheritDoc} */
     @Override
     public String getFileSuffix() {
         return "svg";
     }
 
-    private void setDoubleBufferedRecursively(final JComponent c,
-            final boolean isDoubleBuffered) {
+    private void setDoubleBufferedRecursively(final JComponent c, final boolean isDoubleBuffered) {
         for (Component child : c.getComponents()) {
-            if (child instanceof JComponent) {
-                setDoubleBufferedRecursively((JComponent)child,
-                        isDoubleBuffered);
+            if (child instanceof JComponent comp) {
+                setDoubleBufferedRecursively(comp, isDoubleBuffered);
             }
         }
         c.setDoubleBuffered(isDoubleBuffered);
