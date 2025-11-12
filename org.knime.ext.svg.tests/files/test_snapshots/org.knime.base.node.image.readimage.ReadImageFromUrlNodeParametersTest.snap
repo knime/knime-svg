@@ -1,0 +1,175 @@
+{
+  "data" : {
+    "model" : {
+      "imageTypes" : [ "PNG", "SVG" ],
+      "failOnInvalid" : true,
+      "readTimeoutSeconds" : null,
+      "outputColumn" : null
+    }
+  },
+  "schema" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "failOnInvalid" : {
+            "type" : "boolean",
+            "title" : "Fail on invalid input",
+            "description" : "If selected, the node will fail during execution if any URL is invalid or points to an invalid image file. If unselected, the node will skip these invalid entries and insert a missing value instead.",
+            "default" : true
+          },
+          "imageTypes" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            },
+            "title" : "Image types",
+            "description" : "Select which image types are valid in the input. If a non-valid type is encountered it will handle the error according to the \"Fail on invalid input\" option.",
+            "default" : [ "PNG", "SVG" ]
+          },
+          "outputColumn" : {
+            "type" : [ "string", "null" ],
+            "title" : "Append new column",
+            "description" : "If selected, appends a new column with the images. Otherwise, replaces the input column.",
+            "default" : null
+          },
+          "readTimeoutSeconds" : {
+            "type" : [ "number", "null" ],
+            "format" : "double",
+            "title" : "Custom image read timeout",
+            "description" : "Defines the connection and read timeout for the used URL connections in seconds. The default is 1 second if it is not overwritten by the 'knime.url.timeout' system property.",
+            "default" : null
+          },
+          "urlColumn" : {
+            "type" : "string",
+            "title" : "URL column",
+            "description" : "Select the input column containing the URLs."
+          }
+        }
+      }
+    }
+  },
+  "ui_schema" : {
+    "elements" : [ {
+      "type" : "Control",
+      "scope" : "#/properties/model/properties/urlColumn",
+      "options" : {
+        "format" : "dropDown"
+      },
+      "providedOptions" : [ "possibleValues" ]
+    }, {
+      "type" : "Control",
+      "scope" : "#/properties/model/properties/imageTypes",
+      "options" : {
+        "format" : "comboBox"
+      },
+      "providedOptions" : [ "possibleValues" ]
+    }, {
+      "label" : "Error Handling",
+      "type" : "Section",
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/failOnInvalid",
+        "options" : {
+          "format" : "checkbox"
+        }
+      }, {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/readTimeoutSeconds",
+        "options" : {
+          "validation" : {
+            "min" : {
+              "errorMessage" : "The value must be at least 0.001.",
+              "parameters" : {
+                "isExclusive" : false,
+                "min" : 0.001
+              }
+            }
+          },
+          "hideOnNull" : true
+        },
+        "providedOptions" : [ "default" ]
+      } ]
+    }, {
+      "label" : "Output",
+      "type" : "Section",
+      "elements" : [ {
+        "type" : "Control",
+        "scope" : "#/properties/model/properties/outputColumn",
+        "options" : {
+          "placeholder" : "New column name",
+          "hideOnNull" : true,
+          "default" : ""
+        }
+      } ]
+    } ]
+  },
+  "persist" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "urlColumn" : {
+            "configKey" : "url-column"
+          },
+          "imageTypes" : {
+            "configKey" : "types"
+          },
+          "failOnInvalid" : {
+            "configKey" : "fail-on-invalid"
+          },
+          "readTimeoutSeconds" : {
+            "configPaths" : [ [ "read-timeout" ] ]
+          },
+          "outputColumn" : {
+            "configPaths" : [ [ "new-column-name" ] ]
+          }
+        }
+      }
+    }
+  },
+  "initialUpdates" : [ {
+    "scope" : "#/properties/model/properties/imageTypes",
+    "providedOptionName" : "possibleValues",
+    "values" : [ {
+      "indices" : [ ],
+      "value" : [ {
+        "id" : "PNG",
+        "text" : "PNG"
+      }, {
+        "id" : "SVG",
+        "text" : "SVG"
+      } ]
+    } ]
+  }, {
+    "scope" : "#/properties/model/properties/readTimeoutSeconds",
+    "providedOptionName" : "default",
+    "values" : [ {
+      "indices" : [ ],
+      "value" : 1.0
+    } ]
+  }, {
+    "scope" : "#/properties/model/properties/urlColumn",
+    "providedOptionName" : "possibleValues",
+    "values" : [ {
+      "indices" : [ ],
+      "value" : [ {
+        "id" : "url_column",
+        "text" : "url_column",
+        "type" : {
+          "id" : "org.knime.core.data.StringValue",
+          "text" : "String"
+        }
+      }, {
+        "id" : "other_column",
+        "text" : "other_column",
+        "type" : {
+          "id" : "org.knime.core.data.StringValue",
+          "text" : "String"
+        }
+      } ]
+    } ]
+  } ]
+}

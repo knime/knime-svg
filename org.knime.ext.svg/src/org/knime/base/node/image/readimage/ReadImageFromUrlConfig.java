@@ -67,15 +67,15 @@ import org.knime.core.node.NotConfigurableException;
  */
 final class ReadImageFromUrlConfig {
 
-    private static final String NEW_COLUMN_NAME = "new-column-name";
+    static final String NEW_COLUMN_NAME = "new-column-name";
 
-    private static final String FAIL_IF_INVALID = "fail-on-invalid";
+    static final String FAIL_IF_INVALID = "fail-on-invalid";
 
-    private static final String URL_COLUMN = "url-column";
+    static final String URL_COLUMN = "url-column";
 
-    private static final String CONGIGURED_TYPE = "types";
+    static final String CONFIGURED_TYPE = "types";
 
-    private static final String READ_TIMEOUT = "read-timeout";
+    static final String READ_TIMEOUT = "read-timeout";
 
     private String m_urlColName;
 
@@ -154,7 +154,7 @@ final class ReadImageFromUrlConfig {
         settings.addString(URL_COLUMN, m_urlColName);
         settings.addBoolean(FAIL_IF_INVALID, m_failOnInvalid);
         settings.addString(NEW_COLUMN_NAME, m_newColumnName);
-        settings.addStringArray(CONGIGURED_TYPE, toStringArray(m_types.toArray(new ImageType[0])));
+        settings.addStringArray(CONFIGURED_TYPE, toStringArray(m_types.toArray(new ImageType[0])));
         settings.addInt(READ_TIMEOUT, m_readTimeout);
     }
 
@@ -168,7 +168,7 @@ final class ReadImageFromUrlConfig {
         m_urlColName = settings.getString(URL_COLUMN);
         m_failOnInvalid = settings.getBoolean(FAIL_IF_INVALID);
         m_newColumnName = settings.getString(NEW_COLUMN_NAME);
-        m_types = toEnum(ImageType.class, settings.getStringArray(CONGIGURED_TYPE));
+        m_types = toEnum(ImageType.class, settings.getStringArray(CONFIGURED_TYPE));
         m_readTimeout = settings.getInt(READ_TIMEOUT, -1);
     }
 
@@ -191,7 +191,7 @@ final class ReadImageFromUrlConfig {
         m_readTimeout = settings.getInt(READ_TIMEOUT, -1);
         m_failOnInvalid = settings.getBoolean(FAIL_IF_INVALID, m_failOnInvalid);
         m_newColumnName = settings.getString(NEW_COLUMN_NAME, m_newColumnName);
-        m_types = toEnum(ImageType.class, settings.getStringArray(CONGIGURED_TYPE, toStringArray(ImageType.values())));
+        m_types = toEnum(ImageType.class, settings.getStringArray(CONFIGURED_TYPE, toStringArray(ImageType.values())));
     }
 
     /**
