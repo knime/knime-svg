@@ -1,0 +1,188 @@
+{
+  "data" : {
+    "model" : {
+      "columns" : {
+        "keepAllColumnsSelected" : false,
+        "twinList" : {
+          "inclList" : [ ],
+          "exclList" : [ ]
+        }
+      },
+      "newColumnName" : "Spark Lines"
+    }
+  },
+  "schema" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "columns" : {
+            "type" : "object",
+            "properties" : {
+              "keepAllColumnsSelected" : {
+                "type" : "boolean",
+                "title" : "Always include all columns",
+                "description" : "If checked, node behaves as if all columns were moved to the \"Include\" list.",
+                "default" : false
+              },
+              "twinList" : {
+                "type" : "object",
+                "properties" : {
+                  "exclList" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "string"
+                    },
+                    "default" : [ ]
+                  },
+                  "inclList" : {
+                    "type" : "array",
+                    "items" : {
+                      "type" : "string"
+                    },
+                    "title" : "Column selection",
+                    "description" : "Select the numerical columns to include in the spark line plot. The spark lines will\nvisualize the values from the selected columns in the order they appear in the table.\nDomain information (min/max values) must be present for all selected columns.\n",
+                    "default" : [ ]
+                  }
+                },
+                "default" : {
+                  "inclList" : [ ],
+                  "exclList" : [ ]
+                }
+              }
+            },
+            "default" : {
+              "keepAllColumnsSelected" : false,
+              "twinList" : {
+                "inclList" : [ ],
+                "exclList" : [ ]
+              }
+            }
+          },
+          "newColumnName" : {
+            "type" : "string",
+            "title" : "Name of new column",
+            "description" : "Specify the name for the newly created column that will contain the spark line visualizations.\n",
+            "default" : "Spark Lines"
+          }
+        }
+      }
+    }
+  },
+  "ui_schema" : {
+    "elements" : [ {
+      "type" : "Control",
+      "scope" : "#/properties/model/properties/columns/properties/keepAllColumnsSelected",
+      "options" : {
+        "format" : "checkbox"
+      }
+    }, {
+      "type" : "Control",
+      "scope" : "#/properties/model/properties/columns/properties/twinList/properties/inclList",
+      "options" : {
+        "format" : "twinList"
+      },
+      "providedOptions" : [ "possibleValues" ],
+      "rule" : {
+        "effect" : "DISABLE",
+        "condition" : {
+          "scope" : "#/properties/model/properties/columns/properties/keepAllColumnsSelected",
+          "schema" : {
+            "const" : true
+          }
+        }
+      }
+    }, {
+      "type" : "Control",
+      "scope" : "#/properties/model/properties/newColumnName"
+    } ]
+  },
+  "persist" : {
+    "type" : "object",
+    "properties" : {
+      "model" : {
+        "type" : "object",
+        "properties" : {
+          "columns" : {
+            "type" : "object",
+            "properties" : {
+              "keepAllColumnsSelected" : {
+                "configKey" : "keep_all_columns_selected"
+              },
+              "twinList" : {
+                "type" : "object",
+                "properties" : {
+                  "inclList" : {
+                    "configPaths" : [ [ "InclList" ], [ "ExclList" ] ]
+                  },
+                  "exclList" : {
+                    "configKey" : "ExclList"
+                  }
+                },
+                "propertiesRoute" : [ ".." ]
+              }
+            },
+            "configKey" : "columns"
+          },
+          "newColumnName" : {
+            "configKey" : "new_column_name"
+          }
+        }
+      }
+    }
+  },
+  "initialUpdates" : [ {
+    "scope" : "#/properties/model/properties/columns/properties/twinList/properties/exclList",
+    "values" : [ {
+      "indices" : [ ],
+      "value" : [ "Universe_0_0", "Universe_0_1", "Universe_1_0", "Universe_1_1" ]
+    } ]
+  }, {
+    "scope" : "#/properties/model/properties/columns/properties/twinList/properties/inclList",
+    "providedOptionName" : "possibleValues",
+    "values" : [ {
+      "indices" : [ ],
+      "value" : [ {
+        "id" : "Universe_0_0",
+        "text" : "Universe_0_0",
+        "type" : {
+          "id" : "org.knime.core.data.DoubleValue",
+          "text" : "Number (Float)"
+        }
+      }, {
+        "id" : "Universe_0_1",
+        "text" : "Universe_0_1",
+        "type" : {
+          "id" : "org.knime.core.data.DoubleValue",
+          "text" : "Number (Float)"
+        }
+      }, {
+        "id" : "Universe_1_0",
+        "text" : "Universe_1_0",
+        "type" : {
+          "id" : "org.knime.core.data.DoubleValue",
+          "text" : "Number (Float)"
+        }
+      }, {
+        "id" : "Universe_1_1",
+        "text" : "Universe_1_1",
+        "type" : {
+          "id" : "org.knime.core.data.DoubleValue",
+          "text" : "Number (Float)"
+        }
+      } ]
+    } ]
+  } ],
+  "globalUpdates" : [ {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/columns/properties/keepAllColumnsSelected"
+    },
+    "dependencies" : [ "#/properties/model/properties/columns/properties/keepAllColumnsSelected" ]
+  }, {
+    "trigger" : {
+      "scope" : "#/properties/model/properties/columns/properties/twinList/properties/inclList"
+    },
+    "dependencies" : [ "#/properties/model/properties/columns/properties/twinList/properties/inclList" ]
+  } ]
+}
