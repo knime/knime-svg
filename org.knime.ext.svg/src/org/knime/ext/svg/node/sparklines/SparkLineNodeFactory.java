@@ -44,54 +44,122 @@
  */
 package org.knime.ext.svg.node.sparklines;
 
+import static org.knime.node.impl.description.PortDescription.fixedPort;
+
+import java.util.List;
+import java.util.Map;
+
+import org.knime.core.node.NodeDescription;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
+import org.knime.core.webui.node.dialog.NodeDialog;
+import org.knime.core.webui.node.dialog.NodeDialogFactory;
+import org.knime.core.webui.node.dialog.NodeDialogManager;
+import org.knime.core.webui.node.dialog.SettingsType;
+import org.knime.core.webui.node.dialog.defaultdialog.DefaultKaiNodeInterface;
+import org.knime.core.webui.node.dialog.defaultdialog.DefaultNodeDialog;
+import org.knime.core.webui.node.dialog.kai.KaiNodeInterface;
+import org.knime.core.webui.node.dialog.kai.KaiNodeInterfaceFactory;
+import org.knime.node.impl.description.DefaultNodeDescriptionUtil;
+import org.knime.node.impl.description.PortDescription;
 
 /**
  * Create classes for SparkLine NodeModel, NodeView and NodeDialogPane.
- * 
+ *
  * @author M. Berthold, University of Konstanz
+ * @author Magnus Gohm, KNIME GmbH, Konstanz, Germany
+ * @author AI Migration Pipeline v1.2
  */
-public class SparkLineNodeFactory extends NodeFactory<SparkLineNodeModel> {
-    /**
-     * {@inheritDoc}
-     */
+@SuppressWarnings("restriction")
+public class SparkLineNodeFactory extends NodeFactory<SparkLineNodeModel>
+    implements NodeDialogFactory, KaiNodeInterfaceFactory {
+
     @Override
     public SparkLineNodeModel createNodeModel() {
         return new SparkLineNodeModel();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getNrNodeViews() {
         return 0;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public NodeView<SparkLineNodeModel> createNodeView(final int i,
             final SparkLineNodeModel nodeModel) {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean hasDialog() {
         return true;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    private static final String NODE_NAME = "Spark Line Appender";
+
+    private static final String NODE_ICON = "./sparkline.png";
+
+    private static final String SHORT_DESCRIPTION = """
+            Appends a column holding spark line plots based on the selected columns.
+            """;
+
+    private static final String FULL_DESCRIPTION = """
+            This node appends a new column which holds spark lines for the selected numerical columns. They
+                represent simple graphical representations of the values within the overall range.
+            """;
+
+    private static final List<PortDescription> INPUT_PORTS = List.of(
+            fixedPort("Clustering input", """
+                Input table.
+                """)
+    );
+
+    private static final List<PortDescription> OUTPUT_PORTS = List.of(
+            fixedPort("Labeled input", """
+                The output with the additional column.
+                """)
+    );
+
     @Override
     public NodeDialogPane createNodeDialogPane() {
-        return new SparkLineNodeDialog();
+        return NodeDialogManager.createLegacyFlowVariableNodeDialog(createNodeDialog());
     }
+
+    /**
+     * {@inheritDoc}
+     * @since 5.10
+     */
+    @Override
+    public NodeDialog createNodeDialog() {
+        return new DefaultNodeDialog(SettingsType.MODEL, SparkLineNodeParameters.class);
+    }
+
+    @Override
+    public NodeDescription createNodeDescription() {
+        return DefaultNodeDescriptionUtil.createNodeDescription( //
+            NODE_NAME, //
+            NODE_ICON, //
+            INPUT_PORTS, //
+            OUTPUT_PORTS, //
+            SHORT_DESCRIPTION, //
+            FULL_DESCRIPTION, //
+            List.of(), //
+            SparkLineNodeParameters.class, //
+            null, //
+            NodeType.Visualizer, //
+            List.of(), //
+            null //
+        );
+    }
+
+    /**
+     * {@inheritDoc}
+     * @since 5.10
+     */
+    @Override
+    public KaiNodeInterface createKaiNodeInterface() {
+        return new DefaultKaiNodeInterface(Map.of(SettingsType.MODEL, SparkLineNodeParameters.class));
+    }
+
 }
